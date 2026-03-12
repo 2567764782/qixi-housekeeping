@@ -9,7 +9,8 @@ export default defineAppConfig({
     'pages/about/index',
     'pages/terms/index',
     'pages/privacy/index',
-    'pages/admin/index'
+    'pages/admin/index',
+    'pages/booking-success/index'
   ],
   window: {
     backgroundTextStyle: 'light',
