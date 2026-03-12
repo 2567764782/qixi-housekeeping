@@ -170,4 +170,184 @@ export class RolesService {
 
     return (data || []).map((item: any) => item.permissions);
   }
+
+  /**
+   * 创建角色
+   */
+  async createRole(name: string, description: string) {
+    const { data, error } = await this.client
+      .from('roles')
+      .insert({
+        name,
+        description,
+        is_active: true
+      })
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to create role: ${error.message}`);
+    }
+
+    return data;
+  }
+
+  /**
+   * 更新角色
+   */
+  async updateRole(id: number, updates: { name?: string; description?: string; is_active?: boolean }) {
+    const { data, error } = await this.client
+      .from('roles')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to update role: ${error.message}`);
+    }
+
+    return data;
+  }
+
+  /**
+   * 删除角色
+   */
+  async deleteRole(id: number) {
+    // 先删除角色权限关联
+    await this.client
+      .from('role_permissions')
+      .delete()
+      .eq('role_id', id);
+
+    // 删除用户角色关联
+    await this.client
+      .from('user_roles')
+      .delete()
+      .eq('role_id', id);
+
+    // 删除角色
+    const { error } = await this.client
+      .from('roles')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      throw new Error(`Failed to delete role: ${error.message}`);
+    }
+  }
+
+  /**
+   * 为角色分配权限
+   */
+  async assignPermissionToRole(roleId: number, permissionId: number) {
+    const { data, error } = await this.client
+      .from('role_permissions')
+      .insert({
+        role_id: roleId,
+        permission_id: permissionId
+      })
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to assign permission: ${error.message}`);
+    }
+
+    return data;
+  }
+
+  /**
+   * 移除角色权限
+   */
+  async removePermissionFromRole(roleId: number, permissionId: number) {
+    const { error } = await this.client
+      .from('role_permissions')
+      .delete()
+      .eq('role_id', roleId)
+      .eq('permission_id', permissionId);
+
+    if (error) {
+      throw new Error(`Failed to remove permission: ${error.message}`);
+    }
+  }
+
+  /**
+   * 获取所有权限
+   */
+  async getAllPermissions() {
+    const { data, error } = await this.client
+      .from('permissions')
+      .select('*')
+      .eq('is_active', true);
+
+    if (error) {
+      throw new Error(`Failed to get permissions: ${error.message}`);
+    }
+
+    return data || [];
+  }
+
+  /**
+   * 创建权限
+   */
+  async createPermission(name: string, code: string, description: string, resource?: string, action?: string) {
+    const { data, error } = await this.client
+      .from('permissions')
+      .insert({
+        name,
+        code,
+        description,
+        resource,
+        action,
+        is_active: true
+      })
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to create permission: ${error.message}`);
+    }
+
+    return data;
+  }
+
+  /**
+   * 更新权限
+   */
+  async updatePermission(id: number, updates: { name?: string; code?: string; description?: string; resource?: string; action?: string }) {
+    const { data, error } = await this.client
+      .from('permissions')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to update permission: ${error.message}`);
+    }
+
+    return data;
+  }
+
+  /**
+   * 删除权限
+   */
+  async deletePermission(id: number) {
+    // 先删除角色权限关联
+    await this.client
+      .from('role_permissions')
+      .delete()
+      .eq('permission_id', id);
+
+    // 删除权限
+    const { error } = await this.client
+      .from('permissions')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      throw new Error(`Failed to delete permission: ${error.message}`);
+    }
+  }
 }

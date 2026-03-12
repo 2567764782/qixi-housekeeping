@@ -1,6 +1,7 @@
 import { useLoad } from '@tarojs/taro'
 import { View, Text, ScrollView } from '@tarojs/components'
 import { useState } from 'react'
+import { io, Socket } from 'socket.io-client'
 import { MessageSquare, Send, Bell, MapPin, Clock } from 'lucide-react-taro'
 import './index.css'
 
@@ -12,7 +13,7 @@ interface RealtimeMessage {
 }
 
 interface OrderMessage {
-  orderId: string
+  orderId: string | number
   status: string
   message: string
   cleanerId?: number
@@ -21,7 +22,7 @@ interface OrderMessage {
 
 interface LocationMessage {
   userId: number
-  orderId: string
+  orderId: string | number
   latitude: number
   longitude: number
   address: string
@@ -41,37 +42,140 @@ const RealtimePage = () => {
   const [connected, setConnected] = useState(false)
   const [messages, setMessages] = useState<RealtimeMessage[]>([])
   const [messageInput, setMessageInput] = useState('')
+  const [socket, setSocket] = useState<Socket | null>(null)
 
   // 连接 Socket.IO
   const connectSocket = () => {
     try {
       // Socket.IO 客户端连接
-      // 注意：在实际使用时，需要根据环境配置正确的 Socket.IO 服务器地址
-      const socket = new WebSocket('ws://localhost:3000')
+      // 注意：实际使用时需要根据环境配置正确的服务器地址
+      const socketInstance = io('http://localhost:3000/realtime', {
+        transports: ['websocket'],
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000
+      })
 
-      socket.onopen = () => {
-        console.log('WebSocket connected')
+      // 连接成功
+      socketInstance.on('connect', () => {
+        console.log('Socket.IO connected')
         setConnected(true)
+        setSocket(socketInstance)
         addSystemMessage('已连接到实时通信服务器')
-      }
 
-      socket.onmessage = event => {
-        const message = JSON.parse(event.data)
-        handleMessage(message)
-      }
+        // 发送登录消息（示例）
+        socketInstance.emit('user:login', {
+          userId: 1, // 实际使用时应该从用户信息中获取
+          role: 'admin' // 实际使用时应该从用户信息中获取
+        })
+      })
 
-      socket.onclose = () => {
-        console.log('WebSocket disconnected')
+      // 接收登录成功消息
+      socketInstance.on('user:login:success', data => {
+        console.log('Login success:', data)
+      })
+
+      // 接收订单更新
+      socketInstance.on('order:update', data => {
+        handleMessage({
+          type: 'order',
+          data: {
+            orderId: data.orderId,
+            status: data.status || 'updated',
+            message: data.message || '订单已更新'
+          },
+          timestamp: new Date().toISOString(),
+          id: `order-${data.orderId}-${Date.now()}`
+        })
+      })
+
+      // 接收新订单
+      socketInstance.on('order:new', data => {
+        handleMessage({
+          type: 'order',
+          data: {
+            orderId: data.orderId,
+            status: 'new',
+            message: '收到新订单'
+          },
+          timestamp: new Date().toISOString(),
+          id: `order-new-${data.orderId}-${Date.now()}`
+        })
+      })
+
+      // 接收订单匹配
+      socketInstance.on('order:match', data => {
+        handleMessage({
+          type: 'order',
+          data: {
+            orderId: data.orderId,
+            status: 'matched',
+            message: '订单已匹配'
+          },
+          timestamp: new Date().toISOString(),
+          id: `order-match-${data.orderId}-${Date.now()}`
+        })
+      })
+
+      // 接收保洁员位置更新
+      socketInstance.on('cleaner:location', data => {
+        handleMessage({
+          type: 'location',
+          data: {
+            userId: data.cleanerId,
+            orderId: 0, // 位置更新可能不关联特定订单
+            latitude: data.location.latitude,
+            longitude: data.location.longitude,
+            address: '保洁员位置更新'
+          },
+          timestamp: data.timestamp,
+          id: `location-${data.cleanerId}-${Date.now()}`
+        })
+      })
+
+      // 接收系统广播
+      socketInstance.on('broadcast', data => {
+        handleMessage({
+          type: 'broadcast',
+          data: {
+            title: data.title || '系统通知',
+            content: data.content || data.message,
+            priority: data.priority || 'low'
+          },
+          timestamp: new Date().toISOString(),
+          id: `broadcast-${Date.now()}`
+        })
+      })
+
+      // 接收通知
+      socketInstance.on('notification', data => {
+        handleMessage({
+          type: 'broadcast',
+          data: {
+            title: data.title || '通知',
+            content: data.message,
+            priority: 'medium'
+          },
+          timestamp: new Date().toISOString(),
+          id: `notification-${Date.now()}`
+        })
+      })
+
+      // 断开连接
+      socketInstance.on('disconnect', () => {
+        console.log('Socket.IO disconnected')
         setConnected(false)
         addSystemMessage('与实时通信服务器断开连接')
-      }
+      })
 
-      socket.onerror = error => {
-        console.error('WebSocket error:', error)
+      // 连接错误
+      socketInstance.on('connect_error', error => {
+        console.error('Socket.IO connection error:', error)
+        setConnected(false)
         addSystemMessage('连接错误，请检查网络')
-      }
+      })
     } catch (error) {
-      console.error('Failed to connect to WebSocket:', error)
+      console.error('Failed to connect to Socket.IO:', error)
       addSystemMessage('无法连接到实时通信服务器')
     }
   }
@@ -96,11 +200,16 @@ const RealtimePage = () => {
 
   // 发送消息
   const handleSendMessage = () => {
-    if (!messageInput.trim()) {
+    if (!messageInput.trim() || !socket) {
       return
     }
 
-    // 这里可以通过 WebSocket 发送消息
+    // 通过 Socket.IO 发送消息
+    socket.emit('message', {
+      content: messageInput,
+      timestamp: new Date().toISOString()
+    })
+
     addSystemMessage(`发送消息: ${messageInput}`)
     setMessageInput('')
   }

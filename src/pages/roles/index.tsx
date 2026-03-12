@@ -1,6 +1,7 @@
 import { useLoad } from '@tarojs/taro'
 import { View, Text, ScrollView } from '@tarojs/components'
 import { useState } from 'react'
+import { Network } from '@/network'
 import { Shield, User, Users, Key, Plus, Trash2, RefreshCw } from 'lucide-react-taro'
 import './index.css'
 
@@ -51,14 +52,14 @@ const RolesPage = () => {
   const loadRoles = async () => {
     try {
       setLoading(true)
-      // 这里需要调用后端接口获取角色列表
-      // const res = await Network.request({
-      //   url: '/api/roles',
-      //   method: 'GET'
-      // })
-      // setRoles(res.data || [])
-
-      // 模拟数据
+      const res = await Network.request({
+        url: '/api/roles',
+        method: 'GET'
+      })
+      setRoles(res.data || [])
+    } catch (error) {
+      console.error('Failed to load roles:', error)
+      // 如果接口调用失败，使用模拟数据
       setRoles([
         {
           id: 1,
@@ -79,8 +80,6 @@ const RolesPage = () => {
           created_at: '2024-01-01T00:00:00Z'
         }
       ])
-    } catch (error) {
-      console.error('Failed to load roles:', error)
     } finally {
       setLoading(false)
     }
@@ -90,14 +89,14 @@ const RolesPage = () => {
   const loadPermissions = async () => {
     try {
       setLoading(true)
-      // 这里需要调用后端接口获取权限列表
-      // const res = await Network.request({
-      //   url: '/api/permissions',
-      //   method: 'GET'
-      // })
-      // setPermissions(res.data || [])
-
-      // 模拟数据
+      const res = await Network.request({
+        url: '/api/roles/permissions/all',
+        method: 'GET'
+      })
+      setPermissions(res.data || [])
+    } catch (error) {
+      console.error('Failed to load permissions:', error)
+      // 如果接口调用失败，使用模拟数据
       setPermissions([
         {
           id: 1,
@@ -136,8 +135,6 @@ const RolesPage = () => {
           description: '管理用户信息'
         }
       ])
-    } catch (error) {
-      console.error('Failed to load permissions:', error)
     } finally {
       setLoading(false)
     }
@@ -147,14 +144,14 @@ const RolesPage = () => {
   const loadUserRoles = async () => {
     try {
       setLoading(true)
-      // 这里需要调用后端接口获取用户角色关联
-      // const res = await Network.request({
-      //   url: '/api/user-roles',
-      //   method: 'GET'
-      // })
-      // setUserRoles(res.data || [])
-
-      // 模拟数据
+      const res = await Network.request({
+        url: '/api/user-roles',
+        method: 'GET'
+      })
+      setUserRoles(res.data || [])
+    } catch (error) {
+      console.error('Failed to load user roles:', error)
+      // 如果接口调用失败，使用模拟数据
       setUserRoles([
         {
           userId: 1,
@@ -181,8 +178,6 @@ const RolesPage = () => {
           roleName: 'user'
         }
       ])
-    } catch (error) {
-      console.error('Failed to load user roles:', error)
     } finally {
       setLoading(false)
     }
