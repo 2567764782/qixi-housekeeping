@@ -9,6 +9,18 @@ export const healthCheck = pgTable("health_check", {
 	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow(),
 });
 
+// 用户表
+export const users = pgTable("users", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  phone: varchar("phone", { length: 20 }).notNull().unique(),
+  nickname: varchar("nickname", { length: 64 }), // 昵称
+  avatar: varchar("avatar", { length: 500 }), // 头像URL
+  gender: varchar("gender", { length: 10 }), // 性别: male, female
+  city: varchar("city", { length: 50 }), // 城市
+  createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }),
+})
+
 // 服务表
 export const services = pgTable("services", {
   id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
@@ -79,6 +91,21 @@ export const updateServiceSchema = createCoercedInsertSchema(services).pick({
   icon: true,
 }).partial()
 
+export const insertUserSchema = createCoercedInsertSchema(users).pick({
+  phone: true,
+  nickname: true,
+  avatar: true,
+  gender: true,
+  city: true,
+})
+
+export const updateUserSchema = createCoercedInsertSchema(users).pick({
+  nickname: true,
+  avatar: true,
+  gender: true,
+  city: true,
+}).partial()
+
 export const insertStaffSchema = createCoercedInsertSchema(staff).pick({
   name: true,
   phone: true,
@@ -117,6 +144,10 @@ export const updateOrderSchema = createCoercedInsertSchema(orders).pick({
 }).partial()
 
 // TypeScript types
+export type User = typeof users.$inferSelect
+export type InsertUser = z.infer<typeof insertUserSchema>
+export type UpdateUser = z.infer<typeof updateUserSchema>
+
 export type Service = typeof services.$inferSelect
 export type InsertService = z.infer<typeof insertServiceSchema>
 export type UpdateService = z.infer<typeof updateOrderSchema>
