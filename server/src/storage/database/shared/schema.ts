@@ -3,6 +3,44 @@ import { sql } from "drizzle-orm"
 import { createSchemaFactory } from "drizzle-zod"
 import { z } from "zod"
 
+// 权限相关表
+export const resources = pgTable("resources", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name", { length: 64 }).notNull().unique(), // 资源名称: orders, users, services, staff
+  description: varchar("description", { length: 255 }), // 资源描述
+  createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+})
+
+export const actions = pgTable("actions", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name", { length: 64 }).notNull().unique(), // 操作名称: create, read, update, delete
+  description: varchar("description", { length: 255 }), // 操作描述
+  createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+})
+
+export const permissions = pgTable("permissions", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  resourceId: varchar("resource_id", { length: 36 }).notNull(), // 资源 ID
+  actionId: varchar("action_id", { length: 36 }).notNull(), // 操作 ID
+  roleId: varchar("role_id", { length: 36 }).notNull(), // 角色 ID
+  createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+})
+
+export const roles = pgTable("roles", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name", { length: 64 }).notNull().unique(), // 角色名称: admin, user, staff
+  description: varchar("description", { length: 255 }), // 角色描述
+  createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }),
+})
+
+export const userRoles = pgTable("user_roles", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id", { length: 36 }).notNull(), // 用户 ID
+  roleId: varchar("role_id", { length: 36 }).notNull(), // 角色 ID
+  createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+})
+
 // 系统表
 export const healthCheck = pgTable("health_check", {
 	id: serial().notNull(),
@@ -13,10 +51,12 @@ export const healthCheck = pgTable("health_check", {
 export const users = pgTable("users", {
   id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
   phone: varchar("phone", { length: 20 }).notNull().unique(),
+  password: varchar("password", { length: 255 }), // 密码（哈希后）
   nickname: varchar("nickname", { length: 64 }), // 昵称
   avatar: varchar("avatar", { length: 500 }), // 头像URL
   gender: varchar("gender", { length: 10 }), // 性别: male, female
   city: varchar("city", { length: 50 }), // 城市
+  role: varchar("role", { length: 20 }).default('user'), // 角色: user, admin, staff
   createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }),
 })
@@ -93,17 +133,21 @@ export const updateServiceSchema = createCoercedInsertSchema(services).pick({
 
 export const insertUserSchema = createCoercedInsertSchema(users).pick({
   phone: true,
+  password: true,
   nickname: true,
   avatar: true,
   gender: true,
   city: true,
+  role: true,
 })
 
 export const updateUserSchema = createCoercedInsertSchema(users).pick({
+  password: true,
   nickname: true,
   avatar: true,
   gender: true,
   city: true,
+  role: true,
 }).partial()
 
 export const insertStaffSchema = createCoercedInsertSchema(staff).pick({

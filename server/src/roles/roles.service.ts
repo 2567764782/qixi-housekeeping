@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, CacheInterceptor, UseInterceptors, CacheTTL } from '@nestjs/common';
 import { getSupabaseClient } from '../storage/database/supabase-client';
 
 @Injectable()
@@ -139,6 +139,8 @@ export class RolesService {
   /**
    * 获取所有角色
    */
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(600) // 缓存 10 分钟
   async getAllRoles() {
     const { data, error } = await this.client
       .from('roles')
@@ -349,5 +351,286 @@ export class RolesService {
     if (error) {
       throw new Error(`Failed to delete permission: ${error.message}`);
     }
+  }
+
+  // ========== 细粒度权限控制方法 ==========
+
+  /**
+   * 获取所有资源
+   */
+  async getAllResources() {
+    const { data, error } = await this.client
+      .from('resources')
+      .select('*')
+      .order('name', { ascending: true });
+
+    if (error) {
+      throw new Error(`Failed to get resources: ${error.message}`);
+    }
+
+    return data || [];
+  }
+
+  /**
+   * 创建资源
+   */
+  async createResource(name: string, description?: string) {
+    const { data, error } = await this.client
+      .from('resources')
+      .insert({ name, description })
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to create resource: ${error.message}`);
+    }
+
+    return data;
+  }
+
+  /**
+   * 获取所有操作
+   */
+  async getAllActions() {
+    const { data, error } = await this.client
+      .from('actions')
+      .select('*')
+      .order('name', { ascending: true });
+
+    if (error) {
+      throw new Error(`Failed to get actions: ${error.message}`);
+    }
+
+    return data || [];
+  }
+
+  /**
+   * 创建操作
+   */
+  async createAction(name: string, description?: string) {
+    const { data, error } = await this.client
+      .from('actions')
+      .insert({ name, description })
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to create action: ${error.message}`);
+    }
+
+    return data;
+  }
+
+  /**
+   * 为角色分配资源操作权限
+   */
+  async assignResourcePermission(
+    roleName: string,
+    resourceName: string,
+    actionName: string,
+  ) {
+    // 获取角色 ID
+    const { data: roleData, error: roleError } = await this.client
+      .from('roles')
+      .select('id')
+      .eq('name', roleName)
+      .single();
+
+    if (roleError || !roleData) {
+      throw new Error(`Role not found: ${roleName}`);
+    }
+
+    // 获取资源 ID
+    const { data: resourceData, error: resourceError } = await this.client
+      .from('resources')
+      .select('id')
+      .eq('name', resourceName)
+      .single();
+
+    if (resourceError || !resourceData) {
+      throw new Error(`Resource not found: ${resourceName}`);
+    }
+
+    // 获取操作 ID
+    const { data: actionData, error: actionError } = await this.client
+      .from('actions')
+      .select('id')
+      .eq('name', actionName)
+      .single();
+
+    if (actionError || !actionData) {
+      throw new Error(`Action not found: ${actionName}`);
+    }
+
+    // 检查权限是否已存在
+    const { data: existingPermission } = await this.client
+      .from('permissions')
+      .select('*')
+      .eq('role_id', roleData.id)
+      .eq('resource_id', resourceData.id)
+      .eq('action_id', actionData.id)
+      .single();
+
+    if (existingPermission) {
+      throw new Error('Permission already exists');
+    }
+
+    // 创建权限
+    const { data, error } = await this.client
+      .from('permissions')
+      .insert({
+        role_id: roleData.id,
+        resource_id: resourceData.id,
+        action_id: actionData.id,
+      })
+      .select(`
+        id,
+        resource:resources!inner(name, description),
+        action:actions!inner(name, description),
+        role:roles!inner(name, description)
+      `)
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to assign permission: ${error.message}`);
+    }
+
+    return data;
+  }
+
+  /**
+   * 移除角色的资源操作权限
+   */
+  async removeResourcePermission(
+    roleName: string,
+    resourceName: string,
+    actionName: string,
+  ) {
+    // 获取角色 ID
+    const { data: roleData, error: roleError } = await this.client
+      .from('roles')
+      .select('id')
+      .eq('name', roleName)
+      .single();
+
+    if (roleError || !roleData) {
+      throw new Error(`Role not found: ${roleName}`);
+    }
+
+    // 获取资源 ID
+    const { data: resourceData, error: resourceError } = await this.client
+      .from('resources')
+      .select('id')
+      .eq('name', resourceName)
+      .single();
+
+    if (resourceError || !resourceData) {
+      throw new Error(`Resource not found: ${resourceName}`);
+    }
+
+    // 获取操作 ID
+    const { data: actionData, error: actionError } = await this.client
+      .from('actions')
+      .select('id')
+      .eq('name', actionName)
+      .single();
+
+    if (actionError || !actionData) {
+      throw new Error(`Action not found: ${actionName}`);
+    }
+
+    // 删除权限
+    const { error } = await this.client
+      .from('permissions')
+      .delete()
+      .eq('role_id', roleData.id)
+      .eq('resource_id', resourceData.id)
+      .eq('action_id', actionData.id);
+
+    if (error) {
+      throw new Error(`Failed to remove permission: ${error.message}`);
+    }
+
+    return { success: true };
+  }
+
+  /**
+   * 获取角色的所有资源操作权限
+   */
+  async getResourcePermissions(roleName: string) {
+    // 获取角色 ID
+    const { data: roleData, error: roleError } = await this.client
+      .from('roles')
+      .select('id')
+      .eq('name', roleName)
+      .single();
+
+    if (roleError || !roleData) {
+      throw new Error(`Role not found: ${roleName}`);
+    }
+
+    const { data, error } = await this.client
+      .from('permissions')
+      .select(`
+        id,
+        resource:resources!inner(name, description),
+        action:actions!inner(name, description)
+      `)
+      .eq('role_id', roleData.id);
+
+    if (error) {
+      throw new Error(`Failed to get resource permissions: ${error.message}`);
+    }
+
+    return data || [];
+  }
+
+  /**
+   * 初始化基础资源和操作
+   */
+  async initializeResourcesAndActions() {
+    const resources = [
+      { name: 'users', description: '用户管理' },
+      { name: 'orders', description: '订单管理' },
+      { name: 'services', description: '服务管理' },
+      { name: 'staff', description: '服务人员管理' },
+      { name: 'roles', description: '角色管理' },
+      { name: 'permissions', description: '权限管理' },
+    ]
+
+    const actions = [
+      { name: 'create', description: '创建' },
+      { name: 'read', description: '读取' },
+      { name: 'update', description: '更新' },
+      { name: 'delete', description: '删除' },
+    ]
+
+    // 创建资源
+    for (const resource of resources) {
+      const { data: existing } = await this.client
+        .from('resources')
+        .select('id')
+        .eq('name', resource.name)
+        .single()
+
+      if (!existing) {
+        await this.client.from('resources').insert(resource)
+      }
+    }
+
+    // 创建操作
+    for (const action of actions) {
+      const { data: existing } = await this.client
+        .from('actions')
+        .select('id')
+        .eq('name', action.name)
+        .single()
+
+      if (!existing) {
+        await this.client.from('actions').insert(action)
+      }
+    }
+
+    return { success: true }
   }
 }
