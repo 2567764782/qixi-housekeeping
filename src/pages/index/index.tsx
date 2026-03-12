@@ -3,7 +3,6 @@ import { View, Text, ScrollView } from '@tarojs/components'
 import { Sparkles, Wrench, Building2, Sofa, PaintBucket, ChevronRight, Star, FileText, Video, Share2, Users, CreditCard } from 'lucide-react-taro'
 import { useState } from 'react'
 import { Network } from '@/network'
-import UserCarousel from '@/components/UserCarousel'
 import './index.css'
 
 // 服务类型定义
@@ -14,15 +13,6 @@ interface ServiceType {
   icon: string
   price: string
   category: 'cleaning' | 'renovation'
-}
-
-// 用户类型定义
-interface UserType {
-  id: string
-  nickname: string
-  city: string
-  phone: string
-  gender: string
 }
 
 // 快捷入口类型定义
@@ -37,12 +27,10 @@ const IndexPage = () => {
   useLoad(() => {
     console.log('Page loaded')
     loadServices()
-    loadUsers()
   })
 
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'cleaning' | 'renovation'>('all')
   const [services, setServices] = useState<ServiceType[]>([])
-  const [users, setUsers] = useState<UserType[]>([])
   const [loading, setLoading] = useState(false)
 
   // 快捷入口数据
@@ -68,21 +56,6 @@ const IndexPage = () => {
       console.error('Failed to load services:', error)
     } finally {
       setLoading(false)
-    }
-  }
-
-  // 加载用户列表（用于轮播图）
-  const loadUsers = async () => {
-    try {
-      const res = await Network.request({
-        url: '/api/users/random',
-        method: 'GET',
-        data: { limit: 10 }
-      })
-      console.log('Users response:', res.data)
-      setUsers(res.data || [])
-    } catch (error) {
-      console.error('Failed to load users:', error)
     }
   }
 
@@ -219,11 +192,6 @@ const IndexPage = () => {
               </View>
             </View>
           </View>
-        </View>
-
-        {/* 用户轮播图 */}
-        <View className="px-4 mb-4">
-          <UserCarousel users={users} interval={3000} />
         </View>
 
         {/* 分类筛选 */}
