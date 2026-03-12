@@ -23,7 +23,11 @@ export default defineAppConfig({
     'pages/create-cleaning-order/index',
     'pages/cleaner-management/index',
     'pages/order-review/index',
-    'pages/cleaner-orders/index'
+    'pages/cleaner-orders/index',
+    'pages/statistics/index',
+    'pages/payment/index',
+    'pages/realtime/index',
+    'pages/roles/index'
   ],
   window: {
     backgroundTextStyle: 'light',

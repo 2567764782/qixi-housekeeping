@@ -50,6 +50,38 @@ const ProfilePage = () => {
       }
     },
     {
+      icon: <Award size={22} color="#3B82F6" />,
+      title: '数据统计',
+      subtitle: '订单、保洁员、收入统计',
+      action: () => {
+        Taro.navigateTo({ url: '/pages/statistics/index' })
+      }
+    },
+    {
+      icon: <FileText size={22} color="#8B5CF6" />,
+      title: '支付管理',
+      subtitle: '创建支付、查询、退款',
+      action: () => {
+        Taro.navigateTo({ url: '/pages/payment/index' })
+      }
+    },
+    {
+      icon: <QrCode size={22} color="#F59E0B" />,
+      title: '实时通信',
+      subtitle: '订单推送、位置更新',
+      action: () => {
+        Taro.navigateTo({ url: '/pages/realtime/index' })
+      }
+    },
+    {
+      icon: <Settings size={22} color="#EF4444" />,
+      title: '权限管理',
+      subtitle: '角色、权限、用户分配',
+      action: () => {
+        Taro.navigateTo({ url: '/pages/roles/index' })
+      }
+    },
+    {
       icon: <Award size={22} color="#10B981" />,
       title: '会员中心',
       subtitle: '查看会员权益',
