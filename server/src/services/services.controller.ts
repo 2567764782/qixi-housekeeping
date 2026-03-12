@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common'
+import { Controller, Get, Post } from '@nestjs/common'
 import { ServicesService } from './services.service'
 
 @Controller('services')
@@ -13,5 +13,10 @@ export class ServicesController {
   @Get('seed')
   async seedData() {
     return await this.servicesService.seedData()
+  }
+
+  @Post('update-prices')
+  async updatePrices() {
+    return await this.servicesService.updatePrices()
   }
 }
