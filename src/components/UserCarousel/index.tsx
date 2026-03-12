@@ -38,7 +38,7 @@ const UserCarousel = ({ users: propUsers, interval = 3000 }: UserCarouselProps) 
   }, [displayUsers.length, interval])
 
   // 生成虚拟头像
-  const getAvatarUrl = (user: User, index: number) => {
+  const getAvatarUrl = (user: User | undefined, index: number) => {
     const colors = [
       'from-emerald-400 to-emerald-600',
       'from-blue-400 to-blue-600',
@@ -50,7 +50,7 @@ const UserCarousel = ({ users: propUsers, interval = 3000 }: UserCarouselProps) 
       'from-rose-400 to-rose-600',
     ]
     const colorIndex = index % colors.length
-    return { colorClass: colors[colorIndex], initial: user.nickname?.charAt(0) || '用' }
+    return { colorClass: colors[colorIndex], initial: user?.nickname?.charAt(0) || '用' }
   }
 
   // 生成随机评价
