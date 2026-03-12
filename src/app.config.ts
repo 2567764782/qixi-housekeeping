@@ -1,0 +1,40 @@
+export default defineAppConfig({
+  pages: [
+    'pages/index/index',
+    'pages/booking/index',
+    'pages/orders/index',
+    'pages/profile/index'
+  ],
+  window: {
+    backgroundTextStyle: 'light',
+    navigationBarBackgroundColor: '#fff',
+    navigationBarTitleText: '保洁服务',
+    navigationBarTextStyle: 'black'
+  },
+  tabBar: {
+    color: '#999999',
+    selectedColor: '#10B981',
+    backgroundColor: '#ffffff',
+    borderStyle: 'black',
+    list: [
+      {
+        pagePath: 'pages/index/index',
+        text: '服务大厅',
+        iconPath: './assets/tabbar/home.png',
+        selectedIconPath: './assets/tabbar/home-active.png',
+      },
+      {
+        pagePath: 'pages/orders/index',
+        text: '订单',
+        iconPath: './assets/tabbar/clipboard-list.png',
+        selectedIconPath: './assets/tabbar/clipboard-list-active.png',
+      },
+      {
+        pagePath: 'pages/profile/index',
+        text: '我的',
+        iconPath: './assets/tabbar/user.png',
+        selectedIconPath: './assets/tabbar/user-active.png',
+      }
+    ]
+  }
+})
