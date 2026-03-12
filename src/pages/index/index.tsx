@@ -1,6 +1,6 @@
 import Taro, { useLoad } from '@tarojs/taro'
 import { View, Text, ScrollView } from '@tarojs/components'
-import { Sparkles, Wrench, Building2, Sofa, PaintBucket, ChevronRight, Star, Search } from 'lucide-react-taro'
+import { Sparkles, Wrench, Building2, Sofa, PaintBucket, ChevronRight, Star, FileText, Video, Share2, Users, CreditCard } from 'lucide-react-taro'
 import { useState } from 'react'
 import { Network } from '@/network'
 import UserCarousel from '@/components/UserCarousel'
@@ -25,6 +25,14 @@ interface UserType {
   gender: string
 }
 
+// 快捷入口类型定义
+interface QuickAction {
+  id: string
+  name: string
+  icon: string
+  color: string
+}
+
 const IndexPage = () => {
   useLoad(() => {
     console.log('Page loaded')
@@ -36,6 +44,15 @@ const IndexPage = () => {
   const [services, setServices] = useState<ServiceType[]>([])
   const [users, setUsers] = useState<UserType[]>([])
   const [loading, setLoading] = useState(false)
+
+  // 快捷入口数据
+  const quickActions: QuickAction[] = [
+    { id: '1', name: '我的名片', icon: 'CreditCard', color: 'from-blue-500 to-blue-600' },
+    { id: '2', name: '上传素材', icon: 'FileText', color: 'from-green-500 to-green-600' },
+    { id: '3', name: '视频获客', icon: 'Video', color: 'from-orange-500 to-orange-600' },
+    { id: '4', name: '我的团队', icon: 'Users', color: 'from-blue-500 to-blue-600' },
+    { id: '5', name: '海报获客', icon: 'Share2', color: 'from-orange-500 to-orange-600' },
+  ]
 
   // 加载服务列表
   const loadServices = async () => {
@@ -69,33 +86,45 @@ const IndexPage = () => {
     }
   }
 
+  // 获取快捷入口图标
+  const getQuickActionIcon = (iconName: string) => {
+    const iconMap: Record<string, React.ReactNode> = {
+      CreditCard: <CreditCard size={24} color="#fff" />,
+      FileText: <FileText size={24} color="#fff" />,
+      Video: <Video size={24} color="#fff" />,
+      Users: <Users size={24} color="#fff" />,
+      Share2: <Share2 size={24} color="#fff" />,
+    }
+    return iconMap[iconName] || <Sparkles size={24} color="#fff" />
+  }
+
   // 根据图标名称获取图标组件
   const getIconComponent = (iconName: string, size: number = 40) => {
     const iconMap: Record<string, { icon: React.ReactNode; bg: string; color: string }> = {
       Sparkles: {
         icon: <Sparkles size={size} color="#fff" />,
-        bg: 'bg-emerald-500',
-        color: '#10B981'
+        bg: 'bg-blue-500',
+        color: '#3B82F6'
       },
       Wrench: {
         icon: <Wrench size={size} color="#fff" />,
-        bg: 'bg-amber-500',
-        color: '#F59E0B'
+        bg: 'bg-blue-500',
+        color: '#3B82F6'
       },
       Building2: {
         icon: <Building2 size={size} color="#fff" />,
-        bg: 'bg-purple-500',
-        color: '#8B5CF6'
+        bg: 'bg-blue-500',
+        color: '#3B82F6'
       },
       Sofa: {
         icon: <Sofa size={size} color="#fff" />,
-        bg: 'bg-red-500',
-        color: '#EF4444'
+        bg: 'bg-blue-500',
+        color: '#3B82F6'
       },
       PaintBucket: {
         icon: <PaintBucket size={size} color="#fff" />,
-        bg: 'bg-rose-500',
-        color: '#F43F5E'
+        bg: 'bg-blue-500',
+        color: '#3B82F6'
       }
     }
     return iconMap[iconName] || iconMap.Sparkles
@@ -117,71 +146,93 @@ const IndexPage = () => {
   return (
     <View className="flex flex-col h-full bg-gray-50">
       <ScrollView className="flex-1" scrollY>
-        {/* 顶部 Banner - 多层渐变 + 装饰 */}
-        <View className="relative overflow-hidden bg-gradient-to-br from-emerald-600 via-emerald-500 to-teal-500 pt-10 pb-8 px-6">
+        {/* 顶部科技风轮播横幅 */}
+        <View className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-blue-500 to-cyan-400 pt-12 pb-8 px-6">
           {/* 背景装饰圆 */}
-          <View className="absolute top-[-50px] right-[-50px] w-40 h-40 bg-white/10 rounded-full blur-3xl" />
-          <View className="absolute bottom-[-30px] left-[-30px] w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+          <View className="absolute top-[-60px] right-[-60px] w-48 h-48 bg-white/10 rounded-full blur-3xl" />
+          <View className="absolute bottom-[-40px] left-[-40px] w-40 h-40 bg-white/10 rounded-full blur-2xl" />
 
           <View className="relative">
-            {/* 搜索栏 */}
-            <View className="bg-white/20 backdrop-blur-md rounded-2xl px-4 py-3 mb-6 border border-white/30">
-              <View className="flex flex-row items-center">
-                <Search size={20} color="rgba(255,255,255,0.8)" className="mr-2" />
-                <Text className="block flex-1 text-base text-white/80">搜索服务...</Text>
-              </View>
-            </View>
-
-            {/* 主标题 */}
-            <View className="mb-2">
-              <Text className="block text-3xl font-bold text-white leading-tight mb-2">
-                专业服务
+            {/* 轮播文字 */}
+            <View className="mb-3">
+              <Text className="block text-2xl font-bold text-white mb-2">
+                2024年
               </Text>
-              <Text className="block text-lg text-white/90 font-medium">
-                值得信赖
+              <Text className="block text-3xl font-bold text-white leading-tight mb-2">
+                专业保洁服务
+              </Text>
+              <Text className="block text-lg text-blue-50 font-medium">
+                科技、品质 决定未来
               </Text>
             </View>
 
             {/* 副标题 + 评分 */}
             <View className="flex flex-row items-center mt-4">
               <View className="flex items-center bg-white/20 backdrop-blur-sm rounded-full px-3 py-1.5 border border-white/30">
-                <Star size={16} color="#FFD700" className="mr-1" />
-                <Text className="block text-sm text-white font-semibold">4.9</Text>
+                <Star size={16} color="#FFD700" />
+                <Text className="block text-sm text-white font-semibold ml-1">4.9</Text>
                 <Text className="block text-xs text-white/80 ml-1">评分</Text>
               </View>
             </View>
           </View>
         </View>
 
-        {/* 统计信息 - 玻璃态卡片 */}
-        <View className="mx-4 -mt-4 mb-6 relative z-10">
-          <View className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-lg border border-white/50 p-5">
+        {/* 快捷入口 - 一行5个图标 */}
+        <View className="px-4 -mt-4 mb-4 relative z-10">
+          <View className="bg-white rounded-2xl shadow-md p-4">
             <View className="flex flex-row justify-around">
-              <View className="text-center">
-                <Text className="block text-2xl font-bold text-emerald-600 mb-1">6+</Text>
-                <Text className="block text-xs text-gray-600">服务项目</Text>
+              {quickActions.map((action) => (
+                <View key={action.id} className="flex flex-col items-center">
+                  <View
+                    className={`w-14 h-14 bg-gradient-to-br ${action.color} rounded-2xl flex items-center justify-center mb-2 shadow-sm`}
+                  >
+                    {getQuickActionIcon(action.icon)}
+                  </View>
+                  <Text className="block text-xs text-gray-700 text-center">{action.name}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        </View>
+
+        {/* 资讯早报卡片 */}
+        <View className="px-4 mb-4">
+          <View
+            className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4"
+            style={{
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)'
+            }}
+          >
+            <View className="flex flex-row items-start">
+              <View className="flex-1">
+                <View className="flex flex-row items-center mb-2">
+                  <View className="bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded mr-2">
+                    今日早报
+                  </View>
+                </View>
+                <Text className="block text-sm text-gray-800 leading-relaxed line-clamp-2">
+                  保洁服务行业迎来新机遇，智能设备提升服务效率，用户满意度持续提升
+                </Text>
               </View>
-              <View className="w-px bg-gray-200" />
-              <View className="text-center">
-                <Text className="block text-2xl font-bold text-emerald-600 mb-1">1000+</Text>
-                <Text className="block text-xs text-gray-600">服务次数</Text>
-              </View>
-              <View className="w-px bg-gray-200" />
-              <View className="text-center">
-                <Text className="block text-2xl font-bold text-emerald-600 mb-1">98%</Text>
-                <Text className="block text-xs text-gray-600">好评率</Text>
+              <View className="ml-3 flex items-center justify-center">
+                <ChevronRight size={20} color="#9CA3AF" />
               </View>
             </View>
           </View>
         </View>
 
-        {/* 分类筛选 - 胶囊式设计 */}
-        <View className="px-4 mb-6">
-          <View className="flex flex-row gap-2.5 bg-white/60 backdrop-blur-sm rounded-2xl p-1.5 shadow-sm border border-gray-100">
+        {/* 用户轮播图 */}
+        <View className="px-4 mb-4">
+          <UserCarousel users={users} interval={3000} />
+        </View>
+
+        {/* 分类筛选 */}
+        <View className="px-4 mb-4">
+          <View className="flex flex-row gap-2 bg-white rounded-xl p-1 shadow-sm border border-gray-100">
             <View
-              className={`flex-1 py-2.5 rounded-xl text-center transition-all duration-300 ${
+              className={`flex-1 py-2 rounded-lg text-center transition-all ${
                 selectedCategory === 'all'
-                  ? 'bg-emerald-500 shadow-md'
+                  ? 'bg-blue-500'
                   : 'bg-transparent'
               }`}
               onClick={() => setSelectedCategory('all')}
@@ -195,9 +246,9 @@ const IndexPage = () => {
               </Text>
             </View>
             <View
-              className={`flex-1 py-2.5 rounded-xl text-center transition-all duration-300 ${
+              className={`flex-1 py-2 rounded-lg text-center transition-all ${
                 selectedCategory === 'cleaning'
-                  ? 'bg-emerald-500 shadow-md'
+                  ? 'bg-blue-500'
                   : 'bg-transparent'
               }`}
               onClick={() => setSelectedCategory('cleaning')}
@@ -211,9 +262,9 @@ const IndexPage = () => {
               </Text>
             </View>
             <View
-              className={`flex-1 py-2.5 rounded-xl text-center transition-all duration-300 ${
+              className={`flex-1 py-2 rounded-lg text-center transition-all ${
                 selectedCategory === 'renovation'
-                  ? 'bg-emerald-500 shadow-md'
+                  ? 'bg-blue-500'
                   : 'bg-transparent'
               }`}
               onClick={() => setSelectedCategory('renovation')}
@@ -229,12 +280,7 @@ const IndexPage = () => {
           </View>
         </View>
 
-        {/* 用户轮播图 - 10万用户 */}
-        <View className="px-4 mb-6">
-          <UserCarousel users={users} interval={3000} />
-        </View>
-
-        {/* 服务列表 - 精致卡片设计 */}
+        {/* 服务列表 */}
         <View className="px-4 pb-8">
           {loading ? (
             <View className="flex flex-col items-center justify-center py-16">
@@ -242,67 +288,52 @@ const IndexPage = () => {
             </View>
           ) : filteredServices.length === 0 ? (
             <View className="flex flex-col items-center justify-center py-16">
-              <Text className="block text-base text-gray-500">暂无服务</Text>
+              <Text className="block text-sm text-gray-500">暂无服务</Text>
             </View>
           ) : (
-            <View className="grid grid-cols-1 gap-4">
-              {filteredServices.map(service => {
-                const iconData = getIconComponent(service.icon, 28)
-                return (
-                  <View
-                    key={service.id}
-                    className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden"
-                    style={{
-                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02)'
-                    }}
-                    onClick={() => handleServiceClick(service)}
-                  >
-                    <View className="flex flex-row items-stretch p-5">
-                      {/* 左侧图标 */}
-                      <View
-                        className={`${iconData.bg} w-24 h-24 rounded-2xl flex items-center justify-center flex-shrink-0 mr-4`}
-                        style={{
-                          boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)'
-                        }}
-                      >
-                        {iconData.icon}
-                      </View>
+            filteredServices.map((service) => {
+              const iconData = getIconComponent(service.icon, 48)
+              return (
+                <View
+                  key={service.id}
+                  className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-3"
+                  style={{
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)'
+                  }}
+                  onClick={() => handleServiceClick(service)}
+                >
+                  <View className="flex flex-row items-center">
+                    {/* 左侧图标 */}
+                    <View
+                      className={`w-16 h-16 ${iconData.bg} rounded-2xl flex items-center justify-center mr-4 flex-shrink-0`}
+                      style={{
+                        boxShadow: '0 4px 12px rgba(59, 130, 246, 0.2)'
+                      }}
+                    >
+                      {iconData.icon}
+                    </View>
 
-                      {/* 右侧内容 */}
-                      <View className="flex-1 flex flex-col justify-between py-1">
-                        <View>
-                          <View className="flex flex-row items-center justify-between mb-1.5">
-                            <Text className="block text-lg font-bold text-gray-800">
-                              {service.name}
-                            </Text>
-                            <ChevronRight size={20} color="#D1D5DB" />
-                          </View>
-                          <Text className="block text-sm text-gray-500 leading-relaxed line-clamp-2">
-                            {service.description}
-                          </Text>
-                        </View>
-                        <View className="flex flex-row items-center justify-between mt-2">
-                          <Text
-                            className="block text-xl font-bold"
-                            style={{ color: iconData.color }}
-                          >
-                            {service.price}
-                          </Text>
-                          <View
-                            className="bg-emerald-50 px-4 py-2 rounded-xl"
-                            style={{ border: '1px solid rgba(16, 185, 129, 0.2)' }}
-                          >
-                            <Text className="block text-xs text-emerald-600 font-semibold">
-                              立即预约
-                            </Text>
-                          </View>
-                        </View>
-                      </View>
+                    {/* 中间内容 */}
+                    <View className="flex-1">
+                      <Text className="block text-base font-bold text-gray-800 mb-1">
+                        {service.name}
+                      </Text>
+                      <Text className="block text-xs text-gray-500 leading-relaxed line-clamp-1">
+                        {service.description}
+                      </Text>
+                      <Text className="block text-sm font-semibold text-blue-600 mt-1">
+                        {service.price}
+                      </Text>
+                    </View>
+
+                    {/* 右侧箭头 */}
+                    <View className="flex items-center justify-center">
+                      <ChevronRight size={24} color="#9CA3AF" />
                     </View>
                   </View>
-                )
-              })}
-            </View>
+                </View>
+              )
+            })
           )}
         </View>
       </ScrollView>
