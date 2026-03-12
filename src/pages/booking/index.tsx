@@ -2,7 +2,7 @@ import Taro, { useLoad, useRouter } from '@tarojs/taro'
 import { View, Text, ScrollView, Input, Textarea, Picker } from '@tarojs/components'
 import { useState } from 'react'
 import { Network } from '@/network'
-import { Calendar, MapPin, MessageSquare } from 'lucide-react-taro'
+import { Calendar, MapPin, MessageSquare, Check } from 'lucide-react-taro'
 import './index.css'
 
 const BookingPage = () => {
@@ -88,126 +88,189 @@ const BookingPage = () => {
 
   return (
     <View className="flex flex-col h-full bg-gray-50">
-      <ScrollView className="flex-1 px-4 py-4" scrollY>
-        {/* 服务信息卡片 */}
-        <View className="bg-gradient-to-br from-emerald-500 to-emerald-400 rounded-2xl p-5 mb-4 shadow-md">
-          <Text className="block text-sm text-emerald-100 mb-1">预约服务</Text>
-          <Text className="block text-xl font-bold text-white">{serviceName}</Text>
-        </View>
+      <ScrollView className="flex-1" scrollY>
+        {/* 服务信息卡片 - 多层渐变 + 装饰 */}
+        <View className="relative overflow-hidden bg-gradient-to-br from-emerald-600 via-emerald-500 to-teal-500 p-6 pt-8">
+          {/* 背景装饰 */}
+          <View className="absolute top-[-40px] right-[-40px] w-32 h-32 bg-white/10 rounded-full blur-3xl" />
+          <View className="absolute bottom-[-20px] left-[-20px] w-24 h-24 bg-white/10 rounded-full blur-2xl" />
 
-        {/* 联系信息 */}
-        <View className="bg-white rounded-2xl shadow-sm p-5 mb-4">
-          <View className="flex flex-row items-center mb-4">
-            <MapPin size={20} color="#10B981" className="mr-2" />
-            <Text className="block text-base font-semibold text-gray-800">联系信息</Text>
-          </View>
-
-          <View className="mb-4">
-            <Text className="block text-sm text-gray-500 mb-2">服务地址</Text>
-            <View className="bg-gray-50 rounded-xl px-4 py-3">
-              <Input
-                className="w-full bg-transparent text-base"
-                placeholder="请输入详细地址"
-                value={address}
-                onInput={(e: any) => setAddress(e.detail.value)}
-              />
+          <View className="relative">
+            <View className="flex flex-row items-center mb-3">
+              <View className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mr-3">
+                <Check size={20} color="#fff" />
+              </View>
+              <Text className="block text-sm text-emerald-100 font-medium">预约服务</Text>
             </View>
-          </View>
-
-          <View>
-            <Text className="block text-sm text-gray-500 mb-2">联系电话</Text>
-            <View className="bg-gray-50 rounded-xl px-4 py-3">
-              <Input
-                className="w-full bg-transparent text-base"
-                placeholder="请输入手机号码"
-                type="number"
-                value={phone}
-                onInput={(e: any) => setPhone(e.detail.value)}
-                maxlength={11}
-              />
-            </View>
+            <Text className="block text-2xl font-bold text-white leading-tight">
+              {serviceName}
+            </Text>
           </View>
         </View>
 
-        {/* 预约时间 */}
-        <View className="bg-white rounded-2xl shadow-sm p-5 mb-4">
-          <View className="flex flex-row items-center mb-4">
-            <Calendar size={20} color="#10B981" className="mr-2" />
-            <Text className="block text-base font-semibold text-gray-800">预约时间</Text>
-          </View>
-
-          <View className="mb-4">
-            <Text className="block text-sm text-gray-500 mb-2">选择日期</Text>
-            <View className="bg-gray-50 rounded-xl px-4 py-3">
-              <Picker
-                mode="date"
-                value={appointmentDate}
-                onChange={(e: any) => setAppointmentDate(e.detail.value)}
-              >
-                <View className="flex flex-row items-center">
-                  <Text className={`block flex-1 text-base ${dateSelected ? 'text-gray-800' : 'text-gray-400'}`}>
-                    {dateSelected ? appointmentDate : '请选择日期'}
-                  </Text>
-                  <Text className="block text-gray-400 text-sm ml-2">›</Text>
-                </View>
-              </Picker>
+        <View className="px-4 py-6 space-y-4">
+          {/* 联系信息卡片 - 玻璃态 */}
+          <View
+            className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-sm border border-gray-100 p-6"
+            style={{
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02)'
+            }}
+          >
+            <View className="flex flex-row items-center mb-5">
+              <View className="w-11 h-11 bg-emerald-100 rounded-2xl flex items-center justify-center mr-3">
+                <MapPin size={22} color="#10B981" />
+              </View>
+              <Text className="block text-lg font-bold text-gray-800">联系信息</Text>
             </View>
-          </View>
 
-          <View>
-            <Text className="block text-sm text-gray-500 mb-3">选择时间段</Text>
-            <View className="grid grid-cols-2 gap-3">
-              {timeOptions.map(time => (
+            <View className="space-y-4">
+              <View>
+                <Text className="block text-sm text-gray-500 mb-2.5 font-medium">服务地址</Text>
                 <View
-                  key={time.value}
-                  className={`px-4 py-3 rounded-xl text-center transition-all ${
-                    appointmentTime === time.value
-                      ? 'bg-emerald-500 shadow-md'
-                      : 'bg-gray-100'
-                  }`}
-                  onClick={() => setAppointmentTime(time.value)}
+                  className="bg-gray-50 rounded-2xl px-4 py-3.5 border border-gray-100"
+                  style={{
+                    boxShadow: 'inset 0 1px 2px rgba(0, 0, 0, 0.03)'
+                  }}
                 >
-                  <Text
-                    className={`block text-sm font-medium ${
-                      appointmentTime === time.value ? 'text-white' : 'text-gray-600'
-                    }`}
-                  >
-                    {time.label}
-                  </Text>
+                  <Input
+                    className="w-full bg-transparent text-base"
+                    placeholder="请输入详细地址"
+                    value={address}
+                    onInput={(e: any) => setAddress(e.detail.value)}
+                  />
                 </View>
-              ))}
+              </View>
+
+              <View>
+                <Text className="block text-sm text-gray-500 mb-2.5 font-medium">联系电话</Text>
+                <View
+                  className="bg-gray-50 rounded-2xl px-4 py-3.5 border border-gray-100"
+                  style={{
+                    boxShadow: 'inset 0 1px 2px rgba(0, 0, 0, 0.03)'
+                  }}
+                >
+                  <Input
+                    className="w-full bg-transparent text-base"
+                    placeholder="请输入手机号码"
+                    type="number"
+                    value={phone}
+                    onInput={(e: any) => setPhone(e.detail.value)}
+                    maxlength={11}
+                  />
+                </View>
+              </View>
+            </View>
+          </View>
+
+          {/* 预约时间卡片 - 玻璃态 */}
+          <View
+            className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-sm border border-gray-100 p-6"
+            style={{
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02)'
+            }}
+          >
+            <View className="flex flex-row items-center mb-5">
+              <View className="w-11 h-11 bg-emerald-100 rounded-2xl flex items-center justify-center mr-3">
+                <Calendar size={22} color="#10B981" />
+              </View>
+              <Text className="block text-lg font-bold text-gray-800">预约时间</Text>
+            </View>
+
+            <View className="space-y-4">
+              <View>
+                <Text className="block text-sm text-gray-500 mb-2.5 font-medium">选择日期</Text>
+                <View
+                  className="bg-gray-50 rounded-2xl px-4 py-3.5 border border-gray-100"
+                  style={{
+                    boxShadow: 'inset 0 1px 2px rgba(0, 0, 0, 0.03)'
+                  }}
+                >
+                  <Picker
+                    mode="date"
+                    value={appointmentDate}
+                    onChange={(e: any) => setAppointmentDate(e.detail.value)}
+                  >
+                    <View className="flex flex-row items-center justify-between">
+                      <Text className={`block text-base ${dateSelected ? 'text-gray-800' : 'text-gray-400'}`}>
+                        {dateSelected ? appointmentDate : '请选择日期'}
+                      </Text>
+                      <Text className="block text-gray-400 text-lg ml-2">›</Text>
+                    </View>
+                  </Picker>
+                </View>
+              </View>
+
+              <View>
+                <Text className="block text-sm text-gray-500 mb-3.5 font-medium">选择时间段</Text>
+                <View className="grid grid-cols-2 gap-3">
+                  {timeOptions.map(time => (
+                    <View
+                      key={time.value}
+                      className={`px-4 py-3.5 rounded-2xl text-center transition-all duration-200 ${
+                        appointmentTime === time.value
+                          ? 'bg-emerald-500 shadow-md'
+                          : 'bg-white border border-gray-200'
+                      }`}
+                      onClick={() => setAppointmentTime(time.value)}
+                      style={appointmentTime === time.value ? {
+                        boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)'
+                      } : {}}
+                    >
+                      <Text
+                        className={`block text-sm font-semibold ${
+                          appointmentTime === time.value ? 'text-white' : 'text-gray-700'
+                        }`}
+                      >
+                        {time.label}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            </View>
+          </View>
+
+          {/* 备注卡片 - 玻璃态 */}
+          <View
+            className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-sm border border-gray-100 p-6"
+            style={{
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02)'
+            }}
+          >
+            <View className="flex flex-row items-center mb-5">
+              <View className="w-11 h-11 bg-emerald-100 rounded-2xl flex items-center justify-center mr-3">
+                <MessageSquare size={22} color="#10B981" />
+              </View>
+              <Text className="block text-lg font-bold text-gray-800">备注（可选）</Text>
+            </View>
+            <View
+              className="bg-gray-50 rounded-2xl p-4 border border-gray-100"
+              style={{
+                boxShadow: 'inset 0 1px 2px rgba(0, 0, 0, 0.03)'
+              }}
+            >
+              <Textarea
+                className="w-full bg-transparent text-base"
+                style={{ minHeight: '120px' }}
+                placeholder="请输入备注信息，如特殊要求等..."
+                value={remark}
+                onInput={(e: any) => setRemark(e.detail.value)}
+                maxlength={500}
+              />
+              <View className="text-right mt-2.5">
+                <Text className="block text-xs text-gray-400 font-medium">
+                  {remark.length}/500
+                </Text>
+              </View>
             </View>
           </View>
         </View>
 
-        {/* 备注 */}
-        <View className="bg-white rounded-2xl shadow-sm p-5 mb-4">
-          <View className="flex flex-row items-center mb-4">
-            <MessageSquare size={20} color="#10B981" className="mr-2" />
-            <Text className="block text-base font-semibold text-gray-800">备注（可选）</Text>
-          </View>
-          <View className="bg-gray-50 rounded-2xl p-4">
-            <Textarea
-              className="w-full bg-transparent text-base"
-              style={{ minHeight: '120px' }}
-              placeholder="请输入备注信息，如特殊要求等..."
-              value={remark}
-              onInput={(e: any) => setRemark(e.detail.value)}
-              maxlength={500}
-            />
-            <View className="text-right mt-2">
-              <Text className="block text-xs text-gray-400">
-                {remark.length}/500
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* 底部留白，避免被固定按钮遮挡 */}
-        <View className="h-24" />
+        {/* 底部留白 */}
+        <View className="h-32" />
       </ScrollView>
 
-      {/* 固定底部按钮 */}
+      {/* 固定底部按钮 - 悬浮效果 */}
       <View
         style={{
           position: 'fixed',
@@ -216,17 +279,20 @@ const BookingPage = () => {
           right: 0,
           display: 'flex',
           flexDirection: 'row',
-          gap: '12px',
-          padding: '12px 16px',
-          backgroundColor: '#fff',
-          borderTop: '1px solid #e5e7eb',
+          padding: '16px 20px',
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          backdropFilter: 'blur(10px)',
+          borderTop: '1px solid rgba(229, 231, 235, 0.5)',
           zIndex: 100,
-          paddingBottom: 'calc(12px + env(safe-area-inset-bottom))'
+          paddingBottom: 'calc(16px + env(safe-area-inset-bottom))'
         }}
       >
         <View className="flex-1">
           <button
-            className="w-full bg-gradient-to-r from-emerald-500 to-emerald-400 text-white rounded-xl py-4 text-base font-bold shadow-lg active:shadow-md transition-shadow"
+            className="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 text-white rounded-2xl py-4 text-base font-bold shadow-lg transition-all active:scale-[0.98]"
+            style={{
+              boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35), 0 2px 4px rgba(16, 185, 129, 0.15)'
+            }}
             onClick={handleSubmit}
             disabled={submitting}
           >

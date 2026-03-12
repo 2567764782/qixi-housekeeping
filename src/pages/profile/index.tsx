@@ -1,6 +1,6 @@
 import Taro, { useLoad } from '@tarojs/taro'
 import { View, Text, ScrollView } from '@tarojs/components'
-import { User, Phone, MapPin, Settings, FileText, Award } from 'lucide-react-taro'
+import { User, Phone, MapPin, Settings, FileText, Award, ChevronRight } from 'lucide-react-taro'
 import './index.css'
 
 const ProfilePage = () => {
@@ -62,106 +62,162 @@ const ProfilePage = () => {
   return (
     <View className="flex flex-col h-full bg-gray-50">
       <ScrollView className="flex-1" scrollY>
-        {/* 用户信息卡片 */}
-        <View className="bg-gradient-to-br from-emerald-500 via-emerald-400 to-teal-400 pt-12 pb-8 px-6">
-          <View className="flex flex-row items-center">
-            <View className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mr-4 backdrop-blur-sm">
-              <User size={40} color="#fff" />
-            </View>
-            <View className="flex-1">
-              <Text className="block text-2xl font-bold text-white mb-1">用户中心</Text>
-              <Text className="block text-sm text-emerald-100 opacity-90">
-                享受专业家居服务
-              </Text>
-            </View>
-          </View>
+        {/* 用户信息头部 - 多层渐变 + 装饰 */}
+        <View className="relative overflow-hidden bg-gradient-to-br from-emerald-600 via-emerald-500 to-teal-500 pt-12 pb-10 px-6">
+          {/* 背景装饰 */}
+          <View className="absolute top-[-60px] right-[-60px] w-48 h-48 bg-white/10 rounded-full blur-3xl" />
+          <View className="absolute bottom-[-40px] left-[-40px] w-40 h-40 bg-white/10 rounded-full blur-2xl" />
 
-          {/* 统计数据 */}
-          <View className="flex flex-row justify-around mt-6 bg-white/10 rounded-2xl py-4 backdrop-blur-sm">
-            <View className="text-center">
-              <Text className="block text-2xl font-bold text-white">0</Text>
-              <Text className="block text-xs text-emerald-100 mt-1">全部订单</Text>
+          <View className="relative">
+            <View className="flex flex-row items-center mb-6">
+              {/* 头像 */}
+              <View
+                className="w-24 h-24 bg-white/20 backdrop-blur-sm rounded-3xl flex items-center justify-center mr-5"
+                style={{
+                  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.1)'
+                }}
+              >
+                <User size={44} color="#fff" />
+              </View>
+
+              {/* 用户信息 */}
+              <View className="flex-1">
+                <Text className="block text-3xl font-bold text-white mb-2 leading-tight">
+                  用户中心
+                </Text>
+                <Text className="block text-base text-emerald-100 font-medium">
+                  享受专业家居服务
+                </Text>
+              </View>
             </View>
-            <View className="w-px bg-white/20" />
-            <View className="text-center">
-              <Text className="block text-2xl font-bold text-white">0</Text>
-              <Text className="block text-xs text-emerald-100 mt-1">待服务</Text>
-            </View>
-            <View className="w-px bg-white/20" />
-            <View className="text-center">
-              <Text className="block text-2xl font-bold text-white">0</Text>
-              <Text className="block text-xs text-emerald-100 mt-1">已完成</Text>
+
+            {/* 统计数据 - 玻璃态卡片 */}
+            <View className="bg-white/20 backdrop-blur-md rounded-3xl py-5 border border-white/30">
+              <View className="flex flex-row justify-around">
+                <View className="text-center">
+                  <Text className="block text-3xl font-bold text-white mb-1">0</Text>
+                  <Text className="block text-xs text-emerald-100 font-medium">全部订单</Text>
+                </View>
+                <View className="w-px bg-white/30" />
+                <View className="text-center">
+                  <Text className="block text-3xl font-bold text-white mb-1">0</Text>
+                  <Text className="block text-xs text-emerald-100 font-medium">待服务</Text>
+                </View>
+                <View className="w-px bg-white/30" />
+                <View className="text-center">
+                  <Text className="block text-3xl font-bold text-white mb-1">0</Text>
+                  <Text className="block text-xs text-emerald-100 font-medium">已完成</Text>
+                </View>
+              </View>
             </View>
           </View>
         </View>
 
-        {/* 功能菜单 */}
+        {/* 功能菜单 - 精致卡片 */}
         <View className="px-4 py-6">
-          <View className="bg-white rounded-2xl shadow-sm overflow-hidden">
+          <View
+            className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-sm border border-gray-100 overflow-hidden"
+            style={{
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02)'
+            }}
+          >
             {menuItems.map((item, index) => (
               <View
                 key={index}
-                className={`flex flex-row items-center px-5 py-4 ${
+                className={`flex flex-row items-center px-6 py-5 ${
                   index !== menuItems.length - 1 ? 'border-b border-gray-50' : ''
                 }`}
                 onClick={item.action}
+                style={{
+                  transition: 'all 0.2s ease'
+                }}
               >
-                <View className="w-11 h-11 bg-emerald-50 rounded-xl flex items-center justify-center mr-4">
+                {/* 图标容器 */}
+                <View
+                  className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center mr-4"
+                  style={{
+                    boxShadow: '0 2px 4px rgba(16, 185, 129, 0.08)'
+                  }}
+                >
                   {item.icon}
                 </View>
+
+                {/* 文字内容 */}
                 <View className="flex-1">
-                  <Text className="block text-base font-semibold text-gray-800">
+                  <Text className="block text-lg font-bold text-gray-800 mb-0.5">
                     {item.title}
                   </Text>
-                  <Text className="block text-sm text-gray-500 mt-0.5">
+                  <Text className="block text-sm text-gray-500">
                     {item.subtitle}
                   </Text>
                 </View>
-                <View className="w-6 h-6 flex items-center justify-center">
-                  <Text className="block text-gray-400 text-xl">›</Text>
+
+                {/* 箭头 */}
+                <View className="w-8 h-8 flex items-center justify-center">
+                  <ChevronRight size={20} color="#D1D5DB" />
                 </View>
               </View>
             ))}
           </View>
         </View>
 
-        {/* 服务优势 */}
+        {/* 服务优势 - 精致卡片 */}
         <View className="px-4 pb-6">
-          <Text className="block text-base font-semibold text-gray-800 mb-3 px-1">
-            服务优势
-          </Text>
-          <View className="bg-white rounded-2xl shadow-sm p-5">
+          <View
+            className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-sm border border-gray-100 p-6"
+            style={{
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02)'
+            }}
+          >
+            <Text className="block text-lg font-bold text-gray-800 mb-5">
+              服务优势
+            </Text>
             <View className="grid grid-cols-3 gap-4">
               <View className="text-center">
-                <View className="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-2">
-                  <Award size={24} color="#10B981" />
+                <View
+                  className="w-16 h-16 bg-emerald-50 rounded-3xl flex items-center justify-center mx-auto mb-3"
+                  style={{
+                    boxShadow: '0 4px 8px rgba(16, 185, 129, 0.12)'
+                  }}
+                >
+                  <Award size={28} color="#10B981" />
                 </View>
-                <Text className="block text-sm font-semibold text-gray-800">
+                <Text className="block text-sm font-bold text-gray-800 mb-1">
                   专业团队
                 </Text>
-                <Text className="block text-xs text-gray-500 mt-1">
+                <Text className="block text-xs text-gray-500">
                   经验丰富
                 </Text>
               </View>
               <View className="text-center">
-                <View className="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-2">
-                  <Phone size={24} color="#10B981" />
+                <View
+                  className="w-16 h-16 bg-emerald-50 rounded-3xl flex items-center justify-center mx-auto mb-3"
+                  style={{
+                    boxShadow: '0 4px 8px rgba(16, 185, 129, 0.12)'
+                  }}
+                >
+                  <Phone size={28} color="#10B981" />
                 </View>
-                <Text className="block text-sm font-semibold text-gray-800">
+                <Text className="block text-sm font-bold text-gray-800 mb-1">
                   快速响应
                 </Text>
-                <Text className="block text-xs text-gray-500 mt-1">
+                <Text className="block text-xs text-gray-500">
                   及时服务
                 </Text>
               </View>
               <View className="text-center">
-                <View className="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-2">
-                  <User size={24} color="#10B981" />
+                <View
+                  className="w-16 h-16 bg-emerald-50 rounded-3xl flex items-center justify-center mx-auto mb-3"
+                  style={{
+                    boxShadow: '0 4px 8px rgba(16, 185, 129, 0.12)'
+                  }}
+                >
+                  <User size={28} color="#10B981" />
                 </View>
-                <Text className="block text-sm font-semibold text-gray-800">
+                <Text className="block text-sm font-bold text-gray-800 mb-1">
                   优质保障
                 </Text>
-                <Text className="block text-xs text-gray-500 mt-1">
+                <Text className="block text-xs text-gray-500">
                   品质保证
                 </Text>
               </View>
@@ -169,19 +225,32 @@ const ProfilePage = () => {
           </View>
         </View>
 
-        {/* 联系方式 */}
+        {/* 联系方式 - 渐变卡片 */}
         <View className="px-4 pb-8">
-          <View className="bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-2xl p-5 text-center">
-            <Text className="block text-base font-semibold text-white mb-2">
-              需要帮助？
-            </Text>
-            <Text className="block text-sm text-emerald-100 mb-3">
-              我们的服务团队随时为您服务
-            </Text>
-            <View className="bg-white/20 rounded-xl py-2.5 px-4 inline-block backdrop-blur-sm">
-              <Text className="block text-sm font-semibold text-white">
-                400-888-8888
+          <View
+            className="bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 rounded-3xl p-6 text-center relative overflow-hidden"
+            style={{
+              boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)'
+            }}
+          >
+            {/* 背景装饰 */}
+            <View className="absolute top-[-20px] right-[-20px] w-24 h-24 bg-white/10 rounded-full blur-2xl" />
+            <View className="absolute bottom-[-10px] left-[-10px] w-16 h-16 bg-white/10 rounded-full blur-xl" />
+
+            <View className="relative">
+              <Text className="block text-lg font-bold text-white mb-2">
+                需要帮助？
               </Text>
+              <Text className="block text-sm text-emerald-100 mb-4">
+                我们的服务团队随时为您服务
+              </Text>
+              <View
+                className="bg-white/20 backdrop-blur-sm rounded-2xl py-3 px-6 inline-block border border-white/30"
+              >
+                <Text className="block text-base font-bold text-white">
+                  400-888-8888
+                </Text>
+              </View>
             </View>
           </View>
         </View>
