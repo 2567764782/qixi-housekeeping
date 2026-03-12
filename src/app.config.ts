@@ -19,7 +19,8 @@ export default defineAppConfig({
     'pages/qrcode/index',
     'pages/registration/index',
     'pages/hospital-detail/index',
-    'pages/booking-confirm/index'
+    'pages/booking-confirm/index',
+    'pages/create-cleaning-order/index'
   ],
   window: {
     backgroundTextStyle: 'light',
