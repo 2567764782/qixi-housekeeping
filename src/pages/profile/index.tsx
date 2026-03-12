@@ -34,6 +34,14 @@ const ProfilePage = () => {
       }
     },
     {
+      icon: <Settings size={22} color="#10B981" />,
+      title: '订单管理',
+      subtitle: '自动接单/派单',
+      action: () => {
+        Taro.navigateTo({ url: '/pages/admin/index' })
+      }
+    },
+    {
       icon: <Award size={22} color="#10B981" />,
       title: '会员中心',
       subtitle: '查看会员权益',
@@ -42,7 +50,7 @@ const ProfilePage = () => {
       }
     },
     {
-      icon: <Settings size={22} color="#10B981" />,
+      icon: <User size={22} color="#10B981" />,
       title: '帮助中心',
       subtitle: '常见问题解答',
       action: () => {
@@ -50,7 +58,7 @@ const ProfilePage = () => {
       }
     },
     {
-      icon: <User size={22} color="#10B981" />,
+      icon: <Settings size={22} color="#10B981" />,
       title: '设置',
       subtitle: '账户设置',
       action: () => {
