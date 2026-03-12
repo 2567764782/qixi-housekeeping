@@ -9,9 +9,13 @@ import { SearchModule } from './search/search.module';
 import { CleaningOrdersModule } from './cleaning-orders/cleaning-orders.module';
 import { CleanersModule } from './cleaners/cleaners.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { RolesModule } from './roles/roles.module';
+import { StatisticsModule } from './statistics/statistics.module';
+import { RealtimeModule } from './realtime/realtime.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
-  imports: [ServicesModule, OrdersModule, StaffModule, UsersModule, SearchModule, CleaningOrdersModule, CleanersModule, NotificationsModule],
+  imports: [ServicesModule, OrdersModule, StaffModule, UsersModule, SearchModule, CleaningOrdersModule, CleanersModule, NotificationsModule, RolesModule, StatisticsModule, RealtimeModule, PaymentModule],
   controllers: [AppController],
   providers: [AppService],
 })

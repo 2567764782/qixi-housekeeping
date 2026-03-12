@@ -38,6 +38,9 @@
   ],
   "dependencies": {
     "@babel/runtime": "^7.24.4",
+    "@nestjs/axios": "^4.0.1",
+    "@nestjs/platform-socket.io": "^11.1.16",
+    "@nestjs/websockets": "^11.1.16",
     "@tarojs/components": "4.1.9",
     "@tarojs/helper": "4.1.9",
     "@tarojs/plugin-framework-react": "4.1.9",
@@ -48,10 +51,12 @@
     "@tarojs/runtime": "4.1.9",
     "@tarojs/shared": "4.1.9",
     "@tarojs/taro": "4.1.9",
+    "axios": "^1.13.6",
     "drizzle-kit": "^0.31.8",
     "lucide-react-taro": "^1.2.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
+    "socket.io": "^4.8.3",
     "zustand": "^5.0.9"
   },
   "devDependencies": {

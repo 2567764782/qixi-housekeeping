@@ -13,12 +13,13 @@ export class SendNotificationDto {
   templateId: string;
 
   @IsArray()
+  @IsString({ each: true })
   touser: string[];
 
   @IsString()
   page: string;
 
-  data: Record<string, string>;
+  data: Record<string, { value: string }>;
 }
 
 export class CreateSubscriptionDto {

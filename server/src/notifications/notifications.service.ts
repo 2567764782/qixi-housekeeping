@@ -1,10 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { getSupabaseClient } from '../storage/database/supabase-client';
+import { WechatService } from '../wechat/wechat.service';
 import { SendNotificationDto, CreateSubscriptionDto, NotificationType } from './dto/notifications.dto';
 
 @Injectable()
 export class NotificationsService {
   private readonly client = getSupabaseClient();
+
+  constructor(private readonly wechatService: WechatService) {}
 
   // 创建订阅记录
   async createSubscription(subscriptionDto: CreateSubscriptionDto) {
@@ -28,33 +31,44 @@ export class NotificationsService {
 
   // 发送订阅消息
   async sendNotification(sendNotificationDto: SendNotificationDto) {
-    // 这里应该调用微信小程序订阅消息 API
-    // 由于需要 access_token 和 appid，这里先记录日志
+    const results: Array<any> = [];
 
-    console.log('Sending notification:', sendNotificationDto);
+    try {
+      // 批量发送订阅消息
+      const batchResults = await this.wechatService.sendBatchSubscribeMessage(
+        sendNotificationDto.touser,
+        sendNotificationDto.templateId,
+        sendNotificationDto.data,
+        sendNotificationDto.page
+      );
 
-    // 记录发送历史
-    const { data, error } = await this.client
-      .from('notification_history')
-      .insert({
-        template_id: sendNotificationDto.templateId,
-        touser: sendNotificationDto.touser,
-        page: sendNotificationDto.page,
-        data: sendNotificationDto.data,
-        status: 'sent'
-      })
-      .select()
-      .single();
+      for (const result of batchResults) {
+        // 记录每个接收者的发送结果
+        const { data, error } = await this.client
+          .from('notification_history')
+          .insert({
+            template_id: sendNotificationDto.templateId,
+            touser: [(result as any).openid],
+            page: sendNotificationDto.page,
+            data: sendNotificationDto.data,
+            status: (result as any).success ? 'sent' : 'failed',
+            error_message: (result as any).success ? null : (result as any).error
+          })
+          .select()
+          .single();
 
-    if (error) {
-      throw new Error(`Failed to record notification: ${error.message}`);
+        results.push((result as any).success ? data : error);
+      }
+
+      return {
+        status: 'success',
+        message: `Notifications sent to ${sendNotificationDto.touser.length} users`,
+        data: results
+      };
+    } catch (error) {
+      console.error('Failed to send notification:', error);
+      throw new Error(`Failed to send notification: ${error.message}`);
     }
-
-    return {
-      status: 'success',
-      message: 'Notification sent successfully',
-      data
-    };
   }
 
   // 查询推送记录
@@ -166,7 +180,7 @@ export class NotificationsService {
     }
 
     // 根据状态构建不同的通知数据
-    let notificationData: Record<string, string> = {};
+    let notificationData: Record<string, { value: string }> = {};
     let templateId = '';
     let page = '';
 
@@ -174,7 +188,7 @@ export class NotificationsService {
       case 'accepted':
         templateId = 'ORDER_ACCEPTED_TEMPLATE_ID';
         notificationData = {
-          thing1: { value: order.order_no },
+          thing1: { value: String(order.order_no) },
           date2: { value: new Date().toLocaleDateString() },
           thing3: { value: '已接单' }
         };
@@ -183,7 +197,7 @@ export class NotificationsService {
       case 'in_progress':
         templateId = 'ORDER_IN_PROGRESS_TEMPLATE_ID';
         notificationData = {
-          thing1: { value: order.order_no },
+          thing1: { value: String(order.order_no) },
           date2: { value: new Date().toLocaleDateString() },
           thing3: { value: '进行中' }
         };
@@ -192,7 +206,7 @@ export class NotificationsService {
       case 'completed':
         templateId = 'ORDER_COMPLETED_TEMPLATE_ID';
         notificationData = {
-          thing1: { value: order.order_no },
+          thing1: { value: String(order.order_no) },
           date2: { value: new Date().toLocaleDateString() },
           thing3: { value: '已完成' }
         };
