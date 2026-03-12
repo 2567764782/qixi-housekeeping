@@ -7,9 +7,11 @@ import { StaffModule } from './staff/staff.module';
 import { UsersModule } from './users/users.module';
 import { SearchModule } from './search/search.module';
 import { CleaningOrdersModule } from './cleaning-orders/cleaning-orders.module';
+import { CleanersModule } from './cleaners/cleaners.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
-  imports: [ServicesModule, OrdersModule, StaffModule, UsersModule, SearchModule, CleaningOrdersModule],
+  imports: [ServicesModule, OrdersModule, StaffModule, UsersModule, SearchModule, CleaningOrdersModule, CleanersModule, NotificationsModule],
   controllers: [AppController],
   providers: [AppService],
 })

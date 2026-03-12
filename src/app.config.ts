@@ -20,7 +20,10 @@ export default defineAppConfig({
     'pages/registration/index',
     'pages/hospital-detail/index',
     'pages/booking-confirm/index',
-    'pages/create-cleaning-order/index'
+    'pages/create-cleaning-order/index',
+    'pages/cleaner-management/index',
+    'pages/order-review/index',
+    'pages/cleaner-orders/index'
   ],
   window: {
     backgroundTextStyle: 'light',
