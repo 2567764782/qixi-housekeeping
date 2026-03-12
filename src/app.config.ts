@@ -16,7 +16,10 @@ export default defineAppConfig({
     'pages/activity-detail/index',
     'pages/my-registrations/index',
     'pages/activity-notifications/index',
-    'pages/qrcode/index'
+    'pages/qrcode/index',
+    'pages/registration/index',
+    'pages/hospital-detail/index',
+    'pages/booking-confirm/index'
   ],
   window: {
     backgroundTextStyle: 'light',

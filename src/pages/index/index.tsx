@@ -1,6 +1,6 @@
 import Taro, { useLoad } from '@tarojs/taro'
 import { View, Text, ScrollView } from '@tarojs/components'
-import { Sparkles, Wrench, Building2, Sofa, PaintBucket, ChevronRight, Star, CreditCard, Calendar, Info, UserCheck, Bell } from 'lucide-react-taro'
+import { Sparkles, Wrench, Building2, Sofa, PaintBucket, ChevronRight, Star, CreditCard, Calendar, Info, UserCheck, Stethoscope } from 'lucide-react-taro'
 import { useState } from 'react'
 import { Network } from '@/network'
 import './index.css'
@@ -34,11 +34,11 @@ const IndexPage = () => {
 
   // 快捷入口数据
   const quickActions: QuickAction[] = [
-    { id: '1', name: '我的名片', icon: 'CreditCard', color: 'from-blue-500 to-blue-600' },
-    { id: '2', name: '近期活动', icon: 'Calendar', color: 'from-green-500 to-green-600' },
-    { id: '3', name: '活动详情', icon: 'Info', color: 'from-purple-500 to-purple-600' },
-    { id: '4', name: '我的报名', icon: 'UserCheck', color: 'from-orange-500 to-orange-600' },
-    { id: '5', name: '活动通知', icon: 'Bell', color: 'from-blue-600 to-blue-700' },
+    { id: '1', name: '医院挂号', icon: 'Stethoscope', color: 'from-red-500 to-red-600' },
+    { id: '2', name: '我的名片', icon: 'CreditCard', color: 'from-blue-500 to-blue-600' },
+    { id: '3', name: '近期活动', icon: 'Calendar', color: 'from-green-500 to-green-600' },
+    { id: '4', name: '活动详情', icon: 'Info', color: 'from-purple-500 to-purple-600' },
+    { id: '5', name: '我的报名', icon: 'UserCheck', color: 'from-orange-500 to-orange-600' },
   ]
 
   // 加载服务列表
@@ -60,11 +60,11 @@ const IndexPage = () => {
   // 获取快捷入口图标
   const getQuickActionIcon = (iconName: string) => {
     const iconMap: Record<string, React.ReactNode> = {
+      Stethoscope: <Stethoscope size={24} color="#fff" />,
       CreditCard: <CreditCard size={24} color="#fff" />,
       Calendar: <Calendar size={24} color="#fff" />,
       Info: <Info size={24} color="#fff" />,
       UserCheck: <UserCheck size={24} color="#fff" />,
-      Bell: <Bell size={24} color="#fff" />,
     }
     return iconMap[iconName] || <Sparkles size={24} color="#fff" />
   }
@@ -111,11 +111,11 @@ const IndexPage = () => {
   // 处理快捷入口点击
   const handleQuickActionClick = (actionId: string) => {
     const pageMap: Record<string, string> = {
-      '1': '/pages/my-card/index',
-      '2': '/pages/recent-activities/index',
-      '3': '/pages/activity-detail/index',
-      '4': '/pages/my-registrations/index',
-      '5': '/pages/activity-notifications/index'
+      '1': '/pages/registration/index',
+      '2': '/pages/my-card/index',
+      '3': '/pages/recent-activities/index',
+      '4': '/pages/activity-detail/index',
+      '5': '/pages/my-registrations/index'
     }
     const url = pageMap[actionId]
     if (url) {

@@ -1,0 +1,338 @@
+.hospital-detail-page {
+  min-height: 100vh;
+  background: #f9fafb;
+}
+
+/* 导航栏 */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  padding-top: env(safe-area-inset-top);
+}
+
+.navbar-content {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+}
+
+.nav-back {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.nav-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.nav-placeholder {
+  width: 32px;
+}
+
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  padding-top: calc(12px + env(safe-area-inset-top));
+}
+
+/* 内容区 */
+.content {
+  height: 100vh;
+  padding-top: calc(44px + env(safe-area-inset-top));
+  overflow-y: auto;
+}
+
+/* 英雄区域 */
+.hero-section {
+  position: relative;
+  height: 240px;
+}
+
+.hero-image {
+  width: 100%;
+  height: 100%;
+}
+
+.hero-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
+  padding: 20px 16px;
+}
+
+.hospital-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  padding: 6px 16px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+}
+
+.badge-text {
+  font-size: 13px;
+  color: #fff;
+  font-weight: 700;
+}
+
+/* 信息卡片 */
+.info-card {
+  background: #fff;
+  margin: -24px 16px 16px;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  position: relative;
+  z-index: 10;
+}
+
+.hospital-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.hospital-name {
+  flex: 1;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.rating-wrapper {
+  display: flex;
+  align-items: center;
+  margin-left: 12px;
+}
+
+.rating-text {
+  margin-left: 6px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+/* 标签 */
+.tags-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.tag {
+  padding: 6px 14px;
+  background: #f0fdf4;
+  border-radius: 10px;
+}
+
+.tag-text {
+  font-size: 13px;
+  color: #059669;
+  font-weight: 600;
+}
+
+/* 信息项 */
+.info-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.info-text {
+  margin-left: 10px;
+  font-size: 14px;
+  color: #4b5563;
+  flex: 1;
+}
+
+.description {
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.8;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f3f4f6;
+}
+
+/* 科室列表 */
+.departments-section {
+  margin: 0 16px 16px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.section-icon-wrapper {
+  width: 36px;
+  height: 36px;
+  background: #f0fdf4;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.section-count {
+  font-size: 14px;
+  color: #6b7280;
+  margin-left: 4px;
+}
+
+.departments-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.department-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+}
+
+.department-card:active {
+  transform: scale(0.96);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.department-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  background: #f0fdf4;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.department-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1f2937;
+  text-align: center;
+  flex: 1;
+}
+
+/* 快速挂号 */
+.quick-booking-section {
+  margin: 0 16px 16px;
+}
+
+.quick-booking-card {
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+}
+
+.booking-icon-wrapper {
+  width: 56px;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+}
+
+.booking-info {
+  flex: 1;
+  margin-left: 16px;
+}
+
+.booking-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.booking-subtitle {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.booking-button {
+  background: #fff;
+  padding: 10px 20px;
+  border-radius: 10px;
+}
+
+.booking-button-text {
+  font-size: 14px;
+  font-weight: 700;
+  color: #10B981;
+}
+
+/* 温馨提示 */
+.tips-section {
+  margin: 0 16px 32px;
+}
+
+.tips-card {
+  background: #fef3c7;
+  border-radius: 14px;
+  padding: 20px;
+}
+
+.tips-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.tips-icon {
+  font-size: 20px;
+  margin-right: 8px;
+}
+
+.tips-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #92400e;
+}
+
+.tips-text {
+  font-size: 14px;
+  color: #78350f;
+  line-height: 2;
+}
