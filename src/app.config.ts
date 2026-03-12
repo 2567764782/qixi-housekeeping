@@ -3,7 +3,13 @@ export default defineAppConfig({
     'pages/index/index',
     'pages/booking/index',
     'pages/orders/index',
-    'pages/profile/index'
+    'pages/profile/index',
+    'pages/auth/index',
+    'pages/service-detail/index',
+    'pages/about/index',
+    'pages/terms/index',
+    'pages/privacy/index',
+    'pages/admin/index'
   ],
   window: {
     backgroundTextStyle: 'light',
