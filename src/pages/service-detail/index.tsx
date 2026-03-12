@@ -23,7 +23,6 @@ const ServiceDetailPage = () => {
   const [loading, setLoading] = useState(false)
 
   useLoad(() => {
-    console.log('Service detail page loaded')
     const { id } = router.params
     if (id) {
       loadServiceDetail(id)
@@ -37,7 +36,6 @@ const ServiceDetailPage = () => {
         url: `/api/services/${serviceId}`,
         method: 'GET'
       })
-      console.log('Service detail response:', res.data)
       setService(res.data)
     } catch (error) {
       console.error('Failed to load service detail:', error)

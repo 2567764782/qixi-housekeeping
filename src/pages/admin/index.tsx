@@ -22,7 +22,6 @@ interface Order {
 
 const AdminPage = () => {
   useLoad(() => {
-    console.log('Admin page loaded')
     loadOrders()
   })
 
@@ -38,7 +37,6 @@ const AdminPage = () => {
         url: '/api/orders',
         method: 'GET'
       })
-      console.log('Orders response:', res.data)
       setOrders(res.data || [])
     } catch (error) {
       console.error('Failed to load orders:', error)
@@ -97,11 +95,10 @@ const AdminPage = () => {
   const handleAutoConfigure = async (orderId: string) => {
     try {
       setProcessing(orderId)
-      const res = await Network.request({
+      await Network.request({
         url: `/api/orders/${orderId}/auto-configure`,
         method: 'POST'
       })
-      console.log('Auto configure response:', res.data)
       alert('自动配置成功！')
       loadOrders()
     } catch (error) {
@@ -120,7 +117,6 @@ const AdminPage = () => {
         url: '/api/orders/batch/auto-configure',
         method: 'POST'
       })
-      console.log('Batch auto configure response:', res.data)
       alert(`批量自动配置成功！成功 ${res.data.success} 个，失败 ${res.data.failed} 个`)
       loadOrders()
     } catch (error) {

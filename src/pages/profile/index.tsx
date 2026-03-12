@@ -5,7 +5,7 @@ import './index.css'
 
 const ProfilePage = () => {
   useLoad(() => {
-    console.log('Profile page loaded')
+    // 页面加载初始化
   })
 
   const menuItems = [

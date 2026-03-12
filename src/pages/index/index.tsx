@@ -25,7 +25,6 @@ interface QuickAction {
 
 const IndexPage = () => {
   useLoad(() => {
-    console.log('Page loaded')
     loadServices()
   })
 
@@ -50,7 +49,6 @@ const IndexPage = () => {
         url: '/api/services',
         method: 'GET'
       })
-      console.log('Services response:', res.data)
       setServices(res.data || [])
     } catch (error) {
       console.error('Failed to load services:', error)

@@ -18,7 +18,6 @@ const BookingSuccessPage = () => {
   const [bookingInfo, setBookingInfo] = useState<BookingSuccessProps>({})
 
   useLoad(() => {
-    console.log('Booking success page loaded')
     // 从路由参数获取预约信息
     const router = Taro.getCurrentInstance().router
     const params = router?.params || {}

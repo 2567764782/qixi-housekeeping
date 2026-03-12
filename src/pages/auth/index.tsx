@@ -8,7 +8,7 @@ type LoginMode = 'login' | 'register' | 'forgot'
 
 const AuthPage = () => {
   useLoad(() => {
-    console.log('Auth page loaded')
+    // 页面加载初始化
   })
 
   const [mode, setMode] = useState<LoginMode>('login')

@@ -61,7 +61,7 @@ const BookingPage = () => {
 
     try {
       setSubmitting(true)
-      const res = await Network.request({
+      await Network.request({
         url: '/api/orders',
         method: 'POST',
         data: {
@@ -75,7 +75,6 @@ const BookingPage = () => {
           remark
         }
       })
-      console.log('Order created:', res.data)
       alert('预约成功！')
       Taro.switchTab({ url: '/pages/orders/index' })
     } catch (error) {

@@ -19,12 +19,10 @@ interface Order {
 
 const OrdersPage = () => {
   useLoad(() => {
-    console.log('Orders page loaded')
     loadOrders()
   })
 
   useDidShow(() => {
-    console.log('Orders page showed')
     loadOrders()
   })
 
@@ -35,13 +33,10 @@ const OrdersPage = () => {
   const loadOrders = async () => {
     try {
       setLoading(true)
-      console.log('Starting to load orders...')
       const res = await Network.request({
         url: '/api/orders/user/demo-user-001',
         method: 'GET'
       })
-      console.log('Orders response:', res)
-      console.log('Orders response data:', res.data)
       // 处理不同的响应格式
       let ordersData: Order[] = []
       if (res.data && res.data.data && Array.isArray(res.data.data)) {
@@ -51,12 +46,9 @@ const OrdersPage = () => {
         // 如果后端直接返回数组
         ordersData = res.data as Order[]
       }
-      console.log('Parsed orders:', ordersData)
-      console.log('Orders data type:', typeof ordersData, 'Is array:', Array.isArray(ordersData))
       setOrders(ordersData || [])
     } catch (error) {
       console.error('Failed to load orders:', error)
-      console.error('Error details:', JSON.stringify(error, null, 2))
       setOrders([]) // 出错时设置为空数组
     } finally {
       setLoading(false)
