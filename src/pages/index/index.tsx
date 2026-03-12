@@ -1,6 +1,6 @@
 import Taro, { useLoad } from '@tarojs/taro'
 import { View, Text, ScrollView } from '@tarojs/components'
-import { Sparkles, Wrench, Building2, Sofa, PaintBucket, ChevronRight, Star, FileText, Video, Share2, Users, CreditCard } from 'lucide-react-taro'
+import { Sparkles, Wrench, Building2, Sofa, PaintBucket, ChevronRight, Star, CreditCard, Calendar, Info, UserCheck, Bell } from 'lucide-react-taro'
 import { useState } from 'react'
 import { Network } from '@/network'
 import './index.css'
@@ -35,10 +35,10 @@ const IndexPage = () => {
   // 快捷入口数据
   const quickActions: QuickAction[] = [
     { id: '1', name: '我的名片', icon: 'CreditCard', color: 'from-blue-500 to-blue-600' },
-    { id: '2', name: '上传素材', icon: 'FileText', color: 'from-green-500 to-green-600' },
-    { id: '3', name: '视频获客', icon: 'Video', color: 'from-orange-500 to-orange-600' },
-    { id: '4', name: '我的团队', icon: 'Users', color: 'from-blue-500 to-blue-600' },
-    { id: '5', name: '海报获客', icon: 'Share2', color: 'from-orange-500 to-orange-600' },
+    { id: '2', name: '近期活动', icon: 'Calendar', color: 'from-green-500 to-green-600' },
+    { id: '3', name: '活动详情', icon: 'Info', color: 'from-purple-500 to-purple-600' },
+    { id: '4', name: '我的报名', icon: 'UserCheck', color: 'from-orange-500 to-orange-600' },
+    { id: '5', name: '活动通知', icon: 'Bell', color: 'from-blue-600 to-blue-700' },
   ]
 
   // 加载服务列表
@@ -61,10 +61,10 @@ const IndexPage = () => {
   const getQuickActionIcon = (iconName: string) => {
     const iconMap: Record<string, React.ReactNode> = {
       CreditCard: <CreditCard size={24} color="#fff" />,
-      FileText: <FileText size={24} color="#fff" />,
-      Video: <Video size={24} color="#fff" />,
-      Users: <Users size={24} color="#fff" />,
-      Share2: <Share2 size={24} color="#fff" />,
+      Calendar: <Calendar size={24} color="#fff" />,
+      Info: <Info size={24} color="#fff" />,
+      UserCheck: <UserCheck size={24} color="#fff" />,
+      Bell: <Bell size={24} color="#fff" />,
     }
     return iconMap[iconName] || <Sparkles size={24} color="#fff" />
   }
@@ -106,6 +106,21 @@ const IndexPage = () => {
     Taro.navigateTo({
       url: `/pages/booking/index?name=${encodeURIComponent(service.name)}&id=${service.id}`
     })
+  }
+
+  // 处理快捷入口点击
+  const handleQuickActionClick = (actionId: string) => {
+    const pageMap: Record<string, string> = {
+      '1': '/pages/my-card/index',
+      '2': '/pages/recent-activities/index',
+      '3': '/pages/activity-detail/index',
+      '4': '/pages/my-registrations/index',
+      '5': '/pages/activity-notifications/index'
+    }
+    const url = pageMap[actionId]
+    if (url) {
+      Taro.navigateTo({ url })
+    }
   }
 
   // 过滤服务
@@ -153,7 +168,7 @@ const IndexPage = () => {
           <View className="bg-white rounded-2xl shadow-md p-4">
             <View className="flex flex-row justify-around">
               {quickActions.map((action) => (
-                <View key={action.id} className="flex flex-col items-center">
+                <View key={action.id} className="flex flex-col items-center" onClick={() => handleQuickActionClick(action.id)}>
                   <View
                     className={`w-14 h-14 bg-gradient-to-br ${action.color} rounded-2xl flex items-center justify-center mb-2 shadow-sm`}
                   >

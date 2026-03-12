@@ -10,7 +10,12 @@ export default defineAppConfig({
     'pages/terms/index',
     'pages/privacy/index',
     'pages/admin/index',
-    'pages/booking-success/index'
+    'pages/booking-success/index',
+    'pages/my-card/index',
+    'pages/recent-activities/index',
+    'pages/activity-detail/index',
+    'pages/my-registrations/index',
+    'pages/activity-notifications/index'
   ],
   window: {
     backgroundTextStyle: 'light',
