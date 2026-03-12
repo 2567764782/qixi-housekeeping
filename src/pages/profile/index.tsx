@@ -1,6 +1,6 @@
 import Taro, { useLoad } from '@tarojs/taro'
 import { View, Text, ScrollView } from '@tarojs/components'
-import { User, Phone, MapPin, Settings, FileText, Award, ChevronRight } from 'lucide-react-taro'
+import { User, Phone, MapPin, Settings, FileText, Award, ChevronRight, QrCode } from 'lucide-react-taro'
 import './index.css'
 
 const ProfilePage = () => {
@@ -31,6 +31,14 @@ const ProfilePage = () => {
       subtitle: '在线客服咨询',
       action: () => {
         alert('联系客服功能开发中')
+      }
+    },
+    {
+      icon: <QrCode size={22} color="#10B981" />,
+      title: '扫码入群',
+      subtitle: '加入服务交流群',
+      action: () => {
+        Taro.navigateTo({ url: '/pages/qrcode/index' })
       }
     },
     {

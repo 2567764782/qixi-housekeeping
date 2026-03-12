@@ -15,7 +15,8 @@ export default defineAppConfig({
     'pages/recent-activities/index',
     'pages/activity-detail/index',
     'pages/my-registrations/index',
-    'pages/activity-notifications/index'
+    'pages/activity-notifications/index',
+    'pages/qrcode/index'
   ],
   window: {
     backgroundTextStyle: 'light',

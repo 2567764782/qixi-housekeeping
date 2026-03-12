@@ -1,0 +1,248 @@
+.qrcode-page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f0fdf4 0%, #f9fafb 100%);
+}
+
+/* 导航栏 */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  padding-top: env(safe-area-inset-top);
+}
+
+.navbar-content {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+}
+
+.nav-back {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.nav-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.nav-placeholder {
+  width: 32px;
+}
+
+/* 内容区 */
+.content {
+  height: 100vh;
+  padding-top: calc(44px + env(safe-area-inset-top));
+  overflow-y: auto;
+}
+
+.qrcode-container {
+  padding: 24px 20px;
+}
+
+/* 标题区域 */
+.header-section {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.icon-wrapper {
+  width: 88px;
+  height: 88px;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.25);
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.subtitle {
+  font-size: 15px;
+  color: #6b7280;
+  display: block;
+}
+
+/* 二维码卡片 */
+.qrcode-card {
+  background: white;
+  border-radius: 24px;
+  padding: 32px 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  margin-bottom: 20px;
+}
+
+.qrcode-wrapper {
+  width: 240px;
+  height: 240px;
+  margin: 0 auto 24px;
+  padding: 12px;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.2);
+}
+
+.qrcode-image {
+  width: 100%;
+  height: 100%;
+  background: white;
+  border-radius: 12px;
+}
+
+/* 提示信息 */
+.tips-section {
+  background: #f0fdf4;
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.tips-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #059669;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.tips-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tips-item {
+  display: flex;
+  align-items: center;
+}
+
+.tips-dot {
+  width: 6px;
+  height: 6px;
+  background: #10B981;
+  border-radius: 50%;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.tips-text {
+  font-size: 14px;
+  color: #374151;
+  flex: 1;
+}
+
+/* 微信号区域 */
+.wechat-section {
+  background: white;
+  border-radius: 16px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.wechat-info {
+  flex: 1;
+}
+
+.wechat-label {
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.wechat-id {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  display: block;
+}
+
+.copy-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #f0fdf4;
+  padding: 10px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.copy-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #10B981;
+}
+
+/* 客服信息 */
+.service-section {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.service-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #92400e;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.service-phone {
+  font-size: 16px;
+  font-weight: 600;
+  color: #78350f;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.service-time {
+  font-size: 13px;
+  color: #a16207;
+  display: block;
+}
+
+/* 操作按钮 */
+.action-section {
+  padding-bottom: 20px;
+}
+
+.save-button {
+  width: 100%;
+  height: 48px;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
