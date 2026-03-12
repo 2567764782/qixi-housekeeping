@@ -145,17 +145,26 @@ const RegistrationPage = () => {
   const handleOfficialBooking = (url: string, e) => {
     e.stopPropagation() // 阻止冒泡，避免触发医院详情
     Taro.showModal({
-      title: '提示',
-      content: '即将跳转到医院官方挂号平台',
+      title: '官方挂号平台',
+      content: '即将跳转到医院官方挂号平台，实际挂号操作将在官方平台完成。',
+      confirmText: '继续',
+      cancelText: '取消',
       success: (res) => {
         if (res.confirm) {
-          // 在实际应用中，可以使用 Taro.openDocument 或 web-view 打开
-          // 这里使用复制链接的方式
+          // 复制医院官方挂号链接
           Taro.setClipboardData({
             data: url,
             success: () => {
+              Taro.showModal({
+                title: '链接已复制',
+                content: '医院官方挂号链接已复制到剪贴板，请按以下步骤操作：\n\n1. 打开手机浏览器\n2. 粘贴链接并访问\n3. 在官方平台完成挂号',
+                showCancel: false,
+                confirmText: '知道了'
+              })
+            },
+            fail: () => {
               Taro.showToast({
-                title: '链接已复制，请在浏览器中打开',
+                title: '复制失败，请手动打开',
                 icon: 'none',
                 duration: 2000
               })
@@ -274,8 +283,24 @@ const RegistrationPage = () => {
 
         {/* 底部提示 */}
         <View className="footer-tips">
-          <Text className="tips-icon">💡</Text>
-          <Text className="tips-text">点击&ldquo;官方挂号&rdquo;可直接跳转到医院官方挂号平台</Text>
+          <View className="tips-header">
+            <Text className="tips-icon">💡</Text>
+            <Text className="tips-title">温馨提示</Text>
+          </View>
+          <View className="tips-content">
+            <Text className="tips-text">• 点击&ldquo;官方挂号&rdquo;可跳转到医院官方挂号平台</Text>
+            <Text className="tips-text">• 本平台仅提供医院信息和跳转服务</Text>
+            <Text className="tips-text">• 实际挂号、预约、缴费均在医院官方平台完成</Text>
+            <Text className="tips-text">• 如有疑问，请直接联系医院客服</Text>
+          </View>
+        </View>
+
+        {/* 免责声明 */}
+        <View className="disclaimer-section">
+          <Text className="disclaimer-title">免责声明</Text>
+          <Text className="disclaimer-text">
+            本小程序仅提供医院信息展示和挂号平台跳转服务，不涉及任何实际挂号操作。所有挂号、预约、缴费等行为均通过医院官方平台完成，本平台不对挂号的最终结果承担责任。如需帮助，请直接联系相关医院。
+          </Text>
         </View>
       </ScrollView>
     </View>

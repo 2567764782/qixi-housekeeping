@@ -69,15 +69,26 @@ const HospitalDetailPage = () => {
 
   const handleOfficialBooking = () => {
     Taro.showModal({
-      title: '提示',
-      content: '即将跳转到医院官方挂号平台',
+      title: '官方挂号平台',
+      content: '即将跳转到医院官方挂号平台，实际挂号操作将在官方平台完成。',
+      confirmText: '继续',
+      cancelText: '取消',
       success: (res) => {
         if (res.confirm) {
+          // 复制医院官方挂号链接
           Taro.setClipboardData({
             data: hospital.url,
             success: () => {
+              Taro.showModal({
+                title: '链接已复制',
+                content: '医院官方挂号链接已复制到剪贴板，请按以下步骤操作：\n\n1. 打开手机浏览器\n2. 粘贴链接并访问\n3. 在官方平台完成挂号',
+                showCancel: false,
+                confirmText: '知道了'
+              })
+            },
+            fail: () => {
               Taro.showToast({
-                title: '链接已复制，请在浏览器中打开',
+                title: '复制失败，请手动打开',
                 icon: 'none',
                 duration: 2000
               })
@@ -187,8 +198,8 @@ const HospitalDetailPage = () => {
               <Calendar size={32} color="#10B981" />
             </View>
             <View className="booking-info">
-              <Text className="booking-title">快速挂号</Text>
-              <Text className="booking-subtitle">通过官方平台快速预约</Text>
+              <Text className="booking-title">官方挂号</Text>
+              <Text className="booking-subtitle">跳转到医院官方平台</Text>
             </View>
             <View
               className="booking-button"
