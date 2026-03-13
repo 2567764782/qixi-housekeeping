@@ -1,55 +1,34 @@
 import { Test, TestingModule } from '@nestjs/testing'
-import { ConfigService } from '@nestjs/config'
-import { getRepositoryToken } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
 import { RolesService } from './roles.service'
-import { Role } from './entities/role.entity'
 
 describe('RolesService', () => {
   let service: RolesService
-  let repository: Repository<Role>
-  let configService: ConfigService
 
   const mockRole = {
     id: 1,
     name: 'CUSTOMER',
     description: '普通用户',
-    permissions: ['order:create', 'order:view'],
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    is_active: true,
+    created_at: new Date(),
+    updated_at: new Date(),
   }
 
-  const mockRepository = {
-    find: jest.fn(),
-    findOne: jest.fn(),
-    save: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-  }
-
-  const mockConfigService = {
-    get: jest.fn(),
+  const mockPermission = {
+    id: 1,
+    name: '创建订单',
+    code: 'order:create',
+    description: '允许创建订单',
+    resource: 'order',
+    action: 'create',
+    is_active: true,
   }
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        RolesService,
-        {
-          provide: getRepositoryToken(Role),
-          useValue: mockRepository,
-        },
-        {
-          provide: ConfigService,
-          useValue: mockConfigService,
-        },
-      ],
+      providers: [RolesService],
     }).compile()
 
     service = module.get<RolesService>(RolesService)
-    repository = module.get<Repository<Role>>(getRepositoryToken(Role))
-    configService = module.get<ConfigService>(ConfigService)
   })
 
   afterEach(() => {
@@ -61,162 +40,345 @@ describe('RolesService', () => {
   })
 
   describe('getAllRoles', () => {
-    it('should return all roles', async () => {
-      mockRepository.find.mockResolvedValue([mockRole])
+    it('should return all active roles', async () => {
+      const spy = jest.spyOn(service['client'].from('roles'), 'select').mockResolvedValue({
+        data: [mockRole],
+        error: null,
+      })
 
       const result = await service.getAllRoles()
 
       expect(result).toEqual([mockRole])
-      expect(mockRepository.find).toHaveBeenCalled()
+      spy.mockRestore()
     })
 
     it('should return empty array if no roles exist', async () => {
-      mockRepository.find.mockResolvedValue([])
+      const spy = jest.spyOn(service['client'].from('roles'), 'select').mockResolvedValue({
+        data: [],
+        error: null,
+      })
 
       const result = await service.getAllRoles()
 
       expect(result).toEqual([])
+      spy.mockRestore()
+    })
+
+    it('should throw error if query fails', async () => {
+      const spy = jest.spyOn(service['client'].from('roles'), 'select').mockResolvedValue({
+        data: null,
+        error: { message: 'Database error' },
+      })
+
+      await expect(service.getAllRoles()).rejects.toThrow('Failed to get roles')
+      spy.mockRestore()
     })
   })
 
-  describe('getRoleById', () => {
-    it('should return a role by id', async () => {
-      mockRepository.findOne.mockResolvedValue(mockRole)
+  describe('getUserRoles', () => {
+    it('should return user roles', async () => {
+      const mockUserData = [
+        {
+          role_id: 1,
+          roles: mockRole,
+        },
+      ]
 
-      const result = await service.getRoleById(1)
+      const spy = jest.spyOn(service['client'].from('user_roles'), 'select').mockResolvedValue({
+        data: mockUserData,
+        error: null,
+      })
 
-      expect(result).toEqual(mockRole)
-      expect(mockRepository.findOne).toHaveBeenCalledWith({ where: { id: 1 } })
+      const result = await service.getUserRoles(1)
+
+      expect(result).toEqual([mockRole])
+      spy.mockRestore()
     })
 
-    it('should return null if role not found', async () => {
-      mockRepository.findOne.mockResolvedValue(null)
+    it('should return empty array if user has no roles', async () => {
+      const spy = jest.spyOn(service['client'].from('user_roles'), 'select').mockResolvedValue({
+        data: [],
+        error: null,
+      })
 
-      const result = await service.getRoleById(999)
+      const result = await service.getUserRoles(999)
 
-      expect(result).toBeNull()
+      expect(result).toEqual([])
+      spy.mockRestore()
     })
   })
 
-  describe('getRoleByName', () => {
-    it('should return a role by name', async () => {
-      mockRepository.findOne.mockResolvedValue(mockRole)
+  describe('getUserPermissions', () => {
+    it('should return user permissions', async () => {
+      const mockUserData = [
+        {
+          role_id: 1,
+          roles: {
+            ...mockRole,
+            role_permissions: [
+              {
+                permission_id: 1,
+                permissions: mockPermission,
+              },
+            ],
+          },
+        },
+      ]
 
-      const result = await service.getRoleByName('CUSTOMER')
+      const spy = jest.spyOn(service['client'].from('user_roles'), 'select').mockResolvedValue({
+        data: mockUserData,
+        error: null,
+      })
 
-      expect(result).toEqual(mockRole)
-      expect(mockRepository.findOne).toHaveBeenCalledWith({ where: { name: 'CUSTOMER' } })
+      const result = await service.getUserPermissions(1)
+
+      expect(result).toEqual([mockPermission])
+      spy.mockRestore()
+    })
+  })
+
+  describe('hasPermission', () => {
+    it('should return true if user has permission', async () => {
+      const spy = jest.spyOn(service, 'getUserPermissions').mockResolvedValue([mockPermission])
+
+      const result = await service.hasPermission(1, 'order', 'create')
+
+      expect(result).toBe(true)
+      spy.mockRestore()
     })
 
-    it('should return null if role name not found', async () => {
-      mockRepository.findOne.mockResolvedValue(null)
+    it('should return false if user does not have permission', async () => {
+      const spy = jest.spyOn(service, 'getUserPermissions').mockResolvedValue([])
 
-      const result = await service.getRoleByName('NONEXISTENT')
+      const result = await service.hasPermission(1, 'order', 'delete')
 
-      expect(result).toBeNull()
+      expect(result).toBe(false)
+      spy.mockRestore()
+    })
+  })
+
+  describe('hasRole', () => {
+    it('should return true if user has role', async () => {
+      const spy = jest.spyOn(service, 'getUserRoles').mockResolvedValue([mockRole])
+
+      const result = await service.hasRole(1, 'CUSTOMER')
+
+      expect(result).toBe(true)
+      spy.mockRestore()
+    })
+
+    it('should return false if user does not have role', async () => {
+      const spy = jest.spyOn(service, 'getUserRoles').mockResolvedValue([])
+
+      const result = await service.hasRole(1, 'ADMIN')
+
+      expect(result).toBe(false)
+      spy.mockRestore()
+    })
+  })
+
+  describe('assignRole', () => {
+    it('should assign role to user', async () => {
+      const roleSpy = jest.spyOn(service['client'].from('roles'), 'select').mockResolvedValue({
+        data: mockRole,
+        error: null,
+      })
+
+      const insertSpy = jest.spyOn(service['client'].from('user_roles'), 'insert').mockResolvedValue({
+        data: { user_id: 1, role_id: 1 },
+        error: null,
+      })
+
+      const result = await service.assignRole(1, 'CUSTOMER')
+
+      expect(result).toEqual({ user_id: 1, role_id: 1 })
+      roleSpy.mockRestore()
+      insertSpy.mockRestore()
+    })
+
+    it('should throw error if role not found', async () => {
+      const roleSpy = jest.spyOn(service['client'].from('roles'), 'select').mockResolvedValue({
+        data: null,
+        error: { message: 'Not found' },
+      })
+
+      await expect(service.assignRole(1, 'NONEXISTENT')).rejects.toThrow('Role not found')
+      roleSpy.mockRestore()
+    })
+  })
+
+  describe('removeRole', () => {
+    it('should remove role from user', async () => {
+      const roleSpy = jest.spyOn(service['client'].from('roles'), 'select').mockResolvedValue({
+        data: mockRole,
+        error: null,
+      })
+
+      const deleteSpy = jest.spyOn(service['client'].from('user_roles'), 'delete').mockReturnValue({
+        eq: jest.fn().mockReturnValue({
+          eq: jest.fn().mockResolvedValue({ error: null }),
+        }),
+      })
+
+      const result = await service.removeRole(1, 'CUSTOMER')
+
+      expect(result).toEqual({ success: true })
+      roleSpy.mockRestore()
+      deleteSpy.mockRestore()
     })
   })
 
   describe('createRole', () => {
     it('should create a new role', async () => {
-      const createRoleDto = {
-        name: 'NEW_ROLE',
-        description: '新角色',
-        permissions: ['permission:read'],
-      }
+      const spy = jest.spyOn(service['client'].from('roles'), 'insert').mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          single: jest.fn().mockResolvedValue({
+            data: mockRole,
+            error: null,
+          }),
+        }),
+      })
 
-      mockRepository.create.mockReturnValue(mockRole)
-      mockRepository.save.mockResolvedValue(mockRole)
-
-      const result = await service.createRole(createRoleDto)
+      const result = await service.createRole('NEW_ROLE', 'New role description')
 
       expect(result).toEqual(mockRole)
-      expect(mockRepository.create).toHaveBeenCalledWith(createRoleDto)
-      expect(mockRepository.save).toHaveBeenCalledWith(mockRole)
+      spy.mockRestore()
+    })
+
+    it('should throw error if creation fails', async () => {
+      const spy = jest.spyOn(service['client'].from('roles'), 'insert').mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          single: jest.fn().mockResolvedValue({
+            data: null,
+            error: { message: 'Validation error' },
+          }),
+        }),
+      })
+
+      await expect(service.createRole('NEW_ROLE', 'New role description')).rejects.toThrow('Failed to create role')
+      spy.mockRestore()
     })
   })
 
   describe('updateRole', () => {
     it('should update a role', async () => {
-      const updateRoleDto = {
-        description: '更新后的描述',
-      }
+      const spy = jest.spyOn(service['client'].from('roles'), 'update').mockReturnValue({
+        eq: jest.fn().mockReturnValue({
+          select: jest.fn().mockReturnValue({
+            single: jest.fn().mockResolvedValue({
+              data: { ...mockRole, description: 'Updated description' },
+              error: null,
+            }),
+          }),
+        }),
+      })
 
-      mockRepository.findOne.mockResolvedValue(mockRole)
-      mockRepository.save.mockResolvedValue({ ...mockRole, ...updateRoleDto })
+      const result = await service.updateRole(1, { description: 'Updated description' })
 
-      const result = await service.updateRole(1, updateRoleDto)
-
-      expect(result).toEqual({ ...mockRole, ...updateRoleDto })
-      expect(mockRepository.findOne).toHaveBeenCalledWith({ where: { id: 1 } })
-      expect(mockRepository.save).toHaveBeenCalled()
+      expect(result.description).toBe('Updated description')
+      spy.mockRestore()
     })
 
-    it('should return null if role not found', async () => {
-      const updateRoleDto = {
-        description: '更新后的描述',
-      }
+    it('should throw error if update fails', async () => {
+      const spy = jest.spyOn(service['client'].from('roles'), 'update').mockReturnValue({
+        eq: jest.fn().mockReturnValue({
+          select: jest.fn().mockReturnValue({
+            single: jest.fn().mockResolvedValue({
+              data: null,
+              error: { message: 'Update failed' },
+            }),
+          }),
+        }),
+      })
 
-      mockRepository.findOne.mockResolvedValue(null)
-
-      const result = await service.updateRole(999, updateRoleDto)
-
-      expect(result).toBeNull()
+      await expect(service.updateRole(1, { description: 'Updated description' })).rejects.toThrow('Failed to update role')
+      spy.mockRestore()
     })
   })
 
   describe('deleteRole', () => {
     it('should delete a role', async () => {
-      mockRepository.findOne.mockResolvedValue(mockRole)
-      mockRepository.delete.mockResolvedValue({ affected: 1 })
+      const deleteSpy1 = jest.spyOn(service['client'].from('role_permissions'), 'delete').mockReturnValue({
+        eq: jest.fn().mockResolvedValue({ error: null }),
+      })
 
-      const result = await service.deleteRole(1)
+      const deleteSpy2 = jest.spyOn(service['client'].from('user_roles'), 'delete').mockReturnValue({
+        eq: jest.fn().mockResolvedValue({ error: null }),
+      })
 
-      expect(result).toEqual({ affected: 1 })
-      expect(mockRepository.findOne).toHaveBeenCalledWith({ where: { id: 1 } })
-      expect(mockRepository.delete).toHaveBeenCalledWith(1)
-    })
+      const deleteSpy3 = jest.spyOn(service['client'].from('roles'), 'delete').mockReturnValue({
+        eq: jest.fn().mockResolvedValue({ error: null }),
+      })
 
-    it('should return null if role not found', async () => {
-      mockRepository.findOne.mockResolvedValue(null)
+      await expect(service.deleteRole(1)).resolves.not.toThrow()
 
-      const result = await service.deleteRole(999)
-
-      expect(result).toBeNull()
-    })
-  })
-
-  describe('addPermission', () => {
-    it('should add a permission to role', async () => {
-      const updatedRole = {
-        ...mockRole,
-        permissions: ['order:create', 'order:view', 'order:delete'],
-      }
-
-      mockRepository.findOne.mockResolvedValue(mockRole)
-      mockRepository.save.mockResolvedValue(updatedRole)
-
-      const result = await service.addPermission(1, 'order:delete')
-
-      expect(result).toEqual(updatedRole)
-      expect(mockRepository.save).toHaveBeenCalledWith(updatedRole)
+      deleteSpy1.mockRestore()
+      deleteSpy2.mockRestore()
+      deleteSpy3.mockRestore()
     })
   })
 
-  describe('removePermission', () => {
-    it('should remove a permission from role', async () => {
-      const updatedRole = {
-        ...mockRole,
-        permissions: ['order:create'],
-      }
+  describe('assignPermissionToRole', () => {
+    it('should assign permission to role', async () => {
+      const spy = jest.spyOn(service['client'].from('role_permissions'), 'insert').mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          single: jest.fn().mockResolvedValue({
+            data: { role_id: 1, permission_id: 1 },
+            error: null,
+          }),
+        }),
+      })
 
-      mockRepository.findOne.mockResolvedValue(mockRole)
-      mockRepository.save.mockResolvedValue(updatedRole)
+      const result = await service.assignPermissionToRole(1, 1)
 
-      const result = await service.removePermission(1, 'order:view')
+      expect(result).toEqual({ role_id: 1, permission_id: 1 })
+      spy.mockRestore()
+    })
+  })
 
-      expect(result).toEqual(updatedRole)
-      expect(mockRepository.save).toHaveBeenCalledWith(updatedRole)
+  describe('removePermissionFromRole', () => {
+    it('should remove permission from role', async () => {
+      const spy = jest.spyOn(service['client'].from('role_permissions'), 'delete').mockReturnValue({
+        eq: jest.fn().mockReturnValue({
+          eq: jest.fn().mockResolvedValue({ error: null }),
+        }),
+      })
+
+      await expect(service.removePermissionFromRole(1, 1)).resolves.not.toThrow()
+
+      spy.mockRestore()
+    })
+  })
+
+  describe('getAllPermissions', () => {
+    it('should return all active permissions', async () => {
+      const spy = jest.spyOn(service['client'].from('permissions'), 'select').mockResolvedValue({
+        data: [mockPermission],
+        error: null,
+      })
+
+      const result = await service.getAllPermissions()
+
+      expect(result).toEqual([mockPermission])
+      spy.mockRestore()
+    })
+  })
+
+  describe('createPermission', () => {
+    it('should create a new permission', async () => {
+      const spy = jest.spyOn(service['client'].from('permissions'), 'insert').mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          single: jest.fn().mockResolvedValue({
+            data: mockPermission,
+            error: null,
+          }),
+        }),
+      })
+
+      const result = await service.createPermission('创建订单', 'order:create', '允许创建订单', 'order', 'create')
+
+      expect(result).toEqual(mockPermission)
+      spy.mockRestore()
     })
   })
 })

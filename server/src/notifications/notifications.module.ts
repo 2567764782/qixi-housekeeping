@@ -1,12 +1,10 @@
-import { Module } from '@nestjs/common';
-import { NotificationsService } from './notifications.service';
-import { NotificationsController } from './notifications.controller';
-import { WechatModule } from '../wechat/wechat.module';
+import { Module } from '@nestjs/common'
+import { NotificationService } from './notification.service'
+import { NotificationController } from './notification.controller'
 
 @Module({
-  imports: [WechatModule],
-  controllers: [NotificationsController],
-  providers: [NotificationsService],
-  exports: [NotificationsService]
+  controllers: [NotificationController],
+  providers: [NotificationService],
+  exports: [NotificationService],
 })
-export class NotificationsModule {}
+export class NotificationModule {}

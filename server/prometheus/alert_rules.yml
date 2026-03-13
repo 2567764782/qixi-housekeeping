@@ -1,73 +1,329 @@
 groups:
-  - name: alert_rules
-    interval: 30s
+  # 应用健康与可用性
+  - name: application_health
+    interval: 15s
     rules:
-      # 应用健康检查
+      # 应用下线告警
       - alert: ApplicationDown
         expr: up{job="nestjs_app"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          team: backend
+        annotations:
+          summary: "应用实例 {{ $labels.instance }} 已下线"
+          description: "保洁服务应用实例 {{ $labels.instance }} 已下线超过 30 秒，请立即检查！"
+          runbook_url: "https://wiki.example.com/runbooks/application-down"
+
+      # 健康检查失败
+      - alert: HealthCheckFailed
+        expr: health_check_status == 0
         for: 1m
         labels:
           severity: critical
+          team: backend
         annotations:
-          summary: "应用实例 {{ $labels.instance }} 已下线"
-          description: "应用实例 {{ $labels.instance }} 已经超过 1 分钟无法访问"
+          summary: "健康检查失败"
+          description: "健康检查端点返回失败状态，请检查依赖服务"
 
-      # 高错误率
-      - alert: HighErrorRate
-        expr: rate(http_requests_total{status_code=~"5.."}[5m]) > 0.1
-        for: 5m
-        labels:
-          severity: warning
-        annotations:
-          summary: "高错误率告警"
-          description: "5分钟内 5xx 错误率超过 10%"
-
-      # 高请求延迟
-      - alert: HighLatency
-        expr: histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m])) > 2
-        for: 5m
-        labels:
-          severity: warning
-        annotations:
-          summary: "高延迟告警"
-          description: "99% 的请求延迟超过 2 秒"
-
-      # 内存使用率
-      - alert: HighMemoryUsage
-        expr: (process_resident_memory_bytes / total_memory) * 100 > 80
-        for: 5m
-        labels:
-          severity: warning
-        annotations:
-          summary: "高内存使用率"
-          description: "内存使用率超过 80%"
-
-      # 磁盘空间
-      - alert: LowDiskSpace
-        expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) * 100 < 10
-        for: 5m
-        labels:
-          severity: critical
-        annotations:
-          summary: "磁盘空间不足"
-          description: "磁盘剩余空间低于 10%"
-
-      # 数据库连接问题
-      - alert: DatabaseConnectionFailed
-        expr: up{job="nestjs_app"} == 0
+  # 请求与响应性能
+  - name: request_performance
+    interval: 15s
+    rules:
+      # 5xx 错误率过高
+      - alert: High5xxErrorRate
+        expr: |
+          sum(rate(http_requests_total{status_code=~"5.."}[5m])) by (route)
+          /
+          sum(rate(http_requests_total[5m])) by (route)
+          > 0.05
         for: 2m
         labels:
           severity: critical
+          team: backend
         annotations:
-          summary: "数据库连接失败"
-          description: "应用无法连接到数据库"
+          summary: "{{ $labels.route }} 接口 5xx 错误率过高"
+          description: "{{ $labels.route }} 接口在过去 5 分钟内 5xx 错误率超过 5% (当前值: {{ $value | humanizePercentage }})"
 
-      # Redis 连接问题（如果使用）
+      # 4xx 错误率过高
+      - alert: High4xxErrorRate
+        expr: |
+          sum(rate(http_requests_total{status_code=~"4.."}[5m])) by (route)
+          /
+          sum(rate(http_requests_total[5m])) by (route)
+          > 0.15
+        for: 5m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "{{ $labels.route }} 接口 4xx 错误率过高"
+          description: "{{ $labels.route }} 接口在过去 5 分钟内 4xx 错误率超过 15% (当前值: {{ $value | humanizePercentage }})"
+
+      # P99 延迟过高
+      - alert: HighP99Latency
+        expr: |
+          histogram_quantile(0.99,
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (le, route)
+          ) > 3
+        for: 3m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "{{ $labels.route }} 接口 P99 延迟过高"
+          description: "{{ $labels.route }} 接口在过去 5 分钟内 P99 延迟超过 3 秒 (当前值: {{ $value | humanizeDuration }})"
+
+      # P95 延迟过高
+      - alert: HighP95Latency
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (le, route)
+          ) > 1.5
+        for: 5m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "{{ $labels.route }} 接口 P95 延迟过高"
+          description: "{{ $labels.route }} 接口在过去 5 分钟内 P95 延迟超过 1.5 秒 (当前值: {{ $value | humanizeDuration }})"
+
+      # 请求量突增
+      - alert: HighRequestRate
+        expr: |
+          sum(rate(http_requests_total[2m]))
+          /
+          avg(sum(rate(http_requests_total[2m])) over time 10m)
+          > 2
+        for: 5m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "请求量突增"
+          description: "当前请求量是过去 10 分钟平均值的 {{ $value | humanize }} 倍，可能需要扩容"
+
+      # 请求量骤降
+      - alert: LowRequestRate
+        expr: |
+          sum(rate(http_requests_total[5m])) < 0.1
+        for: 10m
+        labels:
+          severity: info
+          team: backend
+        annotations:
+          summary: "请求量骤降"
+          description: "当前请求量极低 ({{ $value | humanize }} req/s)，请检查是否出现故障"
+
+  # 业务指标告警
+  - name: business_metrics
+    interval: 30s
+    rules:
+      # 订单创建失败率高
+      - alert: HighOrderCreationFailureRate
+        expr: |
+          sum(rate(order_creation_failures_total[5m]))
+          /
+          sum(rate(order_creation_total[5m]))
+          > 0.1
+        for: 5m
+        labels:
+          severity: critical
+          team: backend
+        annotations:
+          summary: "订单创建失败率过高"
+          description: "订单创建失败率超过 10% (当前值: {{ $value | humanizePercentage }})"
+
+      # 待接单订单积压
+      - alert: PendingOrdersBacklog
+        expr: pending_orders_count > 100
+        for: 10m
+        labels:
+          severity: warning
+          team: operations
+        annotations:
+          summary: "待接单订单积压"
+          description: "当前有 {{ $value }} 个订单待接单，请安排保洁员处理"
+
+      # 保洁员在线率过低
+      - alert: LowCleanerOnlineRate
+        expr: |
+          count(up{job="cleaner_service"} == 1)
+          /
+          count(up{job="cleaner_service"}) * 100
+          < 50
+        for: 15m
+        labels:
+          severity: warning
+          team: operations
+        annotations:
+          summary: "保洁员在线率过低"
+          description: "保洁员在线率低于 50% (当前值: {{ $value }}%)，可能影响订单处理"
+
+      # 支付失败率高
+      - alert: HighPaymentFailureRate
+        expr: |
+          sum(rate(payment_failures_total[10m]))
+          /
+          sum(rate(payment_attempts_total[10m]))
+          > 0.05
+        for: 10m
+        labels:
+          severity: critical
+          team: finance
+        annotations:
+          summary: "支付失败率过高"
+          description: "支付失败率超过 5% (当前值: {{ $value | humanizePercentage }})"
+
+      # 短信发送失败率高
+      - alert: HighSmsFailureRate
+        expr: |
+          sum(rate(sms_send_failures_total[10m]))
+          /
+          sum(rate(sms_send_attempts_total[10m]))
+          > 0.1
+        for: 10m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "短信发送失败率过高"
+          description: "短信发送失败率超过 10% (当前值: {{ $value | humanizePercentage }})"
+
+  # 系统资源监控
+  - name: system_resources
+    interval: 30s
+    rules:
+      # CPU 使用率过高
+      - alert: HighCPUUsage
+        expr: |
+          100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)
+          > 80
+        for: 10m
+        labels:
+          severity: warning
+          team: devops
+        annotations:
+          summary: "CPU 使用率过高"
+          description: "实例 {{ $labels.instance }} CPU 使用率超过 80% (当前值: {{ $value }}%)"
+
+      # 内存使用率过高
+      - alert: HighMemoryUsage
+        expr: |
+          (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100
+          > 85
+        for: 5m
+        labels:
+          severity: warning
+          team: devops
+        annotations:
+          summary: "内存使用率过高"
+          description: "实例 {{ $labels.instance }} 内存使用率超过 85% (当前值: {{ $value }}%)"
+
+      # 磁盘空间不足
+      - alert: LowDiskSpace
+        expr: |
+          (node_filesystem_avail_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes{fstype!="tmpfs"}) * 100
+          < 15
+        for: 5m
+        labels:
+          severity: critical
+          team: devops
+        annotations:
+          summary: "磁盘空间不足"
+          description: "实例 {{ $labels.instance }} 挂载点 {{ $labels.mountpoint }} 剩余空间低于 15% (当前值: {{ $value }}%)"
+
+      # 磁盘 I/O 过高
+      - alert: HighDiskIO
+        expr: |
+          rate(node_disk_io_time_seconds_total[5m]) > 0.8
+        for: 10m
+        labels:
+          severity: warning
+          team: devops
+        annotations:
+          summary: "磁盘 I/O 过高"
+          description: "实例 {{ $labels.instance }} 设备 {{ $labels.device }} I/O 使用率超过 80%"
+
+      # 网络流量过高
+      - alert: HighNetworkTraffic
+        expr: |
+          sum(rate(node_network_receive_bytes_total[5m])) by (instance)
+          >
+          100 * 1024 * 1024
+        for: 10m
+        labels:
+          severity: warning
+          team: devops
+        annotations:
+          summary: "网络流量过高"
+          description: "实例 {{ $labels.instance }} 网络接收流量超过 100 MB/s"
+
+  # 数据库与缓存
+  - name: database_cache
+    interval: 30s
+    rules:
+      # 数据库连接池耗尽
+      - alert: DatabaseConnectionPoolExhausted
+        expr: |
+          db_connections_active / db_connections_max > 0.9
+        for: 5m
+        labels:
+          severity: critical
+          team: backend
+        annotations:
+          summary: "数据库连接池耗尽"
+          description: "数据库连接池使用率超过 90% (当前值: {{ $value | humanizePercentage }})"
+
+      # 数据库慢查询
+      - alert: HighDatabaseSlowQueries
+        expr: |
+          rate(database_query_duration_seconds_bucket{le="1"}[5m])
+          /
+          rate(database_query_duration_seconds_count[5m])
+          < 0.95
+        for: 10m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "数据库慢查询过多"
+          description: "超过 1 秒的查询占比超过 5%，请优化数据库查询"
+
+      # Redis 连接失败
       - alert: RedisConnectionFailed
         expr: redis_up == 0
         for: 1m
         labels:
-          severity: warning
+          severity: critical
+          team: backend
         annotations:
           summary: "Redis 连接失败"
-          description: "Redis 实例无法访问"
+          description: "Redis 实例无法访问，缓存功能受影响"
+
+      # Redis 缓存命中率低
+      - alert: LowRedisCacheHitRate
+        expr: |
+          sum(rate(redis_cache_hits_total[10m]))
+          /
+          (sum(rate(redis_cache_hits_total[10m])) + sum(rate(redis_cache_misses_total[10m])))
+          < 0.7
+        for: 15m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "Redis 缓存命中率过低"
+          description: "Redis 缓存命中率低于 70% (当前值: {{ $value | humanizePercentage }})，请检查缓存策略"
+
+      # Redis 内存使用过高
+      - alert: HighRedisMemoryUsage
+        expr: |
+          redis_memory_used_bytes / redis_memory_max_bytes > 0.9
+        for: 10m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "Redis 内存使用过高"
+          description: "Redis 内存使用率超过 90% (当前值: {{ $value | humanizePercentage }})"

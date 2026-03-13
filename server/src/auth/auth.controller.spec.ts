@@ -90,9 +90,8 @@ describe('AuthController', () => {
     })
 
     it('should handle registration errors', async () => {
-      const error = new Error('Phone already exists')
+      const error = new Error('该手机号已注册') as any
       error.status = 409
-      error.message = '该手机号已注册'
 
       mockAuthService.register.mockRejectedValueOnce(error)
 
@@ -145,9 +144,8 @@ describe('AuthController', () => {
     })
 
     it('should handle login errors', async () => {
-      const error = new Error('Invalid credentials')
+      const error = new Error('用户名或密码错误') as any
       error.status = 401
-      error.message = '用户名或密码错误'
 
       mockAuthService.login.mockRejectedValueOnce(error)
 
@@ -187,9 +185,8 @@ describe('AuthController', () => {
 
     it('should handle refresh errors', async () => {
       const mockUser = { userId: 'user-id' }
-      const error = new Error('User not found')
+      const error = new Error('用户不存在') as any
       error.status = 404
-      error.message = '用户不存在'
 
       mockAuthService.refreshToken.mockRejectedValueOnce(error)
 
@@ -239,9 +236,8 @@ describe('AuthController', () => {
     })
 
     it('should handle login with code errors', async () => {
-      const error = new Error('Invalid code')
+      const error = new Error('验证码错误或已过期') as any
       error.status = 401
-      error.message = '验证码错误或已过期'
 
       mockAuthService.loginWithCode.mockRejectedValueOnce(error)
 

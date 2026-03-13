@@ -9,7 +9,7 @@ import { UsersModule } from './users/users.module';
 import { SearchModule } from './search/search.module';
 import { CleaningOrdersModule } from './cleaning-orders/cleaning-orders.module';
 import { CleanersModule } from './cleaners/cleaners.module';
-import { NotificationsModule } from './notifications/notifications.module';
+import { NotificationModule } from './notifications/notifications.module';
 import { RolesModule } from './roles/roles.module';
 import { StatisticsModule } from './statistics/statistics.module';
 import { RealtimeModule } from './realtime/realtime.module';
@@ -33,7 +33,7 @@ import { HealthModule } from './health/health.module';
     SearchModule,
     CleaningOrdersModule,
     CleanersModule,
-    NotificationsModule,
+    NotificationModule,
     RolesModule,
     StatisticsModule,
     RealtimeModule,
