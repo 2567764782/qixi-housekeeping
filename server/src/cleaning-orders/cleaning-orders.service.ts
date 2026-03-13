@@ -1,14 +1,11 @@
 import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
-import { getSupabaseClient } from '../storage/database/supabase-client';
-import { v4 as uuidv4 } from 'uuid';
 import {
   CreateOrderDto,
   VerifyOrderDto,
   MatchOrderDto,
-  AcceptOrderDto,
-  OrderStatus,
-  ServiceType
+  OrderStatus
 } from './dto/cleaning-orders.dto';
+import { getSupabaseClient } from '../storage/database/supabase-client';
 
 @Injectable()
 export class CleaningOrdersService {

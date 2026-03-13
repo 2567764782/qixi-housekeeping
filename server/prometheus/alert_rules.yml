@@ -1,0 +1,73 @@
+groups:
+  - name: alert_rules
+    interval: 30s
+    rules:
+      # 应用健康检查
+      - alert: ApplicationDown
+        expr: up{job="nestjs_app"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "应用实例 {{ $labels.instance }} 已下线"
+          description: "应用实例 {{ $labels.instance }} 已经超过 1 分钟无法访问"
+
+      # 高错误率
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status_code=~"5.."}[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "高错误率告警"
+          description: "5分钟内 5xx 错误率超过 10%"
+
+      # 高请求延迟
+      - alert: HighLatency
+        expr: histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "高延迟告警"
+          description: "99% 的请求延迟超过 2 秒"
+
+      # 内存使用率
+      - alert: HighMemoryUsage
+        expr: (process_resident_memory_bytes / total_memory) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "高内存使用率"
+          description: "内存使用率超过 80%"
+
+      # 磁盘空间
+      - alert: LowDiskSpace
+        expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) * 100 < 10
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "磁盘空间不足"
+          description: "磁盘剩余空间低于 10%"
+
+      # 数据库连接问题
+      - alert: DatabaseConnectionFailed
+        expr: up{job="nestjs_app"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "数据库连接失败"
+          description: "应用无法连接到数据库"
+
+      # Redis 连接问题（如果使用）
+      - alert: RedisConnectionFailed
+        expr: redis_up == 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis 连接失败"
+          description: "Redis 实例无法访问"

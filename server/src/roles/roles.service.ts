@@ -1,4 +1,5 @@
-import { Injectable, CacheInterceptor, UseInterceptors, CacheTTL } from '@nestjs/common';
+import { Injectable, UseInterceptors } from '@nestjs/common';
+import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 import { getSupabaseClient } from '../storage/database/supabase-client';
 
 @Injectable()

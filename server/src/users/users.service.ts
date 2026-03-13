@@ -1,8 +1,6 @@
-import { Injectable, UseInterceptors, CacheTTL } from '@nestjs/common'
-import { users } from '../storage/database/shared/schema'
-import { eq } from 'drizzle-orm'
+import { Injectable, UseInterceptors } from '@nestjs/common'
+import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager'
 import { getSupabaseClient } from '../storage/database/supabase-client'
-import { CacheInterceptor } from '@nestjs/cache-manager'
 
 @Injectable()
 export class UsersService {

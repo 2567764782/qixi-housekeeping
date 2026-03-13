@@ -1,23 +1,55 @@
 import { Test, TestingModule } from '@nestjs/testing'
+import { ConfigService } from '@nestjs/config'
+import { getRepositoryToken } from '@nestjs/typeorm'
+import { Repository } from 'typeorm'
 import { RolesService } from './roles.service'
-import { getSupabaseClient } from '../storage/database/supabase-client'
+import { Role } from './entities/role.entity'
 
 describe('RolesService', () => {
   let service: RolesService
+  let repository: Repository<Role>
+  let configService: ConfigService
 
-  const mockSupabaseClient = {
-    from: jest.fn(),
+  const mockRole = {
+    id: 1,
+    name: 'CUSTOMER',
+    description: '普通用户',
+    permissions: ['order:create', 'order:view'],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  }
+
+  const mockRepository = {
+    find: jest.fn(),
+    findOne: jest.fn(),
+    save: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+  }
+
+  const mockConfigService = {
+    get: jest.fn(),
   }
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [RolesService],
+      providers: [
+        RolesService,
+        {
+          provide: getRepositoryToken(Role),
+          useValue: mockRepository,
+        },
+        {
+          provide: ConfigService,
+          useValue: mockConfigService,
+        },
+      ],
     }).compile()
 
     service = module.get<RolesService>(RolesService)
-
-    // Mock Supabase client
-    jest.spyOn(require('../storage/database/supabase-client'), 'getSupabaseClient').mockReturnValue(mockSupabaseClient)
+    repository = module.get<Repository<Role>>(getRepositoryToken(Role))
+    configService = module.get<ConfigService>(ConfigService)
   })
 
   afterEach(() => {
@@ -29,34 +61,17 @@ describe('RolesService', () => {
   })
 
   describe('getAllRoles', () => {
-    it('should return all active roles', async () => {
-      const mockRoles = [
-        { id: '1', name: 'admin', description: 'Administrator', is_active: true },
-        { id: '2', name: 'user', description: 'User', is_active: true },
-      ]
-
-      mockSupabaseClient.from.mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            order: jest.fn().mockResolvedValue({ data: mockRoles, error: null }),
-          }),
-        }),
-      })
+    it('should return all roles', async () => {
+      mockRepository.find.mockResolvedValue([mockRole])
 
       const result = await service.getAllRoles()
 
-      expect(result).toEqual(mockRoles)
-      expect(mockSupabaseClient.from).toHaveBeenCalledWith('roles')
+      expect(result).toEqual([mockRole])
+      expect(mockRepository.find).toHaveBeenCalled()
     })
 
     it('should return empty array if no roles exist', async () => {
-      mockSupabaseClient.from.mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            order: jest.fn().mockResolvedValue({ data: null, error: null }),
-          }),
-        }),
-      })
+      mockRepository.find.mockResolvedValue([])
 
       const result = await service.getAllRoles()
 
@@ -64,178 +79,144 @@ describe('RolesService', () => {
     })
   })
 
+  describe('getRoleById', () => {
+    it('should return a role by id', async () => {
+      mockRepository.findOne.mockResolvedValue(mockRole)
+
+      const result = await service.getRoleById(1)
+
+      expect(result).toEqual(mockRole)
+      expect(mockRepository.findOne).toHaveBeenCalledWith({ where: { id: 1 } })
+    })
+
+    it('should return null if role not found', async () => {
+      mockRepository.findOne.mockResolvedValue(null)
+
+      const result = await service.getRoleById(999)
+
+      expect(result).toBeNull()
+    })
+  })
+
+  describe('getRoleByName', () => {
+    it('should return a role by name', async () => {
+      mockRepository.findOne.mockResolvedValue(mockRole)
+
+      const result = await service.getRoleByName('CUSTOMER')
+
+      expect(result).toEqual(mockRole)
+      expect(mockRepository.findOne).toHaveBeenCalledWith({ where: { name: 'CUSTOMER' } })
+    })
+
+    it('should return null if role name not found', async () => {
+      mockRepository.findOne.mockResolvedValue(null)
+
+      const result = await service.getRoleByName('NONEXISTENT')
+
+      expect(result).toBeNull()
+    })
+  })
+
   describe('createRole', () => {
-    it('should create a new role successfully', async () => {
-      const newRole = {
-        id: '3',
-        name: 'staff',
-        description: 'Staff member',
-        is_active: true,
+    it('should create a new role', async () => {
+      const createRoleDto = {
+        name: 'NEW_ROLE',
+        description: '新角色',
+        permissions: ['permission:read'],
       }
 
-      mockSupabaseClient.from.mockReturnValue({
-        insert: jest.fn().mockReturnValue({
-          select: jest.fn().mockReturnValue({
-            single: jest.fn().mockResolvedValue({ data: newRole, error: null }),
-          }),
-        }),
-      })
+      mockRepository.create.mockReturnValue(mockRole)
+      mockRepository.save.mockResolvedValue(mockRole)
 
-      const result = await service.createRole('staff', 'Staff member')
+      const result = await service.createRole(createRoleDto)
 
-      expect(result).toEqual(newRole)
-      expect(mockSupabaseClient.from().insert).toHaveBeenCalledWith({
-        name: 'staff',
-        description: 'Staff member',
-        is_active: true,
-      })
-    })
-
-    it('should throw error if creation fails', async () => {
-      mockSupabaseClient.from.mockReturnValue({
-        insert: jest.fn().mockReturnValue({
-          select: jest.fn().mockReturnValue({
-            single: jest.fn().mockResolvedValue({ data: null, error: { message: 'Creation failed' } }),
-          }),
-        }),
-      })
-
-      await expect(service.createRole('staff', 'Staff member')).rejects.toThrow('Failed to create role')
+      expect(result).toEqual(mockRole)
+      expect(mockRepository.create).toHaveBeenCalledWith(createRoleDto)
+      expect(mockRepository.save).toHaveBeenCalledWith(mockRole)
     })
   })
 
-  describe('assignResourcePermission', () => {
-    it('should assign permission to role successfully', async () => {
-      mockSupabaseClient.from.mockImplementation((table: string) => {
-        if (table === 'roles') {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                single: jest.fn().mockResolvedValue({ data: { id: 'role-1' }, error: null }),
-              }),
-            }),
-          }
-        } else if (table === 'resources') {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                single: jest.fn().mockResolvedValue({ data: { id: 'resource-1' }, error: null }),
-              }),
-            }),
-          }
-        } else if (table === 'actions') {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                single: jest.fn().mockResolvedValue({ data: { id: 'action-1' }, error: null }),
-              }),
-            }),
-          }
-        } else if (table === 'permissions') {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                eq: jest.fn().mockReturnValue({
-                  eq: jest.fn().mockReturnValue({
-                    single: jest.fn().mockResolvedValue({ data: null, error: { message: 'Not found' } }),
-                  }),
-                }),
-              }),
-            }),
-            insert: jest.fn().mockReturnValue({
-              select: jest.fn().mockReturnValue({
-                single: jest.fn().mockResolvedValue({
-                  data: {
-                    id: 'permission-1',
-                    resource: { name: 'orders' },
-                    action: { name: 'create' },
-                    role: { name: 'admin' },
-                  },
-                  error: null,
-                }),
-              }),
-            }),
-          }
-        }
-        return {}
-      })
+  describe('updateRole', () => {
+    it('should update a role', async () => {
+      const updateRoleDto = {
+        description: '更新后的描述',
+      }
 
-      const result = await service.assignResourcePermission('admin', 'orders', 'create')
+      mockRepository.findOne.mockResolvedValue(mockRole)
+      mockRepository.save.mockResolvedValue({ ...mockRole, ...updateRoleDto })
 
-      expect(result).toHaveProperty('resource')
-      expect(result).toHaveProperty('action')
-      expect(result).toHaveProperty('role')
+      const result = await service.updateRole(1, updateRoleDto)
+
+      expect(result).toEqual({ ...mockRole, ...updateRoleDto })
+      expect(mockRepository.findOne).toHaveBeenCalledWith({ where: { id: 1 } })
+      expect(mockRepository.save).toHaveBeenCalled()
     })
 
-    it('should throw error if permission already exists', async () => {
-      mockSupabaseClient.from.mockImplementation((table: string) => {
-        if (table === 'roles') {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                single: jest.fn().mockResolvedValue({ data: { id: 'role-1' }, error: null }),
-              }),
-            }),
-          }
-        } else if (table === 'resources') {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                single: jest.fn().mockResolvedValue({ data: { id: 'resource-1' }, error: null }),
-              }),
-            }),
-          }
-        } else if (table === 'actions') {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                single: jest.fn().mockResolvedValue({ data: { id: 'action-1' }, error: null }),
-              }),
-            }),
-          }
-        } else if (table === 'permissions') {
-          return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                eq: jest.fn().mockReturnValue({
-                  eq: jest.fn().mockReturnValue({
-                    single: jest.fn().mockResolvedValue({
-                      data: { id: 'existing-permission' },
-                      error: null,
-                    }),
-                  }),
-                }),
-              }),
-            }),
-          }
-        }
-        return {}
-      })
+    it('should return null if role not found', async () => {
+      const updateRoleDto = {
+        description: '更新后的描述',
+      }
 
-      await expect(service.assignResourcePermission('admin', 'orders', 'create')).rejects.toThrow('Permission already exists')
+      mockRepository.findOne.mockResolvedValue(null)
+
+      const result = await service.updateRole(999, updateRoleDto)
+
+      expect(result).toBeNull()
     })
   })
 
-  describe('initializeResourcesAndActions', () => {
-    it('should initialize basic resources and actions', async () => {
-      let callCount = 0
-      mockSupabaseClient.from.mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            single: jest.fn().mockImplementation(() => {
-              callCount++
-              // Simulate resources and actions not existing
-              return Promise.resolve({ data: null, error: { message: 'Not found' } })
-            }),
-          }),
-        }),
-        insert: jest.fn().mockResolvedValue({ error: null }),
-      })
+  describe('deleteRole', () => {
+    it('should delete a role', async () => {
+      mockRepository.findOne.mockResolvedValue(mockRole)
+      mockRepository.delete.mockResolvedValue({ affected: 1 })
 
-      const result = await service.initializeResourcesAndActions()
+      const result = await service.deleteRole(1)
 
-      expect(result).toEqual({ success: true })
-      expect(mockSupabaseClient.from).toHaveBeenCalled()
+      expect(result).toEqual({ affected: 1 })
+      expect(mockRepository.findOne).toHaveBeenCalledWith({ where: { id: 1 } })
+      expect(mockRepository.delete).toHaveBeenCalledWith(1)
+    })
+
+    it('should return null if role not found', async () => {
+      mockRepository.findOne.mockResolvedValue(null)
+
+      const result = await service.deleteRole(999)
+
+      expect(result).toBeNull()
+    })
+  })
+
+  describe('addPermission', () => {
+    it('should add a permission to role', async () => {
+      const updatedRole = {
+        ...mockRole,
+        permissions: ['order:create', 'order:view', 'order:delete'],
+      }
+
+      mockRepository.findOne.mockResolvedValue(mockRole)
+      mockRepository.save.mockResolvedValue(updatedRole)
+
+      const result = await service.addPermission(1, 'order:delete')
+
+      expect(result).toEqual(updatedRole)
+      expect(mockRepository.save).toHaveBeenCalledWith(updatedRole)
+    })
+  })
+
+  describe('removePermission', () => {
+    it('should remove a permission from role', async () => {
+      const updatedRole = {
+        ...mockRole,
+        permissions: ['order:create'],
+      }
+
+      mockRepository.findOne.mockResolvedValue(mockRole)
+      mockRepository.save.mockResolvedValue(updatedRole)
+
+      const result = await service.removePermission(1, 'order:view')
+
+      expect(result).toEqual(updatedRole)
+      expect(mockRepository.save).toHaveBeenCalledWith(updatedRole)
     })
   })
 })

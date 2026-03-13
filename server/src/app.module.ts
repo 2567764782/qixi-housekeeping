@@ -18,6 +18,8 @@ import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { CacheModule } from './cache/cache.module';
 import { SmsModule } from './sms/sms.module';
+import { MonitoringModule } from './monitoring/monitoring.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -36,6 +38,8 @@ import { SmsModule } from './sms/sms.module';
     StatisticsModule,
     RealtimeModule,
     PaymentModule,
+    MonitoringModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [

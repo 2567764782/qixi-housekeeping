@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
+import { AliyunSmsService } from './aliyun-sms.service'
 
 @Injectable()
 export class SmsService {
-  constructor(@InjectRedis() private readonly redis: Redis) {}
+  constructor(
+    @InjectRedis() private readonly redis: Redis,
+    private readonly aliyunSmsService: AliyunSmsService,
+  ) {}
 
   /**
    * 生成 6 位数字验证码
@@ -14,8 +18,7 @@ export class SmsService {
   }
 
   /**
-   * 发送验证码（模拟短信发送）
-   * 实际项目中应该对接阿里云短信、腾讯云短信等服务
+   * 发送验证码
    */
   async sendVerificationCode(phone: string): Promise<{ success: boolean; code?: string }> {
     const code = this.generateCode()
@@ -24,8 +27,19 @@ export class SmsService {
     // 将验证码存储到 Redis，有效期 5 分钟
     await this.redis.setex(key, 300, code)
 
-    // TODO: 实际项目中应该调用短信服务 API
-    console.log(`[SMS] 发送验证码到 ${phone}: ${code}`)
+    // 发送短信（优先使用阿里云，失败则使用模拟）
+    const useAliyun = process.env.USE_ALIYUN_SMS !== 'false'
+
+    if (useAliyun) {
+      const sent = await this.aliyunSmsService.sendVerificationCode(phone, code)
+
+      if (!sent) {
+        console.log(`[SMS] 阿里云短信发送失败，使用模拟发送`)
+        // TODO: 可以在这里添加备用短信服务
+      }
+    } else {
+      console.log(`[SMS] 模拟发送验证码到 ${phone}: ${code}`)
+    }
 
     return { success: true, code }
   }

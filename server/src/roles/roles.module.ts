@@ -1,8 +1,8 @@
+import { APP_GUARD } from '@nestjs/core';
 import { Module } from '@nestjs/common';
+import { RolesGuard, PermissionsGuard } from './roles.guard';
 import { RolesService } from './roles.service';
 import { RolesController } from './roles.controller';
-import { RolesGuard, PermissionsGuard } from './roles.guard';
-import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   controllers: [RolesController],

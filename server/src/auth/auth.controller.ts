@@ -1,4 +1,5 @@
 import { Controller, Post, Body, Get, UseGuards } from '@nestjs/common'
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger'
 import { AuthService } from './auth.service'
 import { JwtAuthGuard } from './jwt-auth.guard'
 import { GetCurrentUser } from '../decorators/get-current-user.decorator'
@@ -20,6 +21,7 @@ interface LoginWithCodeDto {
   code: string
 }
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -29,6 +31,10 @@ export class AuthController {
    */
   @Public()
   @Post('register')
+  @ApiOperation({ summary: '用户注册' })
+  @ApiResponse({ status: 200, description: '注册成功' })
+  @ApiResponse({ status: 400, description: '参数错误' })
+  @ApiResponse({ status: 409, description: '手机号已注册' })
   async register(@Body() body: RegisterDto) {
     const { phone, password, nickname } = body
 
@@ -69,6 +75,10 @@ export class AuthController {
    */
   @Public()
   @Post('login')
+  @ApiOperation({ summary: '用户登录' })
+  @ApiResponse({ status: 200, description: '登录成功' })
+  @ApiResponse({ status: 400, description: '参数错误' })
+  @ApiResponse({ status: 401, description: '用户名或密码错误' })
   async login(@Body() body: LoginDto) {
     const { phone, password } = body
 
@@ -101,6 +111,10 @@ export class AuthController {
    */
   @Get('me')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: '获取当前用户信息' })
+  @ApiResponse({ status: 200, description: '获取成功' })
+  @ApiResponse({ status: 401, description: '未授权' })
   async getCurrentUser(@GetCurrentUser() user: any) {
     return {
       code: 200,
@@ -114,6 +128,10 @@ export class AuthController {
    */
   @Post('refresh')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: '刷新 token' })
+  @ApiResponse({ status: 200, description: '刷新成功' })
+  @ApiResponse({ status: 401, description: '未授权' })
   async refreshToken(@GetCurrentUser() user: any) {
     try {
       const result = await this.authService.refreshToken(user.userId)
@@ -136,6 +154,10 @@ export class AuthController {
    */
   @Public()
   @Post('login-with-code')
+  @ApiOperation({ summary: '验证码登录' })
+  @ApiResponse({ status: 200, description: '登录成功' })
+  @ApiResponse({ status: 400, description: '参数错误' })
+  @ApiResponse({ status: 401, description: '验证码错误或已过期' })
   async loginWithCode(@Body() body: LoginWithCodeDto) {
     const { phone, code } = body
 
@@ -168,6 +190,10 @@ export class AuthController {
    */
   @Post('logout')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: '用户登出' })
+  @ApiResponse({ status: 200, description: '登出成功' })
+  @ApiResponse({ status: 401, description: '未授权' })
   async logout(@GetCurrentUser() user: any, req: any) {
     try {
       const token = req.headers?.authorization?.replace('Bearer ', '')

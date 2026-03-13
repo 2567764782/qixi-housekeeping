@@ -1,8 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing'
-import { AuthService } from './auth.service'
-import { JwtService } from '@nestjs/jwt'
 import { ConfigService } from '@nestjs/config'
-import { getSupabaseClient } from '../storage/database/supabase-client'
+import { JwtService } from '@nestjs/jwt'
+import { AuthService } from './auth.service'
 
 describe('AuthService', () => {
   let service: AuthService
