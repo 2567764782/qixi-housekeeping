@@ -120,6 +120,11 @@ const IndexPage = () => {
     const url = pageMap[actionId]
     if (url) {
       Taro.navigateTo({ url })
+    } else {
+      Taro.showToast({
+        title: '功能开发中',
+        icon: 'none'
+      })
     }
   }
 

@@ -54,7 +54,7 @@ const AuthPage = () => {
       // 模拟登录请求
       await new Promise(resolve => setTimeout(resolve, 1000))
       alert('登录成功！')
-      Taro.switchTab({ url: '/pages/index/index' })
+      Taro.redirectTo({ url: '/pages/index/index' })
     } catch (error) {
       console.error('Login failed:', error)
       alert('登录失败')

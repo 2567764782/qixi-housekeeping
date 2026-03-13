@@ -6,17 +6,38 @@ import type { Service } from '../storage/database/shared/schema'
 export class ServicesService {
   private readonly client = getSupabaseClient()
 
-  async findAll(): Promise<Service[]> {
+  async findAll(page: number = 1, limit: number = 10): Promise<{ services: Service[]; total: number; page: number; limit: number; totalPages: number }> {
+    const offset = (page - 1) * limit
+
+    // 获取总数
+    const { count, error: countError } = await this.client
+      .from('services')
+      .select('*', { count: 'exact', head: true })
+
+    if (countError) {
+      throw new Error(`Failed to count services: ${countError.message}`)
+    }
+
+    // 获取分页数据
     const { data, error } = await this.client
       .from('services')
       .select('*')
       .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1)
 
     if (error) {
       throw new Error(`Failed to fetch services: ${error.message}`)
     }
 
-    return data || []
+    const totalPages = Math.ceil((count || 0) / limit)
+
+    return {
+      services: data || [],
+      total: count || 0,
+      page,
+      limit,
+      totalPages
+    }
   }
 
   async seedData(): Promise<{ message: string }> {

@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, UseGuards } from '@nestjs/common'
+import { Controller, Post, Body, Get, UseGuards, HttpException, HttpStatus } from '@nestjs/common'
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger'
 import { AuthService } from './auth.service'
 import { JwtAuthGuard } from './jwt-auth.guard'
@@ -36,37 +36,66 @@ export class AuthController {
   @ApiResponse({ status: 400, description: '参数错误' })
   @ApiResponse({ status: 409, description: '手机号已注册' })
   async register(@Body() body: RegisterDto) {
-    const { phone, password, nickname } = body
-
-    if (!phone || !password) {
-      return {
-        code: 400,
-        msg: '手机号和密码不能为空',
-        data: null,
-      }
-    }
-
-    if (password.length < 6) {
-      return {
-        code: 400,
-        msg: '密码长度不能少于6位',
-        data: null,
-      }
-    }
-
     try {
-      const result = await this.authService.register(phone, password, nickname)
+      const { phone, password, nickname } = body
+
+      // 参数验证
+      if (!phone || typeof phone !== 'string' || phone.trim().length === 0) {
+        throw new HttpException(
+          { code: 400, msg: '手机号不能为空', data: null },
+          HttpStatus.BAD_REQUEST
+        )
+      }
+
+      // 验证手机号格式
+      if (!/^1[3-9]\d{9}$/.test(phone.trim())) {
+        throw new HttpException(
+          { code: 400, msg: '手机号格式不正确', data: null },
+          HttpStatus.BAD_REQUEST
+        )
+      }
+
+      if (!password || typeof password !== 'string' || password.length < 6) {
+        throw new HttpException(
+          { code: 400, msg: '密码长度不能少于6位', data: null },
+          HttpStatus.BAD_REQUEST
+        )
+      }
+
+      if (password.length > 20) {
+        throw new HttpException(
+          { code: 400, msg: '密码长度不能超过20位', data: null },
+          HttpStatus.BAD_REQUEST
+        )
+      }
+
+      // 验证昵称（如果提供）
+      if (nickname && (typeof nickname !== 'string' || nickname.length > 20)) {
+        throw new HttpException(
+          { code: 400, msg: '昵称长度不能超过20位', data: null },
+          HttpStatus.BAD_REQUEST
+        )
+      }
+
+      const result = await this.authService.register(phone.trim(), password, nickname ? nickname.trim() : undefined)
       return {
         code: 200,
         msg: '注册成功',
         data: result,
       }
     } catch (error: any) {
-      return {
-        code: error.status || 500,
-        msg: error.message || '注册失败',
-        data: null,
+      if (error instanceof HttpException) {
+        throw error
       }
+      const isProduction = process.env.NODE_ENV === 'production'
+      throw new HttpException(
+        {
+          code: error.status || 500,
+          message: isProduction ? '注册失败，请稍后重试' : (error.message || '注册失败'),
+          data: null,
+        },
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR
+      )
     }
   }
 
@@ -80,29 +109,51 @@ export class AuthController {
   @ApiResponse({ status: 400, description: '参数错误' })
   @ApiResponse({ status: 401, description: '用户名或密码错误' })
   async login(@Body() body: LoginDto) {
-    const { phone, password } = body
-
-    if (!phone || !password) {
-      return {
-        code: 400,
-        msg: '手机号和密码不能为空',
-        data: null,
-      }
-    }
-
     try {
-      const result = await this.authService.login(phone, password)
+      const { phone, password } = body
+
+      // 参数验证
+      if (!phone || typeof phone !== 'string' || phone.trim().length === 0) {
+        throw new HttpException(
+          { code: 400, msg: '手机号不能为空', data: null },
+          HttpStatus.BAD_REQUEST
+        )
+      }
+
+      // 验证手机号格式
+      if (!/^1[3-9]\d{9}$/.test(phone.trim())) {
+        throw new HttpException(
+          { code: 400, msg: '手机号格式不正确', data: null },
+          HttpStatus.BAD_REQUEST
+        )
+      }
+
+      if (!password || typeof password !== 'string' || password.length === 0) {
+        throw new HttpException(
+          { code: 400, msg: '密码不能为空', data: null },
+          HttpStatus.BAD_REQUEST
+        )
+      }
+
+      const result = await this.authService.login(phone.trim(), password)
       return {
         code: 200,
         msg: '登录成功',
         data: result,
       }
     } catch (error: any) {
-      return {
-        code: error.status || 500,
-        msg: error.message || '登录失败',
-        data: null,
+      if (error instanceof HttpException) {
+        throw error
       }
+      const isProduction = process.env.NODE_ENV === 'production'
+      throw new HttpException(
+        {
+          code: error.status || 500,
+          message: isProduction ? '登录失败，请稍后重试' : (error.message || '登录失败'),
+          data: null,
+        },
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR
+      )
     }
   }
 
@@ -141,11 +192,18 @@ export class AuthController {
         data: result,
       }
     } catch (error: any) {
-      return {
-        code: error.status || 500,
-        msg: error.message || '刷新失败',
-        data: null,
+      if (error instanceof HttpException) {
+        throw error
       }
+      const isProduction = process.env.NODE_ENV === 'production'
+      throw new HttpException(
+        {
+          code: error.status || 500,
+          message: isProduction ? '刷新失败，请稍后重试' : (error.message || '刷新失败'),
+          data: null,
+        },
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR
+      )
     }
   }
 
@@ -159,29 +217,59 @@ export class AuthController {
   @ApiResponse({ status: 400, description: '参数错误' })
   @ApiResponse({ status: 401, description: '验证码错误或已过期' })
   async loginWithCode(@Body() body: LoginWithCodeDto) {
-    const { phone, code } = body
-
-    if (!phone || !code) {
-      return {
-        code: 400,
-        msg: '手机号和验证码不能为空',
-        data: null,
-      }
-    }
-
     try {
-      const result = await this.authService.loginWithCode(phone, code)
+      const { phone, code } = body
+
+      // 参数验证
+      if (!phone || typeof phone !== 'string' || phone.trim().length === 0) {
+        throw new HttpException(
+          { code: 400, msg: '手机号不能为空', data: null },
+          HttpStatus.BAD_REQUEST
+        )
+      }
+
+      // 验证手机号格式
+      if (!/^1[3-9]\d{9}$/.test(phone.trim())) {
+        throw new HttpException(
+          { code: 400, msg: '手机号格式不正确', data: null },
+          HttpStatus.BAD_REQUEST
+        )
+      }
+
+      if (!code || typeof code !== 'string' || code.trim().length === 0) {
+        throw new HttpException(
+          { code: 400, msg: '验证码不能为空', data: null },
+          HttpStatus.BAD_REQUEST
+        )
+      }
+
+      // 验证验证码格式（6位数字）
+      if (!/^\d{6}$/.test(code.trim())) {
+        throw new HttpException(
+          { code: 400, msg: '验证码格式不正确', data: null },
+          HttpStatus.BAD_REQUEST
+        )
+      }
+
+      const result = await this.authService.loginWithCode(phone.trim(), code.trim())
       return {
         code: 200,
         msg: '登录成功',
         data: result,
       }
     } catch (error: any) {
-      return {
-        code: error.status || 500,
-        msg: error.message || '登录失败',
-        data: null,
+      if (error instanceof HttpException) {
+        throw error
       }
+      const isProduction = process.env.NODE_ENV === 'production'
+      throw new HttpException(
+        {
+          code: error.status || 500,
+          message: isProduction ? '登录失败，请稍后重试' : (error.message || '登录失败'),
+          data: null,
+        },
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR
+      )
     }
   }
 
@@ -213,11 +301,15 @@ export class AuthController {
         data: null,
       }
     } catch (error: any) {
-      return {
-        code: error.status || 500,
-        msg: error.message || '登出失败',
-        data: null,
-      }
+      const isProduction = process.env.NODE_ENV === 'production'
+      throw new HttpException(
+        {
+          code: error.status || 500,
+          message: isProduction ? '登出失败，请稍后重试' : (error.message || '登出失败'),
+          data: null,
+        },
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR
+      )
     }
   }
 }
