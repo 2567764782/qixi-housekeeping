@@ -1,6 +1,6 @@
 import Taro, { useLoad } from '@tarojs/taro'
 import { View, Text, ScrollView } from '@tarojs/components'
-import { User, Phone, MapPin, Settings, FileText, Award, ChevronRight, QrCode } from 'lucide-react-taro'
+import { User, Phone, MapPin, Settings, FileText, Award, ChevronRight, QrCode, TrendingUp, CreditCard, MessageSquare, Shield } from 'lucide-react-taro'
 import './index.css'
 
 const ProfilePage = () => {
@@ -8,298 +8,200 @@ const ProfilePage = () => {
     // 页面加载初始化
   })
 
-  const menuItems = [
+  // 用户功能分组
+  const userMenuItems = [
     {
-      icon: <FileText size={22} color="#10B981" />,
+      icon: <FileText size={20} color="#10B981" />,
       title: '我的订单',
-      subtitle: '查看预约记录',
       action: () => {
         Taro.switchTab({ url: '/pages/orders/index' })
       }
     },
     {
-      icon: <MapPin size={22} color="#10B981" />,
+      icon: <MapPin size={20} color="#10B981" />,
       title: '地址管理',
-      subtitle: '管理服务地址',
       action: () => {
-        alert('地址管理功能开发中')
+        Taro.showToast({ title: '地址管理功能开发中', icon: 'none' })
       }
     },
     {
-      icon: <Phone size={22} color="#10B981" />,
+      icon: <CreditCard size={20} color="#10B981" />,
+      title: '我的名片',
+      action: () => {
+        Taro.navigateTo({ url: '/pages/my-card/index' })
+      }
+    }
+  ]
+
+  // 服务功能分组
+  const serviceMenuItems = [
+    {
+      icon: <Phone size={20} color="#3B82F6" />,
       title: '联系客服',
-      subtitle: '在线客服咨询',
       action: () => {
-        alert('联系客服功能开发中')
+        Taro.showToast({ title: '联系客服功能开发中', icon: 'none' })
       }
     },
     {
-      icon: <QrCode size={22} color="#10B981" />,
+      icon: <MessageSquare size={20} color="#3B82F6" />,
+      title: '消息通知',
+      action: () => {
+        Taro.navigateTo({ url: '/pages/activity-notifications/index' })
+      }
+    },
+    {
+      icon: <QrCode size={20} color="#3B82F6" />,
       title: '扫码入群',
-      subtitle: '加入服务交流群',
       action: () => {
         Taro.navigateTo({ url: '/pages/qrcode/index' })
       }
-    },
+    }
+  ]
+
+  // 管理功能分组
+  const adminMenuItems = [
     {
-      icon: <Settings size={22} color="#10B981" />,
+      icon: <Settings size={20} color="#F59E0B" />,
       title: '订单管理',
-      subtitle: '自动接单/派单',
       action: () => {
         Taro.navigateTo({ url: '/pages/admin/index' })
       }
     },
     {
-      icon: <Award size={22} color="#3B82F6" />,
+      icon: <TrendingUp size={20} color="#F59E0B" />,
       title: '数据统计',
-      subtitle: '订单、保洁员、收入统计',
       action: () => {
         Taro.navigateTo({ url: '/pages/statistics/index' })
       }
     },
     {
-      icon: <FileText size={22} color="#8B5CF6" />,
-      title: '支付管理',
-      subtitle: '创建支付、查询、退款',
-      action: () => {
-        Taro.navigateTo({ url: '/pages/payment/index' })
-      }
-    },
-    {
-      icon: <QrCode size={22} color="#F59E0B" />,
-      title: '实时通信',
-      subtitle: '订单推送、位置更新',
-      action: () => {
-        Taro.navigateTo({ url: '/pages/realtime/index' })
-      }
-    },
-    {
-      icon: <Settings size={22} color="#EF4444" />,
+      icon: <Shield size={20} color="#F59E0B" />,
       title: '权限管理',
-      subtitle: '角色、权限、用户分配',
       action: () => {
         Taro.navigateTo({ url: '/pages/roles/index' })
-      }
-    },
-    {
-      icon: <Award size={22} color="#10B981" />,
-      title: '会员中心',
-      subtitle: '查看会员权益',
-      action: () => {
-        alert('会员中心功能开发中')
-      }
-    },
-    {
-      icon: <User size={22} color="#10B981" />,
-      title: '帮助中心',
-      subtitle: '常见问题解答',
-      action: () => {
-        alert('帮助中心功能开发中')
-      }
-    },
-    {
-      icon: <Settings size={22} color="#10B981" />,
-      title: '设置',
-      subtitle: '账户设置',
-      action: () => {
-        alert('设置功能开发中')
       }
     }
   ]
 
+  // 其他功能分组
+  const otherMenuItems = [
+    {
+      icon: <Award size={20} color="#8B5CF6" />,
+      title: '会员中心',
+      action: () => {
+        Taro.showToast({ title: '会员中心功能开发中', icon: 'none' })
+      }
+    },
+    {
+      icon: <User size={20} color="#8B5CF6" />,
+      title: '帮助中心',
+      action: () => {
+        Taro.showToast({ title: '帮助中心功能开发中', icon: 'none' })
+      }
+    },
+    {
+      icon: <Settings size={20} color="#8B5CF6" />,
+      title: '设置',
+      action: () => {
+        Taro.showToast({ title: '设置功能开发中', icon: 'none' })
+      }
+    }
+  ]
+
+  // 渲染菜单项
+  const renderMenuItem = (item: any, index: number, lastIndex: number) => (
+    <View
+      key={index}
+      className={`flex flex-row items-center px-5 py-4 ${
+        index !== lastIndex ? 'border-b border-gray-50' : ''
+      }`}
+      onClick={item.action}
+    >
+      <View className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center mr-3">
+        {item.icon}
+      </View>
+      <View className="flex-1">
+        <Text className="block text-base font-medium text-gray-800">
+          {item.title}
+        </Text>
+      </View>
+      <ChevronRight size={18} color="#D1D5DB" />
+    </View>
+  )
+
   return (
     <View className="flex flex-col h-full bg-gray-50">
       <ScrollView className="flex-1" scrollY>
-        {/* 用户信息头部 - 多层渐变 + 装饰 */}
-        <View className="relative overflow-hidden bg-gradient-to-br from-emerald-600 via-emerald-500 to-teal-500 pt-12 pb-10 px-6">
-          {/* 背景装饰 */}
-          <View className="absolute top-[-60px] right-[-60px] w-48 h-48 bg-white/10 rounded-full blur-3xl" />
-          <View className="absolute bottom-[-40px] left-[-40px] w-40 h-40 bg-white/10 rounded-full blur-2xl" />
-
-          <View className="relative">
-            <View className="flex flex-row items-center mb-6">
-              {/* 头像 */}
-              <View
-                className="w-24 h-24 bg-white/20 backdrop-blur-sm rounded-3xl flex items-center justify-center mr-5"
-                style={{
-                  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.1)'
-                }}
-              >
-                <User size={44} color="#fff" />
-              </View>
-
-              {/* 用户信息 */}
-              <View className="flex-1">
-                <Text className="block text-3xl font-bold text-white mb-2 leading-tight">
-                  用户中心
-                </Text>
-                <Text className="block text-base text-emerald-100 font-medium">
-                  享受专业家居服务
-                </Text>
-              </View>
+        {/* 用户信息头部 */}
+        <View className="bg-white px-5 py-6 border-b border-gray-100">
+          <View className="flex flex-row items-center">
+            {/* 头像 */}
+            <View className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center mr-4">
+              <User size={32} color="#10B981" />
             </View>
 
-            {/* 统计数据 - 玻璃态卡片 */}
-            <View className="bg-white/20 backdrop-blur-md rounded-3xl py-5 border border-white/30">
-              <View className="flex flex-row justify-around">
-                <View className="text-center">
-                  <Text className="block text-3xl font-bold text-white mb-1">0</Text>
-                  <Text className="block text-xs text-emerald-100 font-medium">全部订单</Text>
-                </View>
-                <View className="w-px bg-white/30" />
-                <View className="text-center">
-                  <Text className="block text-3xl font-bold text-white mb-1">0</Text>
-                  <Text className="block text-xs text-emerald-100 font-medium">待服务</Text>
-                </View>
-                <View className="w-px bg-white/30" />
-                <View className="text-center">
-                  <Text className="block text-3xl font-bold text-white mb-1">0</Text>
-                  <Text className="block text-xs text-emerald-100 font-medium">已完成</Text>
-                </View>
-              </View>
-            </View>
-          </View>
-        </View>
-
-        {/* 功能菜单 - 精致卡片 */}
-        <View className="px-4 py-6">
-          <View
-            className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-sm border border-gray-100 overflow-hidden"
-            style={{
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02)'
-            }}
-          >
-            {menuItems.map((item, index) => (
-              <View
-                key={index}
-                className={`flex flex-row items-center px-6 py-5 ${
-                  index !== menuItems.length - 1 ? 'border-b border-gray-50' : ''
-                }`}
-                onClick={item.action}
-                style={{
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                {/* 图标容器 */}
-                <View
-                  className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center mr-4"
-                  style={{
-                    boxShadow: '0 2px 4px rgba(16, 185, 129, 0.08)'
-                  }}
-                >
-                  {item.icon}
-                </View>
-
-                {/* 文字内容 */}
-                <View className="flex-1">
-                  <Text className="block text-lg font-bold text-gray-800 mb-0.5">
-                    {item.title}
-                  </Text>
-                  <Text className="block text-sm text-gray-500">
-                    {item.subtitle}
-                  </Text>
-                </View>
-
-                {/* 箭头 */}
-                <View className="w-8 h-8 flex items-center justify-center">
-                  <ChevronRight size={20} color="#D1D5DB" />
-                </View>
-              </View>
-            ))}
-          </View>
-        </View>
-
-        {/* 服务优势 - 精致卡片 */}
-        <View className="px-4 pb-6">
-          <View
-            className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-sm border border-gray-100 p-6"
-            style={{
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02)'
-            }}
-          >
-            <Text className="block text-lg font-bold text-gray-800 mb-5">
-              服务优势
-            </Text>
-            <View className="grid grid-cols-3 gap-4">
-              <View className="text-center">
-                <View
-                  className="w-16 h-16 bg-emerald-50 rounded-3xl flex items-center justify-center mx-auto mb-3"
-                  style={{
-                    boxShadow: '0 4px 8px rgba(16, 185, 129, 0.12)'
-                  }}
-                >
-                  <Award size={28} color="#10B981" />
-                </View>
-                <Text className="block text-sm font-bold text-gray-800 mb-1">
-                  专业团队
-                </Text>
-                <Text className="block text-xs text-gray-500">
-                  经验丰富
-                </Text>
-              </View>
-              <View className="text-center">
-                <View
-                  className="w-16 h-16 bg-emerald-50 rounded-3xl flex items-center justify-center mx-auto mb-3"
-                  style={{
-                    boxShadow: '0 4px 8px rgba(16, 185, 129, 0.12)'
-                  }}
-                >
-                  <Phone size={28} color="#10B981" />
-                </View>
-                <Text className="block text-sm font-bold text-gray-800 mb-1">
-                  快速响应
-                </Text>
-                <Text className="block text-xs text-gray-500">
-                  及时服务
-                </Text>
-              </View>
-              <View className="text-center">
-                <View
-                  className="w-16 h-16 bg-emerald-50 rounded-3xl flex items-center justify-center mx-auto mb-3"
-                  style={{
-                    boxShadow: '0 4px 8px rgba(16, 185, 129, 0.12)'
-                  }}
-                >
-                  <User size={28} color="#10B981" />
-                </View>
-                <Text className="block text-sm font-bold text-gray-800 mb-1">
-                  优质保障
-                </Text>
-                <Text className="block text-xs text-gray-500">
-                  品质保证
-                </Text>
-              </View>
-            </View>
-          </View>
-        </View>
-
-        {/* 联系方式 - 渐变卡片 */}
-        <View className="px-4 pb-8">
-          <View
-            className="bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 rounded-3xl p-6 text-center relative overflow-hidden"
-            style={{
-              boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)'
-            }}
-          >
-            {/* 背景装饰 */}
-            <View className="absolute top-[-20px] right-[-20px] w-24 h-24 bg-white/10 rounded-full blur-2xl" />
-            <View className="absolute bottom-[-10px] left-[-10px] w-16 h-16 bg-white/10 rounded-full blur-xl" />
-
-            <View className="relative">
-              <Text className="block text-lg font-bold text-white mb-2">
-                需要帮助？
+            {/* 用户信息 */}
+            <View className="flex-1">
+              <Text className="block text-xl font-bold text-gray-800 mb-1">
+                欢迎您
               </Text>
-              <Text className="block text-sm text-emerald-100 mb-4">
-                我们的服务团队随时为您服务
+              <Text className="block text-sm text-gray-500">
+                享受专业家居服务
               </Text>
-              <View
-                className="bg-white/20 backdrop-blur-sm rounded-2xl py-3 px-6 inline-block border border-white/30"
-              >
-                <Text className="block text-base font-bold text-white">
-                  400-888-8888
-                </Text>
+            </View>
+
+            {/* 统计数据 */}
+            <View className="flex flex-row items-center">
+              <View className="bg-emerald-50 px-3 py-1.5 rounded-xl">
+                <Text className="block text-lg font-bold text-emerald-600">0</Text>
               </View>
             </View>
+          </View>
+
+          {/* 快捷统计 */}
+          <View className="flex flex-row mt-5 pt-5 border-t border-gray-50">
+            <View className="flex-1 text-center">
+              <Text className="block text-xl font-bold text-gray-800 mb-1">0</Text>
+              <Text className="block text-xs text-gray-500">全部订单</Text>
+            </View>
+            <View className="flex-1 text-center">
+              <Text className="block text-xl font-bold text-gray-800 mb-1">0</Text>
+              <Text className="block text-xs text-gray-500">待服务</Text>
+            </View>
+            <View className="flex-1 text-center">
+              <Text className="block text-xl font-bold text-gray-800 mb-1">0</Text>
+              <Text className="block text-xs text-gray-500">已完成</Text>
+            </View>
+          </View>
+        </View>
+
+        <View className="px-4 py-5 space-y-4">
+          {/* 用户功能 */}
+          <View className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            {renderMenuItem(userMenuItems[0], 0, 2)}
+            {renderMenuItem(userMenuItems[1], 1, 2)}
+            {renderMenuItem(userMenuItems[2], 2, 2)}
+          </View>
+
+          {/* 服务功能 */}
+          <View className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            {renderMenuItem(serviceMenuItems[0], 0, 2)}
+            {renderMenuItem(serviceMenuItems[1], 1, 2)}
+            {renderMenuItem(serviceMenuItems[2], 2, 2)}
+          </View>
+
+          {/* 管理功能 */}
+          <View className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            {renderMenuItem(adminMenuItems[0], 0, 2)}
+            {renderMenuItem(adminMenuItems[1], 1, 2)}
+            {renderMenuItem(adminMenuItems[2], 2, 2)}
+          </View>
+
+          {/* 其他功能 */}
+          <View className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            {renderMenuItem(otherMenuItems[0], 0, 2)}
+            {renderMenuItem(otherMenuItems[1], 1, 2)}
+            {renderMenuItem(otherMenuItems[2], 2, 2)}
           </View>
         </View>
       </ScrollView>
