@@ -1,6 +1,8 @@
 export default defineAppConfig({
   pages: [
     'pages/index/index',
+    'pages/news/index',
+    'pages/webview/index',
     'pages/login/index',
     'pages/booking/index',
     'pages/orders/index',

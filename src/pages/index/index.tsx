@@ -1,6 +1,6 @@
 import Taro, { useLoad } from '@tarojs/taro'
 import { View, Text, ScrollView, Input } from '@tarojs/components'
-import { Sparkles, Wrench, Building2, Sofa, PaintBucket, ChevronRight, Star, Calendar, FileText, Bell, User, Search } from 'lucide-react-taro'
+import { Sparkles, Wrench, Building2, Sofa, PaintBucket, ChevronRight, Star, Calendar, FileText, User, Search, Newspaper } from 'lucide-react-taro'
 import { useState } from 'react'
 import { Network } from '@/network'
 import './index.css'
@@ -36,7 +36,7 @@ const IndexPage = () => {
   const quickActions: QuickAction[] = [
     { id: '1', name: '服务预约', icon: 'Calendar', color: 'bg-emerald-500' },
     { id: '2', name: '我的订单', icon: 'FileText', color: 'bg-blue-500' },
-    { id: '3', name: '消息通知', icon: 'Bell', color: 'bg-orange-500' },
+    { id: '3', name: '实时新闻', icon: 'Newspaper', color: 'bg-orange-500' },
     { id: '4', name: '个人中心', icon: 'User', color: 'bg-purple-500' },
   ]
 
@@ -61,7 +61,7 @@ const IndexPage = () => {
     const iconMap: Record<string, React.ReactNode> = {
       Calendar: <Calendar size={24} color="#fff" />,
       FileText: <FileText size={24} color="#fff" />,
-      Bell: <Bell size={24} color="#fff" />,
+      Newspaper: <Newspaper size={24} color="#fff" />,
       User: <User size={24} color="#fff" />,
     }
     return iconMap[iconName] || <Sparkles size={24} color="#fff" />
@@ -111,7 +111,7 @@ const IndexPage = () => {
     const pageMap: Record<string, string> = {
       '1': '/pages/booking/index',
       '2': '/pages/orders/index',
-      '3': '/pages/activity-notifications/index',
+      '3': '/pages/news/index',
       '4': '/pages/profile/index'
     }
     const url = pageMap[actionId]

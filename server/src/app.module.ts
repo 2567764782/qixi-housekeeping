@@ -20,6 +20,7 @@ import { CacheModule } from './cache/cache.module';
 import { SmsModule } from './sms/sms.module';
 import { MonitoringModule } from './monitoring/monitoring.module';
 import { HealthModule } from './health/health.module';
+import { NewsModule } from './news/news.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { HealthModule } from './health/health.module';
     PaymentModule,
     MonitoringModule,
     HealthModule,
+    NewsModule,
   ],
   controllers: [AppController],
   providers: [
