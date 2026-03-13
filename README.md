@@ -89,6 +89,40 @@ pnpm build:server # 仅构建后端
 pnpm preview:weapp # 构建并生成预览小程序二维码
 ```
 
+## 微信小程序配置
+
+本项目支持快速配置微信小程序，提供两种方式：
+
+### 方式一：一键配置（推荐）
+
+运行自动配置脚本：
+
+```bash
+bash scripts/config-wechat-app.sh
+```
+
+脚本会引导你完成所有配置，包括：
+- ✅ 微信小程序 AppID
+- ✅ 服务器域名
+- ✅ 数据库连接
+- ✅ 微信支付（可选）
+
+### 方式二：手动配置
+
+详细步骤请查看：
+
+- 📖 [微信小程序快速配置指南](QUICK_START_WECHAT.md)
+- 📖 [详细配置文档](docs/WECHAT_APP_SETUP.md)
+
+快速配置步骤：
+
+1. **获取 AppID**：登录 [微信公众平台](https://mp.weixin.qq.com/) → 开发 → 开发设置
+2. **配置环境变量**：复制 `server/.env.wechat.example` 为 `.env.production` 并填写配置
+3. **配置域名白名单**：在小程序后台添加服务器域名
+4. **构建上传**：`pnpm build:weapp` → 用微信开发者工具上传
+
+详细功能对接说明（登录、支付、订阅消息）请参考 [docs/WECHAT_APP_SETUP.md](docs/WECHAT_APP_SETUP.md)
+
 ## 前端核心开发规范
 
 ### 新建页面流程
