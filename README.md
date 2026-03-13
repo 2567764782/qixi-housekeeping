@@ -2,6 +2,16 @@
 
 这是一个基于 [Taro 4](https://docs.taro.zone/docs/) + [Nest.js](https://nestjs.com/) 的前后端分离项目，由扣子编程 CLI 创建。
 
+## 📚 目录导航
+
+- 🚀 **[快速开始](#快速开始小白专用)**
+- 📦 **[前端模块化](#前端模块化)**
+- 🐛 **[调试指南](#调试指南)**
+- 🎯 **[配置指南](#微信小程序配置)**
+- 📖 **[技术栈](#技术栈)**
+- 📁 **[项目结构](#项目结构)**
+- 🔧 **[前端核心开发规范](#前端核心开发规范)**
+
 ## 🚀 快速开始（小白专用）
 
 ### 第 1 步：一键配置小程序
@@ -35,7 +45,131 @@ pnpm build:weapp
 
 ---
 
-## 技术栈
+## 📦 前端模块化
+
+项目支持完整的模块化开发，可以创建可复用的组件、Hook 和服务层。
+
+### 快速创建模块
+
+```bash
+# 运行模块创建工具
+bash scripts/create-module.sh
+```
+
+**支持的创建类型：**
+- 1. 创建组件（Component）
+- 2. 创建页面（Page）
+- 3. 创建 Hook（自定义 Hook）
+- 4. 创建服务层（Service）
+
+### 模块化结构
+
+```
+src/
+├── components/        # 可复用组件
+│   ├── OrderCard/    # 订单卡片
+│   └── ServiceCard/  # 服务卡片
+├── hooks/            # 自定义 Hooks
+│   └── useOrders.ts  # 订单 Hook
+├── services/         # 服务层
+│   └── orders.service.ts
+└── pages/            # 页面
+    ├── index/        # 首页
+    └── orders/       # 订单页
+```
+
+### 示例：创建组件
+
+```bash
+# 运行创建工具
+bash scripts/create-module.sh
+# 选择 1. 创建组件
+# 输入组件名称：OrderCard
+```
+
+创建完成后，组件会自动生成在 `src/components/OrderCard/` 目录。
+
+### 使用组件
+
+```typescript
+// src/pages/orders/index.tsx
+import { OrderCard } from '@/components/OrderCard'
+
+const OrdersPage = () => {
+  const orders = [...]
+  return (
+    <View>
+      {orders.map(order => (
+        <OrderCard key={order.id} {...order} />
+      ))}
+    </View>
+  )
+}
+```
+
+**详细文档：** [前端模块化完整指南](docs/FRONTEND_MODULAR_DEBUG.md)
+
+---
+
+## 🐛 调试指南
+
+### 调试位置
+
+**微信开发者工具调试器（最常用）：**
+- 位置：底部「调试器」标签
+- 功能：Console、Sources、Network、Elements、React
+
+**浏览器 DevTools（H5）：**
+- 快捷键：`F12` 或 `Ctrl+Shift+I`
+- 访问：http://localhost:5000
+
+**真机调试（vconsole）：**
+```javascript
+// 在控制台执行
+localStorage.setItem('enableVConsole', 'true')
+```
+
+### 常用调试代码
+
+```typescript
+// 打印日志
+console.log('🔄 开始加载...')
+console.log('✅ 加载成功:', data)
+console.error('❌ 加载失败:', error)
+
+// 调试网络请求
+const fetchData = async () => {
+  console.log('📡 请求配置:', { url, method, data })
+  try {
+    const res = await Network.request({ ... })
+    console.log('✅ 响应数据:', res.data)
+    return res.data
+  } catch (error) {
+    console.error('❌ 请求失败:', error)
+    throw error
+  }
+}
+
+// 调试状态更新
+const [count, setCount] = useState(0)
+useEffect(() => {
+  console.log('✨ count 变化:', count)
+}, [count])
+```
+
+### 调试技巧
+
+1. **设置断点**：Sources 标签 → 点击行号
+2. **查看变量**：Scope 面板
+3. **监控表达式**：Watch 面板
+4. **网络请求**：Network 标签
+
+**快速参考：** [调试小抄](docs/DEBUG_CHEATSHEET.md)
+**详细指南：** [调试快速指南](docs/DEBUG_QUICK_GUIDE.md)
+
+---
+
+## 🎯 微信小程序配置
 
 - **整体框架**: Taro 4.1.9
 - **语言**: TypeScript 5.4.5
