@@ -151,4 +151,24 @@ export class OrdersController {
       }
     }
   }
+
+  // 生成虚拟订单接口
+  @Post('generate-mock')
+  async generateMockOrders(@Body() body: { count?: number }) {
+    try {
+      const count = body.count || 10
+      const result = await this.ordersService.generateMockOrders(count)
+      return {
+        code: 200,
+        msg: `Successfully generated ${result.success} mock orders`,
+        data: result
+      }
+    } catch (error) {
+      return {
+        code: 500,
+        msg: error.message,
+        data: null
+      }
+    }
+  }
 }

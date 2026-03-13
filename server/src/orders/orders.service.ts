@@ -189,4 +189,124 @@ export class OrdersService {
       orders: processedOrders
     }
   }
+
+  // 生成虚拟订单数据
+  async generateMockOrders(count: number = 10): Promise<{ success: number; failed: number; orders: Order[] }> {
+    // 模拟服务列表
+    const mockServices = [
+      { id: 'service-1', name: '家庭保洁', category: 'cleaning', price: '100元/小时' },
+      { id: 'service-2', name: '深度保洁', category: 'cleaning', price: '150元/小时' },
+      { id: 'service-3', name: '空调清洗', category: 'cleaning', price: '80元/台' },
+      { id: 'service-4', name: '厨房油污清理', category: 'cleaning', price: '120元/次' },
+      { id: 'service-5', name: '卫生间深度清洁', category: 'cleaning', price: '100元/次' },
+      { id: 'service-6', name: '墙面刷新', category: 'renovation', price: '50元/平方米' },
+      { id: 'service-7', name: '地板更换', category: 'renovation', price: '200元/平方米' },
+      { id: 'service-8', name: '水电改造', category: 'renovation', price: '300元/小时' },
+    ]
+
+    // 模拟地址列表
+    const mockAddresses = [
+      '北京市朝阳区建国路88号',
+      '北京市海淀区中关村大街1号',
+      '北京市西城区金融街10号',
+      '上海市浦东新区陆家嘴环路1000号',
+      '上海市徐汇区淮海中路999号',
+      '广州市天河区珠江新城华夏路',
+      '深圳市福田区深南大道6000号',
+      '杭州市西湖区文三路500号',
+      '成都市武侯区天府大道',
+      '南京市鼓楼区中山路',
+    ]
+
+    // 模拟联系人电话
+    const mockPhones = [
+      '13800138001',
+      '13800138002',
+      '13800138003',
+      '13800138004',
+      '13800138005',
+      '13900139001',
+      '13900139002',
+      '13900139003',
+      '13900139004',
+      '13900139005',
+    ]
+
+    // 模拟日期列表（未来7天）
+    const mockDates: string[] = []
+    const today = new Date()
+    for (let i = 1; i <= 7; i++) {
+      const date = new Date(today)
+      date.setDate(today.getDate() + i)
+      mockDates.push(date.toISOString().split('T')[0])
+    }
+
+    // 模拟时间段
+    const mockTimeSlots = ['09:00-11:00', '10:00-12:00', '14:00-16:00', '15:00-17:00', '16:00-18:00', '19:00-21:00']
+
+    // 模拟用户 ID
+    const mockUserIds = ['user-001', 'user-002', 'user-003', 'user-004', 'user-005']
+
+    // 模拟备注
+    const mockRemarks = [
+      '家里有宠物，请注意安全',
+      '请自备清洁工具',
+      '需要携带专业的地板清洁剂',
+      '门口有快递柜，请联系我开门',
+      '',
+      '需要额外擦窗户',
+      '家里有小孩，请使用环保清洁剂',
+      '',
+      '请在约定时间前15分钟联系我',
+      '工作完成后请拍照发给我',
+    ]
+
+    // 生成虚拟订单
+    const generatedOrders: Order[] = []
+    let success = 0
+    let failed = 0
+
+    for (let i = 0; i < count; i++) {
+      try {
+        const service = mockServices[Math.floor(Math.random() * mockServices.length)]
+        const address = mockAddresses[Math.floor(Math.random() * mockAddresses.length)]
+        const phone = mockPhones[Math.floor(Math.random() * mockPhones.length)]
+        const appointmentDate = mockDates[Math.floor(Math.random() * mockDates.length)]
+        const appointmentTime = mockTimeSlots[Math.floor(Math.random() * mockTimeSlots.length)]
+        const userId = mockUserIds[Math.floor(Math.random() * mockUserIds.length)]
+        const remark = mockRemarks[Math.floor(Math.random() * mockRemarks.length)]
+
+        const order = await this.create({
+          userId,
+          serviceId: service.id,
+          serviceName: service.name,
+          address,
+          phone,
+          appointmentDate,
+          appointmentTime,
+          remark,
+        })
+
+        // 随机分配一个状态（pending, confirmed, completed, cancelled）
+        const statuses = ['pending', 'pending', 'confirmed', 'confirmed', 'completed']
+        const randomStatus = statuses[Math.floor(Math.random() * statuses.length)]
+
+        if (randomStatus !== 'pending') {
+          await this.update(order.id, { status: randomStatus })
+        }
+
+        generatedOrders.push({ ...order, status: randomStatus })
+        success++
+      } catch (error) {
+        console.error(`Failed to generate mock order ${i + 1}:`, error.message)
+        failed++
+      }
+    }
+
+    return {
+      success,
+      failed,
+      orders: generatedOrders
+    }
+  }
 }
