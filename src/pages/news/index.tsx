@@ -93,7 +93,7 @@ const NewsPage = () => {
             </View>
           ) : (
             <View className="space-y-3">
-              {newsList.map((news, index) => (
+              {newsList.slice(0, 3).map((news, index) => (
                 <View
                   key={index}
                   className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5"
@@ -131,6 +131,15 @@ const NewsPage = () => {
                   </View>
                 </View>
               ))}
+            </View>
+          )}
+
+          {/* 底部提示 */}
+          {newsList.length > 0 && (
+            <View className="mt-4 flex flex-row items-center justify-center">
+              <Text className="block text-xs text-gray-400">
+                只展示前 3 条热点新闻
+              </Text>
             </View>
           )}
         </View>

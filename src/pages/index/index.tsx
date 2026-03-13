@@ -15,6 +15,15 @@ interface ServiceType {
   category: 'cleaning' | 'renovation'
 }
 
+// 新闻类型定义
+interface NewsItem {
+  title: string
+  url: string
+  source?: string
+  publish_time?: string
+  description?: string
+}
+
 // 快捷入口类型定义
 interface QuickAction {
   id: string
@@ -26,11 +35,13 @@ interface QuickAction {
 const IndexPage = () => {
   useLoad(() => {
     loadServices()
+    loadNews()
   })
 
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'cleaning' | 'renovation'>('all')
   const [services, setServices] = useState<ServiceType[]>([])
   const [loading, setLoading] = useState(false)
+  const [newsList, setNewsList] = useState<NewsItem[]>([])
 
   // 快捷入口数据
   const quickActions: QuickAction[] = [
@@ -53,6 +64,20 @@ const IndexPage = () => {
       console.error('Failed to load services:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  // 加载新闻列表
+  const loadNews = async () => {
+    try {
+      const res = await Network.request({
+        url: '/api/news/toutiao',
+        method: 'GET'
+      })
+      console.log('📰 首页新闻数据:', res.data)
+      setNewsList(res.data || [])
+    } catch (error) {
+      console.error('Failed to load news:', error)
     }
   }
 
@@ -145,6 +170,36 @@ const IndexPage = () => {
             <Input className="flex-1 ml-2 bg-transparent text-base" placeholder="搜索服务..." />
           </View>
         </View>
+
+        {/* 新闻轮播条 */}
+        {newsList.length > 0 && (
+          <View className="bg-gradient-to-r from-emerald-50 to-blue-50 px-4 py-3 border-b border-emerald-100">
+            <View className="flex flex-row items-center">
+              <Newspaper size={16} color="#10B981" />
+              <Text className="block text-xs font-bold text-emerald-600 ml-2 mr-3">热点</Text>
+              <ScrollView scrollX className="flex-1" showScrollbar={false}>
+                <View className="flex flex-row items-center">
+                  {newsList.slice(0, 3).map((news, index) => (
+                    <View
+                      key={index}
+                      className="flex flex-row items-center mr-4"
+                      onClick={() => Taro.navigateTo({
+                        url: `/pages/webview/index?url=${encodeURIComponent(news.url)}`
+                      })}
+                    >
+                      <Text className="block text-sm text-gray-700 line-clamp-1">
+                        {news.title}
+                      </Text>
+                      {index < 2 && newsList.length > 1 && (
+                        <View className="w-1 h-1 bg-gray-300 rounded-full mx-3" />
+                      )}
+                    </View>
+                  ))}
+                </View>
+              </ScrollView>
+            </View>
+          </View>
+        )}
 
         {/* 快捷入口 */}
         <View className="px-4 py-4">
