@@ -4,21 +4,35 @@ import { ExtractJwt, Strategy } from 'passport-jwt'
 import { ConfigService } from '@nestjs/config'
 import { UsersService } from '../users/users.service'
 import { getSupabaseClient } from '../storage/database/supabase-client'
+import { JwtBlacklistService } from './jwt-blacklist.service'
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     private readonly configService: ConfigService,
     private readonly usersService: UsersService,
+    private readonly jwtBlacklistService: JwtBlacklistService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       secretOrKey: configService.get<string>('JWT_SECRET') || 'your-secret-key',
+      passReqToCallback: true,
     })
   }
 
-  async validate(payload: any) {
+  async validate(req: any, payload: any) {
+    // 检查 token 是否在黑名单中
+    const token = ExtractJwt.fromAuthHeaderAsBearerToken()(req)
+
+    if (token) {
+      const isBlacklisted = await this.jwtBlacklistService.isBlacklisted(token)
+
+      if (isBlacklisted) {
+        throw new UnauthorizedException('Token 已失效')
+      }
+    }
+
     const supabase = getSupabaseClient()
     const { data: user, error } = await supabase
       .from('users')

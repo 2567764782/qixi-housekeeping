@@ -15,6 +15,11 @@ interface LoginDto {
   password: string
 }
 
+interface LoginWithCodeDto {
+  phone: string
+  code: string
+}
+
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -121,6 +126,70 @@ export class AuthController {
       return {
         code: error.status || 500,
         msg: error.message || '刷新失败',
+        data: null,
+      }
+    }
+  }
+
+  /**
+   * 验证码登录
+   */
+  @Public()
+  @Post('login-with-code')
+  async loginWithCode(@Body() body: LoginWithCodeDto) {
+    const { phone, code } = body
+
+    if (!phone || !code) {
+      return {
+        code: 400,
+        msg: '手机号和验证码不能为空',
+        data: null,
+      }
+    }
+
+    try {
+      const result = await this.authService.loginWithCode(phone, code)
+      return {
+        code: 200,
+        msg: '登录成功',
+        data: result,
+      }
+    } catch (error: any) {
+      return {
+        code: error.status || 500,
+        msg: error.message || '登录失败',
+        data: null,
+      }
+    }
+  }
+
+  /**
+   * 用户登出
+   */
+  @Post('logout')
+  @UseGuards(JwtAuthGuard)
+  async logout(@GetCurrentUser() user: any, req: any) {
+    try {
+      const token = req.headers?.authorization?.replace('Bearer ', '')
+
+      if (token) {
+        // 计算剩余有效期
+        const decoded = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+        const expiresIn = decoded.exp - Math.floor(Date.now() / 1000)
+
+        // 将 token 加入黑名单
+        await this.authService.addToBlacklist(token, expiresIn)
+      }
+
+      return {
+        code: 200,
+        msg: '登出成功',
+        data: null,
+      }
+    } catch (error: any) {
+      return {
+        code: error.status || 500,
+        msg: error.message || '登出失败',
         data: null,
       }
     }

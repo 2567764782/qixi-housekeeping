@@ -1,5 +1,7 @@
-import { Controller, Get, Query, HttpException, HttpStatus } from '@nestjs/common'
+import { Controller, Get, Query, HttpException, HttpStatus, UseInterceptors } from '@nestjs/common'
 import { UsersService } from './users.service'
+import { FieldPermission } from '../decorators/field-permission.decorator'
+import { FieldPermissionInterceptor } from '../interceptors/field-permission.interceptor'
 
 @Controller('users')
 export class UsersController {
@@ -9,6 +11,8 @@ export class UsersController {
    * 获取随机用户列表（用于轮播图展示）
    */
   @Get('random')
+  @FieldPermission('users', ['id', 'nickname', 'avatar', 'gender', 'city'])
+  @UseInterceptors(FieldPermissionInterceptor)
   async getRandomUsers(@Query('limit') limit?: string) {
     try {
       const userCount = limit ? parseInt(limit, 10) : 10

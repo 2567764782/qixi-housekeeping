@@ -1,14 +1,18 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common'
+import { Injectable, UnauthorizedException, ConflictException, Inject } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import * as bcrypt from 'bcrypt'
 import { ConfigService } from '@nestjs/config'
 import { getSupabaseClient } from '../storage/database/supabase-client'
+import { SmsService } from '../sms/sms.service'
+import { JwtBlacklistService } from './jwt-blacklist.service'
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly smsService: SmsService,
+    private readonly jwtBlacklistService: JwtBlacklistService,
   ) {}
 
   /**
@@ -134,5 +138,52 @@ export class AuthService {
       access_token: token,
       user,
     }
+  }
+
+  /**
+   * 验证码登录
+   */
+  async loginWithCode(phone: string, code: string) {
+    // 验证验证码
+    const isValid = await this.smsService.verifyCode(phone, code)
+
+    if (!isValid) {
+      throw new UnauthorizedException('验证码错误或已过期')
+    }
+
+    const supabase = getSupabaseClient()
+
+    // 查找用户
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('phone', phone)
+      .single()
+
+    if (error || !user) {
+      // 用户不存在，自动创建用户
+      return await this.register(phone, '', `用户${phone.slice(-4)}`)
+    }
+
+    // 生成 JWT token
+    const payload = { sub: user.id, phone: user.phone, role: user.role }
+    const token = this.jwtService.sign(payload)
+
+    return {
+      access_token: token,
+      user: {
+        id: user.id,
+        phone: user.phone,
+        nickname: user.nickname,
+        role: user.role,
+      },
+    }
+  }
+
+  /**
+   * 将 token 加入黑名单
+   */
+  async addToBlacklist(token: string, expiresIn: number): Promise<void> {
+    await this.jwtBlacklistService.addToBlacklist(token, expiresIn)
   }
 }

@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, UseInterceptors, CacheTTL } from '@nestjs/common'
 import { users } from '../storage/database/shared/schema'
 import { eq } from 'drizzle-orm'
 import { getSupabaseClient } from '../storage/database/supabase-client'
+import { CacheInterceptor } from '@nestjs/cache-manager'
 
 @Injectable()
 export class UsersService {
@@ -49,8 +50,10 @@ export class UsersService {
   }
 
   /**
-   * 获取用户统计信息
+   * 获取用户统计信息（缓存 30 分钟）
    */
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(1800)
   async getUserStats() {
     const supabase = getSupabaseClient()
 

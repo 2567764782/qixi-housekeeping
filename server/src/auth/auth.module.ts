@@ -6,10 +6,13 @@ import { AuthService } from './auth.service'
 import { AuthController } from './auth.controller'
 import { JwtStrategy } from './jwt.strategy'
 import { UsersModule } from '../users/users.module'
+import { SmsModule } from '../sms/sms.module'
+import { JwtBlacklistService } from './jwt-blacklist.service'
 
 @Module({
   imports: [
     UsersModule,
+    SmsModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -23,7 +26,7 @@ import { UsersModule } from '../users/users.module'
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
-  exports: [AuthService, JwtStrategy, PassportModule, JwtModule],
+  providers: [AuthService, JwtStrategy, JwtBlacklistService],
+  exports: [AuthService, JwtStrategy, PassportModule, JwtModule, JwtBlacklistService],
 })
 export class AuthModule {}

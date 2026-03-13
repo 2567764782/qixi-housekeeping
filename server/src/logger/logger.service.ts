@@ -1,6 +1,7 @@
 import { Injectable, LoggerService } from '@nestjs/common'
 import * as winston from 'winston'
 import 'winston-daily-rotate-file'
+import { ElasticsearchTransport } from 'winston-elasticsearch'
 
 @Injectable()
 export class Logger implements LoggerService {
@@ -42,6 +43,20 @@ export class Logger implements LoggerService {
         ),
       }),
     ]
+
+    // 添加 Elasticsearch 传输（如果配置了）
+    if (process.env.ELASTICSEARCH_NODE && process.env.ELASTICSEARCH_INDEX) {
+      const esTransport = new ElasticsearchTransport({
+        level: 'info',
+        clientOpts: {
+          node: process.env.ELASTICSEARCH_NODE,
+        },
+        index: process.env.ELASTICSEARCH_INDEX,
+        dataStream: true,
+      })
+
+      transports.push(esTransport)
+    }
 
     this.logger = winston.createLogger({
       level: process.env.LOG_LEVEL || 'info',

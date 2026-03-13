@@ -17,10 +17,12 @@ import { PaymentModule } from './payment/payment.module';
 import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { CacheModule } from './cache/cache.module';
+import { SmsModule } from './sms/sms.module';
 
 @Module({
   imports: [
     CacheModule,
+    SmsModule,
     AuthModule,
     ServicesModule,
     OrdersModule,

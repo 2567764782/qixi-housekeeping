@@ -29,6 +29,16 @@
   margin-bottom: 32rpx;
 }
 
+.input-group-with-button {
+  margin-bottom: 32rpx;
+  display: flex;
+  gap: 16rpx;
+}
+
+.input-field-wrapper {
+  flex: 1;
+}
+
 .input-field {
   width: 100%;
   height: 96rpx;
@@ -37,6 +47,20 @@
   border-radius: 16rpx;
   font-size: 28rpx;
   color: #333;
+}
+
+.code-button {
+  flex-shrink: 0;
+  height: 96rpx;
+  padding: 0 32rpx;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #ffffff;
+  border-radius: 16rpx;
+  font-size: 24rpx;
+}
+
+.code-button[disabled] {
+  background: #ccc;
 }
 
 .auth-button {
