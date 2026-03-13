@@ -2,6 +2,39 @@
 
 这是一个基于 [Taro 4](https://docs.taro.zone/docs/) + [Nest.js](https://nestjs.com/) 的前后端分离项目，由扣子编程 CLI 创建。
 
+## 🚀 快速开始（小白专用）
+
+### 第 1 步：一键配置小程序
+
+```bash
+bash scripts/easy-config.sh
+```
+
+只需要回答 5 个问题，配置自动完成！
+
+**需要准备的：**
+- 微信小程序 AppID（从 https://mp.weixin.qq.com/ 获取）
+- 微信小程序 AppSecret（同上）
+- Supabase URL（从 https://supabase.com/ 获取）
+- Supabase Key（同上）
+
+详细步骤见：[小白配置指南](EASY_CONFIG.md) | [截图说明](docs/CONFIG_STEPS_VISUAL.md) | [配置小抄](CHEATSHEET.md)
+
+### 第 2 步：安装依赖并构建
+
+```bash
+pnpm install
+pnpm build:weapp
+```
+
+### 第 3 步：用微信开发者工具打开
+
+1. 下载微信开发者工具：https://developers.weixin.qq.com/miniprogram/dev/devtools/download.html
+2. 导入项目，选择 `dist` 文件夹
+3. **重要：** 点击右上角「详情」→「本地设置」→勾选「不校验合法域名」
+
+---
+
 ## 技术栈
 
 - **整体框架**: Taro 4.1.9
