@@ -38,7 +38,7 @@ export default defineAppConfig({
   window: {
     backgroundTextStyle: 'light',
     navigationBarBackgroundColor: '#fff',
-    navigationBarTitleText: '保洁服务',
+    navigationBarTitleText: '柒玺家政',
     navigationBarTextStyle: 'black'
   },
   tabBar: {

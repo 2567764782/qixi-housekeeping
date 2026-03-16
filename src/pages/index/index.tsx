@@ -1,6 +1,6 @@
 import Taro, { useLoad } from '@tarojs/taro'
 import { View, Text, ScrollView, Input } from '@tarojs/components'
-import { Sparkles, Wrench, Building2, Sofa, PaintBucket, ChevronRight, Star, Calendar, FileText, User, Search, Newspaper } from 'lucide-react-taro'
+import { Sparkles, Wrench, Building2, Sofa, PaintBucket, ChevronRight, Star, Calendar, FileText, User, Search, Newspaper, Droplets, Phone } from 'lucide-react-taro'
 import { useState } from 'react'
 import { Network } from '@/network'
 import './index.css'
@@ -12,7 +12,7 @@ interface ServiceType {
   description: string
   icon: string
   price: string
-  category: 'cleaning' | 'renovation'
+  category: 'cleaning' | 'washing'
 }
 
 // 新闻类型定义
@@ -38,7 +38,7 @@ const IndexPage = () => {
     loadNews()
   })
 
-  const [selectedCategory, setSelectedCategory] = useState<'all' | 'cleaning' | 'renovation'>('all')
+  const [selectedCategory, setSelectedCategory] = useState<'all' | 'cleaning' | 'washing'>('all')
   const [services, setServices] = useState<ServiceType[]>([])
   const [loading, setLoading] = useState(false)
   const [newsList, setNewsList] = useState<NewsItem[]>([])
@@ -47,7 +47,7 @@ const IndexPage = () => {
   const quickActions: QuickAction[] = [
     { id: '1', name: '服务预约', icon: 'Calendar', color: 'bg-emerald-500' },
     { id: '2', name: '我的订单', icon: 'FileText', color: 'bg-blue-500' },
-    { id: '3', name: '实时新闻', icon: 'Newspaper', color: 'bg-orange-500' },
+    { id: '3', name: '联系师傅', icon: 'Phone', color: 'bg-orange-500' },
     { id: '4', name: '个人中心', icon: 'User', color: 'bg-purple-500' },
   ]
 
@@ -85,50 +85,50 @@ const IndexPage = () => {
       {
         id: '1',
         name: '日常保洁',
-        description: '家庭日常清洁，包括厨房、卫生间、客厅等',
+        description: '全屋除尘、地面清洁、物品整理',
         icon: 'Sparkles',
-        price: '88元/次',
+        price: '50元/小时',
         category: 'cleaning'
       },
       {
         id: '2',
         name: '深度保洁',
-        description: '全面深度清洁，彻底清除污渍和死角',
+        description: '全屋深度清洁、除菌消毒、除螨除味',
         icon: 'Sparkles',
-        price: '258元/次',
+        price: '100元/小时',
         category: 'cleaning'
       },
       {
         id: '3',
-        name: '厨房改造',
-        description: '橱柜更换、水电改造、瓷砖翻新',
-        icon: 'Wrench',
-        price: '起价5000元',
-        category: 'renovation'
+        name: '开荒保洁',
+        description: '新房装修后清洁、除胶除漆、精细擦洗',
+        icon: 'Sparkles',
+        price: '8元/平米',
+        category: 'cleaning'
       },
       {
         id: '4',
-        name: '卫生间改造',
-        description: '卫浴设施更换、防水处理、空间优化',
-        icon: 'Wrench',
-        price: '起价8000元',
-        category: 'renovation'
+        name: '家电清洗',
+        description: '空调、油烟机、洗衣机深度清洗',
+        icon: 'Droplets',
+        price: '80元/台起',
+        category: 'washing'
       },
       {
         id: '5',
-        name: '墙面刷新',
-        description: '墙面修补、重新刷漆、色彩搭配',
-        icon: 'PaintBucket',
-        price: '35元/平米',
-        category: 'renovation'
+        name: '沙发清洗',
+        description: '布艺沙发、真皮沙发深层清洁养护',
+        icon: 'Droplets',
+        price: '200元/座',
+        category: 'washing'
       },
       {
         id: '6',
-        name: '地板更换',
-        description: '地板拆除、新地板铺设、踢脚线处理',
-        icon: 'Building2',
-        price: '120元/平米',
-        category: 'renovation'
+        name: '地毯清洗',
+        description: '专业地毯清洗、除螨杀菌、快速干燥',
+        icon: 'Droplets',
+        price: '15元/平米',
+        category: 'washing'
       }
     ]
     setServices(mockServices)
@@ -190,7 +190,7 @@ const IndexPage = () => {
     const iconMap: Record<string, React.ReactNode> = {
       Calendar: <Calendar size={24} color="#fff" />,
       FileText: <FileText size={24} color="#fff" />,
-      Newspaper: <Newspaper size={24} color="#fff" />,
+      Phone: <Phone size={24} color="#fff" />,
       User: <User size={24} color="#fff" />,
     }
     return iconMap[iconName] || <Sparkles size={24} color="#fff" />
@@ -203,6 +203,11 @@ const IndexPage = () => {
         icon: <Sparkles size={size} color="#fff" />,
         bg: 'bg-emerald-500',
         color: '#10B981'
+      },
+      Droplets: {
+        icon: <Droplets size={size} color="#fff" />,
+        bg: 'bg-blue-500',
+        color: '#3B82F6'
       },
       Wrench: {
         icon: <Wrench size={size} color="#fff" />,
@@ -237,10 +242,23 @@ const IndexPage = () => {
 
   // 处理快捷入口点击
   const handleQuickActionClick = (actionId: string) => {
+    if (actionId === '3') {
+      // 联系师傅 - 拨打客服电话
+      Taro.makePhoneCall({
+        phoneNumber: '400-888-9999', // 客服电话
+        fail: () => {
+          Taro.showToast({
+            title: '拨打失败',
+            icon: 'none'
+          })
+        }
+      })
+      return
+    }
+    
     const pageMap: Record<string, string> = {
       '1': '/pages/booking/index',
       '2': '/pages/orders/index',
-      '3': '/pages/news/index',
       '4': '/pages/profile/index'
     }
     const url = pageMap[actionId]
@@ -352,11 +370,11 @@ const IndexPage = () => {
             </View>
             <View
               className={`flex-1 py-3 rounded-xl text-center font-medium text-sm transition-all ${
-                selectedCategory === 'renovation' ? 'bg-emerald-500 text-white shadow-md' : 'bg-white text-gray-600 border border-gray-200'
+                selectedCategory === 'washing' ? 'bg-blue-500 text-white shadow-md' : 'bg-white text-gray-600 border border-gray-200'
               }`}
-              onClick={() => setSelectedCategory('renovation')}
+              onClick={() => setSelectedCategory('washing')}
             >
-              局部改造
+              清洗服务
             </View>
           </View>
         </View>

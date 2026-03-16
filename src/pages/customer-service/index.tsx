@@ -1,5 +1,5 @@
 import Taro, { useLoad } from '@tarojs/taro'
-import { View, Text, ScrollView, Input, Image } from '@tarojs/components'
+import { View, Text, ScrollView, Input } from '@tarojs/components'
 import { useState, useRef } from 'react'
 import { Network } from '@/network'
 import { Send, Headphones, User, Settings, Check } from 'lucide-react-taro'
@@ -21,7 +21,6 @@ const CustomerServicePage = () => {
   const [connected, setConnected] = useState(false)
   const [sending, setSending] = useState(false)
   const socketRef = useRef<Socket | null>(null)
-  const userInfo = Taro.getStorageSync('userInfo') || { nickname: '用户' }
   const userId = Taro.getStorageSync('userId') || 'guest-' + Date.now()
 
   useLoad(() => {
@@ -74,7 +73,8 @@ const CustomerServicePage = () => {
   // 连接 WebSocket
   const connectWebSocket = () => {
     try {
-      const socketUrl = process.env.PROJECT_DOMAIN || 'http://localhost:3000'
+      // 使用全局注入的 PROJECT_DOMAIN
+      const socketUrl = (window as any).PROJECT_DOMAIN || 'http://localhost:3000'
       
       socketRef.current = io(`${socketUrl}/realtime`, {
         transports: ['websocket'],

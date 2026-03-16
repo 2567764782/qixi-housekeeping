@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { getSupabaseClient } from '../storage/database/supabase-client';
 
-interface Message {
+export interface Message {
   id: string;
   content: string;
   sender: 'user' | 'service';

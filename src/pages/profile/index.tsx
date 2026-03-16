@@ -1,6 +1,6 @@
 import Taro, { useLoad } from '@tarojs/taro'
 import { View, Text, ScrollView } from '@tarojs/components'
-import { User, Phone, MapPin, Settings, FileText, Award, ChevronRight, QrCode, TrendingUp, CreditCard, MessageSquare, Shield, Headphones } from 'lucide-react-taro'
+import { User, MapPin, Settings, FileText, Award, ChevronRight, QrCode, TrendingUp, CreditCard, MessageSquare, Shield, Headphones } from 'lucide-react-taro'
 import './index.css'
 
 const ProfilePage = () => {

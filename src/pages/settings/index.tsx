@@ -24,14 +24,14 @@ const SettingsPage = () => {
       title: '修改昵称',
       editable: true,
       placeholderText: '请输入新昵称',
-      success: (res) => {
+      success: (res: any) => {
         if (res.confirm && res.content) {
           const newUserInfo = { ...userInfo, nickname: res.content }
           Taro.setStorageSync('userInfo', newUserInfo)
           Taro.showToast({ title: '修改成功', icon: 'success' })
         }
       }
-    })
+    } as any)
   }
 
   // 修改密码
@@ -52,7 +52,7 @@ const SettingsPage = () => {
           setNotificationEnabled(false)
           Taro.showToast({ title: '开启失败', icon: 'none' })
         }
-      })
+      } as any)
     } else {
       Taro.showToast({ title: '已关闭通知', icon: 'success' })
     }
