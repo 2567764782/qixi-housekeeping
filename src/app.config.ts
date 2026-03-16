@@ -43,10 +43,10 @@ export default defineAppConfig({
     navigationBarTextStyle: 'black'
   },
   tabBar: {
-    color: '#999999',
-    selectedColor: '#10B981',
+    color: '#B3B3B3',
+    selectedColor: '#F85659',
     backgroundColor: '#ffffff',
-    borderStyle: 'black',
+    borderStyle: 'white',
     list: [
       {
         pagePath: 'pages/index/index',
@@ -57,8 +57,8 @@ export default defineAppConfig({
       {
         pagePath: 'pages/orders/index',
         text: '我的预约',
-        iconPath: './assets/tabbar/calendar.png',
-        selectedIconPath: './assets/tabbar/calendar-active.png',
+        iconPath: './assets/tabbar/file-text.png',
+        selectedIconPath: './assets/tabbar/file-text-active.png',
       },
       {
         pagePath: 'pages/profile/index',

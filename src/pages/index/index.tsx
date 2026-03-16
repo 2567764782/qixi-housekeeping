@@ -1,6 +1,6 @@
 import Taro, { useLoad } from '@tarojs/taro'
 import { View, Text, Swiper, SwiperItem, Image } from '@tarojs/components'
-import { Sparkles, House, Tv, LayoutGrid, ChevronRight, Phone, FileText, User } from 'lucide-react-taro'
+import { Sparkles, House, Tv, LayoutGrid, ChevronRight, Phone, FileText, User, Search } from 'lucide-react-taro'
 import { useState } from 'react'
 import './index.css'
 
@@ -10,9 +10,11 @@ interface ServiceType {
   name: string
   description: string
   price: string
+  unit: string
   duration: string
   icon: string
   features: string[]
+  color: string // 每个服务的专属颜色
 }
 
 // 轮播图类型
@@ -22,57 +24,85 @@ interface BannerItem {
   title: string
 }
 
+// 分类入口类型
+interface CategoryItem {
+  id: string
+  name: string
+  icon: string
+  color: string
+  serviceIds: string[]
+}
+
 const IndexPage = () => {
   useLoad(() => {
     console.log('🏠 首页加载')
   })
 
+  // 服务数据 - 每个服务有专属颜色
   const [services] = useState<ServiceType[]>([
     {
       id: '1',
       name: '日常保洁',
       description: '地面清洁、桌面整理、卫生间清洁、厨房基础清洁、垃圾清理',
-      price: '50元/小时',
+      price: '50',
+      unit: '元/小时',
       duration: '2小时起',
       icon: 'Sparkles',
+      color: '#F85659', // 红色
       features: ['地面清洁', '桌面整理', '卫生间清洁', '厨房基础清洁', '垃圾清理']
     },
     {
       id: '2',
       name: '深度保洁',
       description: '日常保洁 + 玻璃擦拭、厨房重油污清洁、卫生间深度除垢、边角细节清洁',
-      price: '100元/小时',
+      price: '100',
+      unit: '元/小时',
       duration: '4小时起',
       icon: 'Sparkles',
+      color: '#007CFF', // 蓝色
       features: ['日常保洁全部内容', '玻璃擦拭', '厨房重油污清洁', '卫生间深度除垢', '边角细节清洁']
     },
     {
       id: '3',
       name: '新居开荒',
       description: '装修后全面清洁、灰尘清理、玻璃清洗、地面胶渍处理、全屋细节打扫',
-      price: '8元/平米',
+      price: '8',
+      unit: '元/平米',
       duration: '全天',
       icon: 'House',
+      color: '#5DC801', // 绿色
       features: ['装修后全面清洁', '灰尘清理', '玻璃清洗', '地面胶渍处理', '全屋细节打扫']
     },
     {
       id: '4',
       name: '家电清洗',
       description: '空调清洗、油烟机清洗、洗衣机清洗、冰箱清洗',
-      price: '80元/台起',
+      price: '80',
+      unit: '元/台起',
       duration: '1-2小时',
       icon: 'Tv',
+      color: '#F38F00', // 橙色
       features: ['空调清洗', '油烟机清洗', '洗衣机清洗', '冰箱清洗']
     },
     {
       id: '5',
       name: '收纳整理',
       description: '衣柜整理、杂物分类、空间规划、居家物品归位',
-      price: '200元/次',
+      price: '200',
+      unit: '元/次',
       duration: '3小时起',
       icon: 'LayoutGrid',
+      color: '#9B40D8', // 紫色
       features: ['衣柜整理', '杂物分类', '空间规划', '居家物品归位']
     }
+  ])
+
+  // 分类入口数据
+  const [categories] = useState<CategoryItem[]>([
+    { id: 'cleaning', name: '保洁服务', icon: 'Sparkles', color: '#F85659', serviceIds: ['1', '2'] },
+    { id: 'deep', name: '新居开荒', icon: 'House', color: '#5DC801', serviceIds: ['3'] },
+    { id: 'appliance', name: '家电清洗', icon: 'Tv', color: '#F38F00', serviceIds: ['4'] },
+    { id: 'organize', name: '收纳整理', icon: 'LayoutGrid', color: '#9B40D8', serviceIds: ['5'] }
   ])
 
   // 轮播图数据
@@ -83,14 +113,14 @@ const IndexPage = () => {
   ])
 
   // 获取服务图标
-  const getServiceIcon = (iconName: string) => {
+  const getServiceIcon = (iconName: string, color: string = '#fff') => {
     const iconMap: Record<string, React.ReactNode> = {
-      Sparkles: <Sparkles size={28} color="#fff" />,
-      House: <House size={28} color="#fff" />,
-      Tv: <Tv size={28} color="#fff" />,
-      LayoutGrid: <LayoutGrid size={28} color="#fff" />
+      Sparkles: <Sparkles size={24} color={color} />,
+      House: <House size={24} color={color} />,
+      Tv: <Tv size={24} color={color} />,
+      LayoutGrid: <LayoutGrid size={24} color={color} />
     }
-    return iconMap[iconName] || <Sparkles size={28} color="#fff" />
+    return iconMap[iconName] || <Sparkles size={24} color={color} />
   }
 
   // 跳转到服务详情
@@ -126,10 +156,30 @@ const IndexPage = () => {
     })
   }
 
+  // 分类点击
+  const handleCategoryClick = (category: CategoryItem) => {
+    // 跳转到第一个服务
+    if (category.serviceIds.length > 0) {
+      handleServiceClick(services.find(s => s.id === category.serviceIds[0])!)
+    }
+  }
+
   return (
-    <View className="min-h-screen bg-gray-50">
+    <View className="min-h-screen" style={{ backgroundColor: '#f5f5f5' }}>
+      {/* 搜索栏 */}
+      <View className="px-4 pt-4 pb-2">
+        <View 
+          className="flex flex-row items-center bg-white rounded-full px-4 py-3"
+          style={{ border: '1px solid #EDEDED' }}
+          onClick={() => Taro.showToast({ title: '搜索功能开发中', icon: 'none' })}
+        >
+          <Search size={20} color="#B3B3B3" />
+          <Text className="ml-2 text-sm" style={{ color: '#B3B3B3' }}>搜索服务...</Text>
+        </View>
+      </View>
+
       {/* 轮播图 */}
-      <View className="px-4 pt-4">
+      <View className="px-4 py-2">
         <Swiper
           className="h-40 rounded-2xl overflow-hidden"
           indicatorDots
@@ -137,7 +187,7 @@ const IndexPage = () => {
           interval={3000}
           duration={500}
           indicatorColor="rgba(255,255,255,0.5)"
-          indicatorActiveColor="#10B981"
+          indicatorActiveColor="#F85659"
         >
           {banners.map(banner => (
             <SwiperItem key={banner.id}>
@@ -151,45 +201,89 @@ const IndexPage = () => {
         </Swiper>
       </View>
 
-      {/* 快捷入口 */}
+      {/* 分类入口网格 - 参考 design006.com 的分类展示 */}
       <View className="px-4 py-4">
-        <View className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+        <View className="flex flex-row flex-wrap gap-3">
+          {categories.map(category => (
+            <View
+              key={category.id}
+              className="flex-1 min-w-[45%] bg-white rounded-2xl p-4"
+              style={{ border: '1px solid #EDEDED' }}
+              onClick={() => handleCategoryClick(category)}
+            >
+              <View className="flex flex-row items-center">
+                <View 
+                  className="w-10 h-10 rounded-xl flex items-center justify-center"
+                  style={{ backgroundColor: category.color }}
+                >
+                  {getServiceIcon(category.icon)}
+                </View>
+                <Text 
+                  className="ml-3 text-sm font-medium"
+                  style={{ color: '#2E2E30' }}
+                >
+                  {category.name}
+                </Text>
+              </View>
+            </View>
+          ))}
+        </View>
+      </View>
+
+      {/* 快捷入口 */}
+      <View className="px-4 pb-4">
+        <View 
+          className="bg-white rounded-2xl p-4"
+          style={{ border: '1px solid #EDEDED' }}
+        >
           <View className="flex flex-row justify-around">
             <View 
               className="flex flex-col items-center" 
               onClick={() => handleBooking()}
             >
-              <View className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center mb-2">
+              <View 
+                className="w-12 h-12 rounded-xl flex items-center justify-center mb-2"
+                style={{ backgroundColor: '#F85659' }}
+              >
                 <Sparkles size={24} color="#fff" />
               </View>
-              <Text className="block text-sm text-gray-700">立即预约</Text>
+              <Text className="block text-sm" style={{ color: '#2E2E30' }}>立即预约</Text>
             </View>
             <View 
               className="flex flex-col items-center"
               onClick={() => Taro.switchTab({ url: '/pages/orders/index' })}
             >
-              <View className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center mb-2">
+              <View 
+                className="w-12 h-12 rounded-xl flex items-center justify-center mb-2"
+                style={{ backgroundColor: '#007CFF' }}
+              >
                 <FileText size={24} color="#fff" />
               </View>
-              <Text className="block text-sm text-gray-700">我的预约</Text>
+              <Text className="block text-sm" style={{ color: '#2E2E30' }}>我的预约</Text>
             </View>
             <View 
               className="flex flex-col items-center"
               onClick={handleCallService}
             >
-              <View className="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center mb-2">
+              <View 
+                className="w-12 h-12 rounded-xl flex items-center justify-center mb-2"
+                style={{ backgroundColor: '#F38F00' }}
+              >
                 <Phone size={24} color="#fff" />
               </View>
-              <Text className="block text-sm text-gray-700">客服电话</Text>
+              <Text className="block text-sm" style={{ color: '#2E2E30' }}>客服电话</Text>
             </View>
             <View 
               className="flex flex-col items-center"
               onClick={() => Taro.switchTab({ url: '/pages/profile/index' })}
             >
-              <View className="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center mb-2">
+              <View 
+                className="w-12 h-12 rounded-xl flex items-center justify-center mb-2"
+                style={{ backgroundColor: '#9B40D8' }}
+              >
                 <User size={24} color="#fff" />
               </View>
-              <Text className="block text-sm text-gray-700">个人中心</Text>
+              <Text className="block text-sm" style={{ color: '#2E2E30' }}>个人中心</Text>
             </View>
           </View>
         </View>
@@ -198,29 +292,60 @@ const IndexPage = () => {
       {/* 服务列表 */}
       <View className="px-4 pb-4">
         <View className="flex flex-row items-center justify-between mb-3">
-          <Text className="block text-lg font-bold text-gray-800">服务项目</Text>
+          <Text className="block text-lg font-bold" style={{ color: '#2E2E30' }}>热门服务</Text>
         </View>
 
         <View className="flex flex-col gap-3">
           {services.map(service => (
             <View
               key={service.id}
-              className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100"
+              className="bg-white rounded-2xl p-4"
+              style={{ border: '1px solid #EDEDED' }}
               onClick={() => handleServiceClick(service)}
             >
               <View className="flex flex-row items-center">
-                <View className="w-14 h-14 bg-emerald-500 rounded-xl flex items-center justify-center">
+                {/* 服务图标 - 使用专属颜色 */}
+                <View 
+                  className="w-14 h-14 rounded-xl flex items-center justify-center"
+                  style={{ backgroundColor: service.color }}
+                >
                   {getServiceIcon(service.icon)}
                 </View>
                 <View className="ml-3 flex-1">
-                  <Text className="block text-base font-semibold text-gray-800">{service.name}</Text>
-                  <Text className="block text-sm text-gray-500 mt-1 line-clamp-1">{service.description}</Text>
+                  <Text 
+                    className="block text-base font-semibold"
+                    style={{ color: '#2E2E30' }}
+                  >
+                    {service.name}
+                  </Text>
+                  <Text 
+                    className="block text-sm mt-1 line-clamp-1"
+                    style={{ color: '#B3B3B3' }}
+                  >
+                    {service.description}
+                  </Text>
                   <View className="flex flex-row items-center mt-2">
-                    <Text className="text-emerald-500 font-bold">{service.price}</Text>
-                    <Text className="text-gray-400 text-xs ml-2">{service.duration}</Text>
+                    <Text 
+                      className="font-bold"
+                      style={{ color: service.color }}
+                    >
+                      ¥{service.price}
+                    </Text>
+                    <Text 
+                      className="text-xs ml-1"
+                      style={{ color: '#B3B3B3' }}
+                    >
+                      {service.unit}
+                    </Text>
+                    <Text 
+                      className="text-xs ml-2"
+                      style={{ color: '#B3B3B3' }}
+                    >
+                      {service.duration}
+                    </Text>
                   </View>
                 </View>
-                <ChevronRight size={20} color="#9CA3AF" />
+                <ChevronRight size={20} color="#B3B3B3" />
               </View>
             </View>
           ))}
@@ -229,18 +354,37 @@ const IndexPage = () => {
 
       {/* 底部客服信息 */}
       <View className="px-4 pb-6">
-        <View className="bg-emerald-50 rounded-2xl p-4">
+        <View 
+          className="rounded-2xl p-4"
+          style={{ backgroundColor: '#FFF7F7' }}
+        >
           <View className="flex flex-row items-center justify-between">
             <View>
-              <Text className="block text-base font-semibold text-gray-800">需要帮助？</Text>
-              <Text className="block text-sm text-gray-500 mt-1">客服热线：400-888-9999</Text>
-              <Text className="block text-xs text-gray-400 mt-1">服务时间：08:00-22:00</Text>
+              <Text 
+                className="block text-base font-semibold"
+                style={{ color: '#2E2E30' }}
+              >
+                需要帮助？
+              </Text>
+              <Text 
+                className="block text-sm mt-1"
+                style={{ color: '#B3B3B3' }}
+              >
+                客服热线：400-888-9999
+              </Text>
+              <Text 
+                className="block text-xs mt-1"
+                style={{ color: '#B3B3B3' }}
+              >
+                服务时间：08:00-22:00
+              </Text>
             </View>
             <View 
-              className="bg-emerald-500 text-white px-6 py-3 rounded-xl"
+              className="px-6 py-3 rounded-xl"
+              style={{ backgroundColor: '#F85659' }}
               onClick={handleCallService}
             >
-              <Text className="text-sm font-medium">立即咨询</Text>
+              <Text className="text-sm font-medium text-white">立即咨询</Text>
             </View>
           </View>
         </View>
