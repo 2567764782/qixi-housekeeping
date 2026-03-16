@@ -109,6 +109,19 @@ export class RolesController {
   }
 
   /**
+   * 获取所有用户角色关联
+   */
+  @Get('user-roles/all')
+  @Roles('admin')
+  async getAllUserRoles() {
+    const userRoles = await this.rolesService.getAllUserRoles();
+    return {
+      status: 'success',
+      data: userRoles
+    };
+  }
+
+  /**
    * 获取用户的所有角色
    */
   @Get('user/:userId')

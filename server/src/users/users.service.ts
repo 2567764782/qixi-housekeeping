@@ -5,6 +5,25 @@ import { getSupabaseClient } from '../storage/database/supabase-client'
 @Injectable()
 export class UsersService {
   /**
+   * 获取所有用户列表
+   */
+  async getAllUsers(limit: number = 100) {
+    const supabase = getSupabaseClient()
+
+    const { data, error } = await supabase
+      .from('users')
+      .select('id, nickname, phone, gender, city, created_at')
+      .order('created_at', { ascending: false })
+      .limit(limit)
+
+    if (error) {
+      throw new Error(`获取用户列表失败: ${error.message}`)
+    }
+
+    return data || []
+  }
+
+  /**
    * 获取随机用户列表（用于轮播图展示）
    */
   async getRandomUsers(limit: number = 10) {

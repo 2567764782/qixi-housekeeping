@@ -7,6 +7,31 @@ export class RolesService {
   private readonly client = getSupabaseClient();
 
   /**
+   * 获取所有用户角色关联
+   */
+  async getAllUserRoles() {
+    const { data, error } = await this.client
+      .from('user_roles')
+      .select(`
+        user_id,
+        role_id,
+        users!inner (id, nickname, phone),
+        roles!inner (id, name)
+      `);
+
+    if (error) {
+      throw new Error(`Failed to get user roles: ${error.message}`);
+    }
+
+    return (data || []).map((item: any) => ({
+      userId: item.user_id,
+      roleId: item.role_id,
+      userName: item.users?.nickname || item.users?.phone || 'Unknown',
+      roleName: item.roles?.name || 'Unknown'
+    }));
+  }
+
+  /**
    * 获取用户的所有角色
    */
   async getUserRoles(userId: number) {

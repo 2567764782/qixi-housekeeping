@@ -8,6 +8,43 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   /**
+   * 获取所有用户列表
+   */
+  @Get()
+  async getAllUsers(@Query('limit') limit?: string) {
+    try {
+      const userCount = limit ? parseInt(limit, 10) : 100
+      if (Number.isNaN(userCount) || userCount < 1 || userCount > 500) {
+        throw new HttpException(
+          { code: 400, message: 'limit 参数必须在 1-500 之间', data: null },
+          HttpStatus.BAD_REQUEST
+        )
+      }
+
+      const users = await this.usersService.getAllUsers(userCount)
+
+      return {
+        code: 200,
+        message: '获取成功',
+        data: users,
+      }
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error
+      }
+      const isProduction = process.env.NODE_ENV === 'production'
+      throw new HttpException(
+        {
+          code: 500,
+          message: isProduction ? '获取用户列表失败，请稍后重试' : (error.message || '获取用户列表失败'),
+          data: null,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      )
+    }
+  }
+
+  /**
    * 获取随机用户列表（用于轮播图展示）
    */
   @Get('random')
