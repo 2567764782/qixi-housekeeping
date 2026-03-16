@@ -60,66 +60,78 @@ const IndexPage = () => {
         method: 'GET'
       })
       console.log('🔧 服务数据:', res.data)
-      // 后端返回的是 { services: [...], total, page, limit, totalPages }
-      const servicesData = res.data?.services || res.data || []
-      setServices(servicesData)
+      
+      // 检查响应是否成功（状态码 200 且有数据）
+      if (res.statusCode === 200 && res.data) {
+        // 后端返回的是 { services: [...], total, page, limit, totalPages }
+        const servicesData = res.data?.services || res.data || []
+        setServices(servicesData)
+      } else {
+        // 后端返回错误状态码，使用模拟数据
+        console.warn('后端返回错误状态码，使用模拟数据')
+        useMockServices()
+      }
     } catch (error) {
       console.error('Failed to load services, using mock data:', error)
-      // 如果后端不可用，使用模拟数据
-      const mockServices: ServiceType[] = [
-        {
-          id: '1',
-          name: '日常保洁',
-          description: '家庭日常清洁，包括厨房、卫生间、客厅等',
-          icon: 'Sparkles',
-          price: '88元/次',
-          category: 'cleaning'
-        },
-        {
-          id: '2',
-          name: '深度保洁',
-          description: '全面深度清洁，彻底清除污渍和死角',
-          icon: 'Sparkles',
-          price: '258元/次',
-          category: 'cleaning'
-        },
-        {
-          id: '3',
-          name: '厨房改造',
-          description: '橱柜更换、水电改造、瓷砖翻新',
-          icon: 'Wrench',
-          price: '起价5000元',
-          category: 'renovation'
-        },
-        {
-          id: '4',
-          name: '卫生间改造',
-          description: '卫浴设施更换、防水处理、空间优化',
-          icon: 'Wrench',
-          price: '起价8000元',
-          category: 'renovation'
-        },
-        {
-          id: '5',
-          name: '墙面刷新',
-          description: '墙面修补、重新刷漆、色彩搭配',
-          icon: 'PaintBucket',
-          price: '35元/平米',
-          category: 'renovation'
-        },
-        {
-          id: '6',
-          name: '地板更换',
-          description: '地板拆除、新地板铺设、踢脚线处理',
-          icon: 'Building2',
-          price: '120元/平米',
-          category: 'renovation'
-        }
-      ]
-      setServices(mockServices)
+      useMockServices()
     } finally {
       setLoading(false)
     }
+  }
+
+  // 使用模拟服务数据
+  const useMockServices = () => {
+    const mockServices: ServiceType[] = [
+      {
+        id: '1',
+        name: '日常保洁',
+        description: '家庭日常清洁，包括厨房、卫生间、客厅等',
+        icon: 'Sparkles',
+        price: '88元/次',
+        category: 'cleaning'
+      },
+      {
+        id: '2',
+        name: '深度保洁',
+        description: '全面深度清洁，彻底清除污渍和死角',
+        icon: 'Sparkles',
+        price: '258元/次',
+        category: 'cleaning'
+      },
+      {
+        id: '3',
+        name: '厨房改造',
+        description: '橱柜更换、水电改造、瓷砖翻新',
+        icon: 'Wrench',
+        price: '起价5000元',
+        category: 'renovation'
+      },
+      {
+        id: '4',
+        name: '卫生间改造',
+        description: '卫浴设施更换、防水处理、空间优化',
+        icon: 'Wrench',
+        price: '起价8000元',
+        category: 'renovation'
+      },
+      {
+        id: '5',
+        name: '墙面刷新',
+        description: '墙面修补、重新刷漆、色彩搭配',
+        icon: 'PaintBucket',
+        price: '35元/平米',
+        category: 'renovation'
+      },
+      {
+        id: '6',
+        name: '地板更换',
+        description: '地板拆除、新地板铺设、踢脚线处理',
+        icon: 'Building2',
+        price: '120元/平米',
+        category: 'renovation'
+      }
+    ]
+    setServices(mockServices)
   }
 
   // 加载新闻列表
@@ -130,35 +142,47 @@ const IndexPage = () => {
         method: 'GET'
       })
       console.log('📰 首页新闻数据:', res.data)
-      setNewsList(res.data || [])
+      
+      // 检查响应是否成功（状态码 200 且有数据）
+      if (res.statusCode === 200 && res.data) {
+        setNewsList(res.data || [])
+      } else {
+        // 后端返回错误状态码，使用模拟数据
+        console.warn('后端返回错误状态码，使用模拟新闻数据')
+        useMockNews()
+      }
     } catch (error) {
       console.error('Failed to load news, using mock data:', error)
-      // 如果后端不可用，使用模拟数据
-      const mockNews = [
-        {
-          title: '财经新闻：最新市场动态分析',
-          url: 'https://example.com/news/finance/1',
-          source: '头条号',
-          publish_time: new Date().toISOString(),
-          description: '这是一条关于财经领域的最新报道...'
-        },
-        {
-          title: '娱乐热点：明星动态与影视资讯',
-          url: 'https://example.com/news/entertainment/2',
-          source: '头条号',
-          publish_time: new Date(Date.now() - 3600000).toISOString(),
-          description: '娱乐圈最新动态...'
-        },
-        {
-          title: '家庭生活：家政服务小技巧',
-          url: 'https://example.com/news/family/3',
-          source: '头条号',
-          publish_time: new Date(Date.now() - 7200000).toISOString(),
-          description: '实用的家庭清洁技巧...'
-        }
-      ]
-      setNewsList(mockNews)
+      useMockNews()
     }
+  }
+
+  // 使用模拟新闻数据
+  const useMockNews = () => {
+    const mockNews = [
+      {
+        title: '财经新闻：最新市场动态分析',
+        url: 'https://example.com/news/finance/1',
+        source: '头条号',
+        publish_time: new Date().toISOString(),
+        description: '这是一条关于财经领域的最新报道...'
+      },
+      {
+        title: '娱乐热点：明星动态与影视资讯',
+        url: 'https://example.com/news/entertainment/2',
+        source: '头条号',
+        publish_time: new Date(Date.now() - 3600000).toISOString(),
+        description: '娱乐圈最新动态...'
+      },
+      {
+        title: '家庭生活：家政服务小技巧',
+        url: 'https://example.com/news/family/3',
+        source: '头条号',
+        publish_time: new Date(Date.now() - 7200000).toISOString(),
+        description: '实用的家庭清洁技巧...'
+      }
+    ]
+    setNewsList(mockNews)
   }
 
   // 获取快捷入口图标
