@@ -1,7 +1,6 @@
-import Taro from '@tarojs/taro'
+import Taro, { useLoad } from '@tarojs/taro'
 import { View, Text, ScrollView } from '@tarojs/components'
 import { Clock, ExternalLink, ArrowLeft } from 'lucide-react-taro'
-import { useLoad } from '@tarojs/taro'
 import { useState } from 'react'
 import './index.css'
 
@@ -40,7 +39,7 @@ const NewsDetailPage = () => {
     try {
       const date = new Date(dateStr)
       // 检查日期是否有效
-      if (isNaN(date.getTime())) {
+      if (Number.isNaN(date.getTime())) {
         return '刚刚'
       }
       

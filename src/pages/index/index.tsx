@@ -69,18 +69,18 @@ const IndexPage = () => {
       } else {
         // 后端返回错误状态码，使用模拟数据
         console.warn('后端返回错误状态码，使用模拟数据')
-        useMockServices()
+        getMockServices()
       }
     } catch (error) {
       console.error('Failed to load services, using mock data:', error)
-      useMockServices()
+      getMockServices()
     } finally {
       setLoading(false)
     }
   }
 
   // 使用模拟服务数据
-  const useMockServices = () => {
+  const getMockServices = () => {
     const mockServices: ServiceType[] = [
       {
         id: '1',
@@ -149,16 +149,16 @@ const IndexPage = () => {
       } else {
         // 后端返回错误状态码，使用模拟数据
         console.warn('后端返回错误状态码，使用模拟新闻数据')
-        useMockNews()
+        getMockNews()
       }
     } catch (error) {
       console.error('Failed to load news, using mock data:', error)
-      useMockNews()
+      getMockNews()
     }
   }
 
   // 使用模拟新闻数据
-  const useMockNews = () => {
+  const getMockNews = () => {
     const mockNews = [
       {
         title: '财经新闻：最新市场动态分析',

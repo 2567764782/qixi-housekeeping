@@ -36,12 +36,101 @@ const ServiceDetailPage = () => {
         url: `/api/services/${serviceId}`,
         method: 'GET'
       })
-      setService(res.data)
+      
+      // 检查响应是否成功
+      if (res.statusCode === 200 && res.data) {
+        setService(res.data)
+      } else {
+        // 后端不可用，使用模拟数据
+        console.warn('后端返回错误，使用模拟服务详情')
+        getMockServiceDetail(serviceId)
+      }
     } catch (error) {
-      console.error('Failed to load service detail:', error)
+      console.error('Failed to load service detail, using mock data:', error)
+      getMockServiceDetail(serviceId)
     } finally {
       setLoading(false)
     }
+  }
+
+  // 使用模拟服务详情数据
+  const getMockServiceDetail = (serviceId: string) => {
+    const mockServices: Record<string, ServiceDetail> = {
+      '1': {
+        id: '1',
+        name: '日常保洁',
+        description: '家庭日常清洁服务，包括厨房、卫生间、客厅、卧室等区域的清洁整理。专业保洁员上门服务，让您享受整洁舒适的家居环境。',
+        category: 'cleaning',
+        price: '88元/次',
+        icon: 'Sparkles',
+        features: ['专业清洁工具', '环保清洁剂', '2小时服务', '满意为止'],
+        duration: '约2小时',
+        rating: 4.9,
+        reviews: 1256
+      },
+      '2': {
+        id: '2',
+        name: '深度保洁',
+        description: '全面深度清洁服务，彻底清除顽固污渍和卫生死角。适合长期未清洁或需要深度清洁的家庭，让您的家焕然一新。',
+        category: 'cleaning',
+        price: '258元/次',
+        icon: 'Sparkles',
+        features: ['深度清洁', '死角清理', '消毒杀菌', '4小时服务'],
+        duration: '约4小时',
+        rating: 4.8,
+        reviews: 892
+      },
+      '3': {
+        id: '3',
+        name: '厨房改造',
+        description: '专业厨房改造服务，包括橱柜更换、水电改造、瓷砖翻新等。根据您的需求定制改造方案，打造理想的烹饪空间。',
+        category: 'renovation',
+        price: '起价5000元',
+        icon: 'Wrench',
+        features: ['免费测量', '方案设计', '专业施工', '质保2年'],
+        duration: '7-15天',
+        rating: 4.7,
+        reviews: 356
+      },
+      '4': {
+        id: '4',
+        name: '卫生间改造',
+        description: '卫生间整体改造服务，包括卫浴设施更换、防水处理、空间优化等。解决漏水、发霉等问题，提升使用体验。',
+        category: 'renovation',
+        price: '起价8000元',
+        icon: 'Wrench',
+        features: ['防水质保', '品牌卫浴', '空间优化', '专业施工'],
+        duration: '5-10天',
+        rating: 4.8,
+        reviews: 428
+      },
+      '5': {
+        id: '5',
+        name: '墙面刷新',
+        description: '墙面翻新服务，包括墙面修补、重新刷漆、色彩搭配建议。让您的墙壁焕发新生，改善居住环境。',
+        category: 'renovation',
+        price: '35元/平米',
+        icon: 'PaintBucket',
+        features: ['环保漆料', '色彩搭配', '修补裂缝', '清理现场'],
+        duration: '2-3天',
+        rating: 4.9,
+        reviews: 567
+      },
+      '6': {
+        id: '6',
+        name: '地板更换',
+        description: '地板更换服务，包括旧地板拆除、新地板铺设、踢脚线处理。多种材质可选，专业安装确保质量。',
+        category: 'renovation',
+        price: '120元/平米',
+        icon: 'Building2',
+        features: ['多种材质', '专业拆除', '精准铺设', '质保3年'],
+        duration: '3-5天',
+        rating: 4.6,
+        reviews: 289
+      }
+    }
+    
+    setService(mockServices[serviceId] || mockServices['1'])
   }
 
   const getIconComponent = (iconName: string, size: number = 40) => {

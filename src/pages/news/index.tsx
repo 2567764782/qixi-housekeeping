@@ -38,18 +38,18 @@ const NewsPage = () => {
       } else {
         // 后端返回错误状态码，使用模拟数据
         console.warn('后端返回错误状态码，使用模拟新闻数据')
-        useMockNews()
+        getMockNews()
       }
     } catch (error) {
       console.error('Failed to load news, using mock data:', error)
-      useMockNews()
+      getMockNews()
     } finally {
       setLoading(false)
     }
   }
 
   // 使用模拟新闻数据
-  const useMockNews = () => {
+  const getMockNews = () => {
     const mockNews = [
       {
         title: '财经新闻：最新市场动态分析',
