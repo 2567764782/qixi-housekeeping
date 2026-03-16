@@ -59,9 +59,64 @@ const IndexPage = () => {
         url: '/api/services',
         method: 'GET'
       })
-      setServices(res.data || [])
+      console.log('🔧 服务数据:', res.data)
+      // 后端返回的是 { services: [...], total, page, limit, totalPages }
+      const servicesData = res.data?.services || res.data || []
+      setServices(servicesData)
     } catch (error) {
-      console.error('Failed to load services:', error)
+      console.error('Failed to load services, using mock data:', error)
+      // 如果后端不可用，使用模拟数据
+      const mockServices: ServiceType[] = [
+        {
+          id: '1',
+          name: '日常保洁',
+          description: '家庭日常清洁，包括厨房、卫生间、客厅等',
+          icon: 'Sparkles',
+          price: '88元/次',
+          category: 'cleaning'
+        },
+        {
+          id: '2',
+          name: '深度保洁',
+          description: '全面深度清洁，彻底清除污渍和死角',
+          icon: 'Sparkles',
+          price: '258元/次',
+          category: 'cleaning'
+        },
+        {
+          id: '3',
+          name: '厨房改造',
+          description: '橱柜更换、水电改造、瓷砖翻新',
+          icon: 'Wrench',
+          price: '起价5000元',
+          category: 'renovation'
+        },
+        {
+          id: '4',
+          name: '卫生间改造',
+          description: '卫浴设施更换、防水处理、空间优化',
+          icon: 'Wrench',
+          price: '起价8000元',
+          category: 'renovation'
+        },
+        {
+          id: '5',
+          name: '墙面刷新',
+          description: '墙面修补、重新刷漆、色彩搭配',
+          icon: 'PaintBucket',
+          price: '35元/平米',
+          category: 'renovation'
+        },
+        {
+          id: '6',
+          name: '地板更换',
+          description: '地板拆除、新地板铺设、踢脚线处理',
+          icon: 'Building2',
+          price: '120元/平米',
+          category: 'renovation'
+        }
+      ]
+      setServices(mockServices)
     } finally {
       setLoading(false)
     }
