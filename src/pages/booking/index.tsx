@@ -19,7 +19,7 @@ const BookingPage = () => {
 
   useLoad(() => {
     const { name, id } = router.params
-    if (name) setServiceName(name)
+    if (name) setServiceName(decodeURIComponent(name))
     if (id) setServiceId(id)
     // 设置默认日期为今天
     const today = new Date()
