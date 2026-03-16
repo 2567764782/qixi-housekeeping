@@ -48,15 +48,15 @@ export default defineAppConfig({
     list: [
       {
         pagePath: 'pages/index/index',
-        text: '服务大厅',
-        iconPath: './assets/tabbar/home.png',
-        selectedIconPath: './assets/tabbar/home-active.png',
+        text: '首页',
+        iconPath: './assets/tabbar/house.png',
+        selectedIconPath: './assets/tabbar/house-active.png',
       },
       {
-        pagePath: 'pages/orders/index',
-        text: '订单',
-        iconPath: './assets/tabbar/clipboard-list.png',
-        selectedIconPath: './assets/tabbar/clipboard-list-active.png',
+        pagePath: 'pages/booking/index',
+        text: '服务预约',
+        iconPath: './assets/tabbar/calendar.png',
+        selectedIconPath: './assets/tabbar/calendar-active.png',
       },
       {
         pagePath: 'pages/profile/index',

@@ -2,13 +2,26 @@ import Taro, { useLoad, useRouter } from '@tarojs/taro'
 import { View, Text, ScrollView, Input, Textarea, Picker } from '@tarojs/components'
 import { useState } from 'react'
 import { Network } from '@/network'
-import { Calendar, MapPin, MessageSquare, Check, Phone, Lock } from 'lucide-react-taro'
+import { Calendar, MapPin, MessageSquare, Check, Sparkles, ChevronRight, Star } from 'lucide-react-taro'
 import './index.css'
+
+// 服务类型定义
+interface ServiceType {
+  id: string
+  name: string
+  description: string
+  icon: string
+  price: string
+  category: 'cleaning' | 'renovation'
+}
 
 const BookingPage = () => {
   const router = useRouter()
   const [serviceName, setServiceName] = useState('')
   const [serviceId, setServiceId] = useState('')
+  const [showServiceList, setShowServiceList] = useState(false)
+  const [services, setServices] = useState<ServiceType[]>([])
+  const [loading, setLoading] = useState(false)
   
   // 第一步：联系信息
   const [address, setAddress] = useState('')
@@ -30,8 +43,15 @@ const BookingPage = () => {
 
   useLoad(() => {
     const { name, id } = router.params
-    if (name) setServiceName(decodeURIComponent(name))
-    if (id) setServiceId(id)
+    
+    // 如果没有服务参数，加载服务列表
+    if (!name) {
+      setShowServiceList(true)
+      loadServices()
+    } else {
+      setServiceName(decodeURIComponent(name))
+      if (id) setServiceId(id)
+    }
     
     // 检查是否已登录
     const token = Taro.getStorageSync('token')
@@ -48,6 +68,75 @@ const BookingPage = () => {
       setDateSelected(true)
     }
   })
+
+  // 加载服务列表
+  const loadServices = async () => {
+    try {
+      setLoading(true)
+      const res = await Network.request({
+        url: '/api/services',
+        method: 'GET'
+      })
+      
+      if (res.statusCode === 200 && res.data) {
+        const servicesData = res.data?.services || res.data || []
+        setServices(servicesData)
+      } else {
+        getMockServices()
+      }
+    } catch (error) {
+      console.error('Failed to load services:', error)
+      getMockServices()
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // 使用模拟服务数据
+  const getMockServices = () => {
+    const mockServices: ServiceType[] = [
+      {
+        id: '1',
+        name: '日常保洁',
+        description: '家庭日常清洁，包括厨房、卫生间、客厅等',
+        icon: 'Sparkles',
+        price: '88元/次',
+        category: 'cleaning'
+      },
+      {
+        id: '2',
+        name: '深度保洁',
+        description: '全面深度清洁，彻底清除污渍和死角',
+        icon: 'Sparkles',
+        price: '258元/次',
+        category: 'cleaning'
+      },
+      {
+        id: '3',
+        name: '厨房改造',
+        description: '橱柜更换、水电改造、瓷砖翻新',
+        icon: 'Sparkles',
+        price: '起价5000元',
+        category: 'renovation'
+      },
+      {
+        id: '4',
+        name: '卫生间改造',
+        description: '卫浴设施更换、防水处理、空间优化',
+        icon: 'Sparkles',
+        price: '起价8000元',
+        category: 'renovation'
+      }
+    ]
+    setServices(mockServices)
+  }
+
+  // 选择服务
+  const handleSelectService = (service: ServiceType) => {
+    setServiceName(service.name)
+    setServiceId(service.id)
+    setShowServiceList(false)
+  }
 
   // 时间选项
   const timeOptions = [
@@ -223,42 +312,93 @@ const BookingPage = () => {
 
   return (
     <View className="flex flex-col h-full bg-gray-50">
-      <ScrollView className="flex-1" scrollY>
-        {/* 服务信息卡片 */}
-        <View className="relative overflow-hidden bg-gradient-to-br from-emerald-600 via-emerald-500 to-teal-500 p-6 pt-8">
-          <View className="absolute top-[-40px] right-[-40px] w-32 h-32 bg-white/10 rounded-full blur-3xl" />
-          <View className="absolute bottom-[-20px] left-[-20px] w-24 h-24 bg-white/10 rounded-full blur-2xl" />
-
-          <View className="relative">
-            <View className="flex flex-row items-center mb-3">
-              <View className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mr-3">
-                <Check size={20} color="#fff" />
-              </View>
-              <Text className="block text-sm text-emerald-100 font-medium">预约服务</Text>
-            </View>
-            <Text className="block text-2xl font-bold text-white leading-tight">
-              {serviceName}
-            </Text>
+      {/* 服务选择界面 */}
+      {showServiceList ? (
+        <ScrollView className="flex-1" scrollY>
+          <View className="bg-gradient-to-br from-emerald-600 via-emerald-500 to-teal-500 p-6 pt-8">
+            <View className="absolute top-[-40px] right-[-40px] w-32 h-32 bg-white/10 rounded-full blur-3xl" />
+            <Text className="block text-2xl font-bold text-white leading-tight">选择服务</Text>
+            <Text className="block text-sm text-emerald-100 mt-2">请选择您需要的服务类型</Text>
           </View>
-        </View>
 
-        <View className="px-4 py-6 space-y-4">
-          {/* 第一步：联系信息 */}
-          <View
-            className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-sm border border-gray-100 p-6"
-            style={{
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02)'
-            }}
-          >
-            <View className="flex flex-row items-center mb-5">
-              <View className="w-11 h-11 bg-emerald-100 rounded-2xl flex items-center justify-center mr-3">
-                <MapPin size={22} color="#10B981" />
+          <View className="px-4 py-6">
+            {loading ? (
+              <View className="flex flex-col items-center justify-center py-12">
+                <Text className="block text-sm text-gray-500">加载中...</Text>
               </View>
-              <Text className="block text-lg font-bold text-gray-800">联系信息</Text>
+            ) : (
+              <View className="space-y-3">
+                {services.map((service) => (
+                  <View
+                    key={service.id}
+                    className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm flex flex-row items-center"
+                    onClick={() => handleSelectService(service)}
+                  >
+                    <View className="w-16 h-16 bg-emerald-500 rounded-2xl flex items-center justify-center mr-4 shadow-sm">
+                      <Sparkles size={32} color="#fff" />
+                    </View>
+                    <View className="flex-1">
+                      <Text className="block text-base font-bold text-gray-800 mb-1">
+                        {service.name}
+                      </Text>
+                      <Text className="block text-sm text-gray-500 mb-2 line-clamp-1">
+                        {service.description}
+                      </Text>
+                      <View className="flex flex-row items-center">
+                        <Text className="block text-sm font-bold text-emerald-600">
+                          {service.price}
+                        </Text>
+                        <View className="flex flex-row items-center ml-3">
+                          <Star size={12} color="#F59E0B" />
+                          <Text className="block text-xs text-gray-500 ml-1">4.9</Text>
+                        </View>
+                      </View>
+                    </View>
+                    <ChevronRight size={20} color="#D1D5DB" />
+                  </View>
+                ))}
+              </View>
+            )}
+          </View>
+        </ScrollView>
+      ) : (
+        <>
+          <ScrollView className="flex-1" scrollY>
+            {/* 服务信息卡片 */}
+            <View className="relative overflow-hidden bg-gradient-to-br from-emerald-600 via-emerald-500 to-teal-500 p-6 pt-8">
+              <View className="absolute top-[-40px] right-[-40px] w-32 h-32 bg-white/10 rounded-full blur-3xl" />
+              <View className="absolute bottom-[-20px] left-[-20px] w-24 h-24 bg-white/10 rounded-full blur-2xl" />
+
+              <View className="relative">
+                <View className="flex flex-row items-center mb-3">
+                  <View className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mr-3">
+                    <Check size={20} color="#fff" />
+                  </View>
+                  <Text className="block text-sm text-emerald-100 font-medium">预约服务</Text>
+                </View>
+                <Text className="block text-2xl font-bold text-white leading-tight">
+                  {serviceName}
+                </Text>
+              </View>
             </View>
 
-            <View className="space-y-4">
-              <View>
+            <View className="px-4 py-6 space-y-4">
+              {/* 第一步：联系信息 */}
+              <View
+                className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-sm border border-gray-100 p-6"
+                style={{
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02)'
+                }}
+              >
+                <View className="flex flex-row items-center mb-5">
+                  <View className="w-11 h-11 bg-emerald-100 rounded-2xl flex items-center justify-center mr-3">
+                    <MapPin size={22} color="#10B981" />
+                  </View>
+                  <Text className="block text-lg font-bold text-gray-800">联系信息</Text>
+                </View>
+
+                <View className="space-y-4">
+                  <View>
                 <Text className="block text-sm text-gray-500 mb-2.5 font-medium">服务地址</Text>
                 <View
                   className="bg-gray-50 rounded-2xl px-4 py-3.5 border border-gray-100"
@@ -490,6 +630,8 @@ const BookingPage = () => {
           )}
         </View>
       </View>
+        </>
+      )}
     </View>
   )
 }
