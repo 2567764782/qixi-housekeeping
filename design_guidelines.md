@@ -1,230 +1,150 @@
-# 保洁和局部改造小程序设计指南
+# 柒玺家政小程序设计指南
 
 ## 品牌定位
 
-- **应用定位**：生活服务类小程序，提供保洁服务和局部改造服务
-- **目标用户**：需要家庭服务的用户，注重便捷、专业、可靠
-- **设计风格**：温暖、专业、便捷、值得信赖
-- **核心价值**：快速预约、专业服务、透明价格
+- **应用名称**：柒玺家政
+- **应用类型**：生活服务类小程序
+- **设计风格**：简洁、专业、可信赖
+- **目标用户**：需要家政服务的家庭用户
+- **核心价值**：专业、便捷、透明
 
 ## 配色方案
 
-### 主色系（绿/橙暖色）
-- **主色调**：`#10B981` (emerald-500) - 代表清洁、健康、可靠
-- **辅助色**：`#F59E0B` (amber-500) - 代表活力、服务、温暖
-- **强调色**：`#3B82F6` (blue-500) - 用于操作按钮、链接
+### 主色板（绿色系 - 代表专业与信任）
+
+| 用途 | Tailwind 类名 | 颜色值 | 说明 |
+|------|--------------|--------|------|
+| 主色 | `bg-emerald-500` | #10B981 | 品牌主色，用于主按钮、重点强调 |
+| 主色浅 | `bg-emerald-50` | #ECFDF5 | 背景色、卡片背景 |
+| 主色深 | `bg-emerald-600` | #059669 | 按钮按下态 |
 
 ### 中性色
-- **主背景**：`#F9FAFB` (gray-50)
-- **卡片背景**：`#FFFFFF` (white)
-- **边框色**：`#E5E7EB` (gray-200)
-- **分割线**：`#F3F4F6` (gray-100)
+
+| 用途 | Tailwind 类名 | 颜色值 | 说明 |
+|------|--------------|--------|------|
+| 标题文字 | `text-gray-800` | #1F2937 | 页面标题 |
+| 正文文字 | `text-gray-600` | #4B5563 | 正文内容 |
+| 次要文字 | `text-gray-400` | #9CA3AF | 描述、提示 |
+| 边框 | `border-gray-100` | #F3F4F6 | 卡片边框 |
+| 分割线 | `border-gray-200` | #E5E7EB | 分割线 |
 
 ### 语义色
-- **成功**：`#10B981` (emerald-500)
-- **警告**：`#F59E0B` (amber-500)
-- **错误**：`#EF4444` (red-500)
-- **信息**：`#3B82F6` (blue-500)
 
-## Tailwind 类名映射
-
-```tsx
-// 主色
-className="bg-emerald-500 text-white"
-className="text-emerald-500"
-className="border-emerald-500"
-
-// 辅助色
-className="bg-amber-500 text-white"
-className="text-amber-500"
-
-// 强调色
-className="bg-blue-500 text-white"
-
-// 背景
-className="bg-gray-50"
-className="bg-white"
-
-// 边框
-className="border border-gray-200"
-className="border-gray-100"
-```
+| 用途 | Tailwind 类名 | 颜色值 | 说明 |
+|------|--------------|--------|------|
+| 成功 | `bg-green-500` | #22C55E | 完成状态 |
+| 警告 | `bg-orange-500` | #F97316 | 进行中状态 |
+| 错误 | `bg-red-500` | #EF4444 | 取消状态 |
+| 信息 | `bg-blue-500` | #3B82F6 | 链接、提示 |
 
 ## 字体规范
 
-| 层级 | 字体大小 | 字重 | 用途 |
-|------|---------|------|------|
-| H1 | `text-2xl` | `font-bold` | 页面标题 |
-| H2 | `text-xl` | `font-semibold` | 卡片标题 |
-| H3 | `text-lg` | `font-medium` | 列表标题 |
-| Body | `text-base` | `font-normal` | 正文内容 |
-| Small | `text-sm` | `font-normal` | 辅助文字 |
-| Caption | `text-xs` | `font-normal` | 提示文字 |
+| 层级 | Tailwind 类名 | 字号 | 用途 |
+|------|--------------|------|------|
+| H1 | `text-xl font-bold` | 20px | 页面标题 |
+| H2 | `text-lg font-bold` | 18px | 模块标题 |
+| H3 | `text-base font-semibold` | 16px | 卡片标题 |
+| Body | `text-sm` | 14px | 正文内容 |
+| Caption | `text-xs` | 12px | 辅助说明 |
 
 ## 间距系统
 
-| 类名 | 用途 |
-|------|------|
-| `p-4` | 页面内边距 |
-| `px-4` | 左右内边距 |
-| `py-4` | 上下内边距 |
-| `mb-4` | 元素下间距 |
-| `gap-4` | Flex/Grid 间距 |
-| `gap-2` | 小间距 |
+| 用途 | Tailwind 类名 | 数值 |
+|------|--------------|------|
+| 页面边距 | `px-4` | 16px |
+| 卡片内边距 | `p-4` | 16px |
+| 组件间距 | `gap-3` | 12px |
+| 列表项间距 | `mb-4` | 16px |
 
 ## 组件规范
 
-### 按钮
+### 主按钮
 
 ```tsx
-// 主按钮
-<View className="w-full">
-  <Button className="w-full bg-emerald-500 text-white rounded-lg py-3">
-    立即预约
-  </Button>
-</View>
-
-// 次按钮
-<View className="w-full">
-  <Button className="w-full bg-white text-emerald-500 border border-emerald-500 rounded-lg py-3">
-    查看详情
-  </Button>
-</View>
-
-// 禁用态
-<Button className="w-full bg-gray-200 text-gray-400 rounded-lg py-3" disabled>
-  不可用
-</Button>
-```
-
-### 卡片
-
-```tsx
-<View className="bg-white rounded-xl shadow-sm p-4 mb-4">
-  <Text className="block text-lg font-semibold mb-2">标题</Text>
-  <Text className="block text-sm text-gray-500">描述文字</Text>
+<View className="w-full bg-emerald-500 text-white text-center py-3 rounded-xl font-medium">
+  立即预约
 </View>
 ```
 
-### 输入框（跨端兼容）
+### 次按钮
 
 ```tsx
-<View className="bg-gray-50 rounded-xl px-4 py-3 mb-4">
-  <Input className="w-full bg-transparent" placeholder="请输入内容" />
+<View className="w-full bg-white border border-emerald-500 text-emerald-500 text-center py-3 rounded-xl font-medium">
+  取消
 </View>
 ```
 
-### 文本域（跨端兼容）
+### 服务卡片
 
 ```tsx
-<View className="bg-gray-50 rounded-2xl p-4 mb-4">
-  <Textarea
-    style={{ width: '100%', minHeight: '100px', backgroundColor: 'transparent' }}
-    placeholder="请输入详细描述..."
-    maxlength={500}
-  />
-</View>
-```
-
-### 空状态
-
-```tsx
-<View className="flex flex-col items-center justify-center py-16">
-  <View className="mb-4">
-    {/* 图标 */}
+<View className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+  <View className="flex flex-row items-center">
+    <View className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center">
+      <Sparkles size={24} color="#fff" />
+    </View>
+    <View className="ml-3 flex-1">
+      <Text className="block text-base font-semibold text-gray-800">日常保洁</Text>
+      <Text className="block text-sm text-gray-500 mt-1">地面清洁、桌面整理...</Text>
+    </View>
+    <Text className="text-emerald-500 font-semibold">50元/小时</Text>
   </View>
-  <Text className="block text-base text-gray-500">暂无数据</Text>
 </View>
 ```
 
-### 加载状态
+### 订单状态标签
 
 ```tsx
-<View className="flex flex-col items-center justify-center py-16">
-  <Text className="block text-sm text-gray-500">加载中...</Text>
-</View>
+// 待上门
+<View className="px-3 py-1 bg-orange-100 text-orange-600 rounded-full text-xs">待上门</View>
+// 已完成
+<View className="px-3 py-1 bg-green-100 text-green-600 rounded-full text-xs">已完成</View>
+// 已取消
+<View className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs">已取消</View>
 ```
 
 ## 导航结构
 
 ### TabBar 配置
 
-```typescript
-tabBar: {
-  color: '#999999',
-  selectedColor: '#10B981',  // 主色
-  backgroundColor: '#ffffff',
-  borderStyle: 'black',
-  list: [
-    {
-      pagePath: 'pages/index/index',
-      text: '服务大厅',
-      iconPath: './assets/tabbar/home.png',
-      selectedIconPath: './assets/tabbar/home-active.png',
-    },
-    {
-      pagePath: 'pages/orders/index',
-      text: '订单',
-      iconPath: './assets/tabbar/list.png',
-      selectedIconPath: './assets/tabbar/list-active.png',
-    },
-    {
-      pagePath: 'pages/profile/index',
-      text: '我的',
-      iconPath: './assets/tabbar/user.png',
-      selectedIconPath: './assets/tabbar/user-active.png',
-    }
-  ]
-}
-```
+| 页面 | 文本 | 图标 |
+|------|------|------|
+| pages/index/index | 首页 | house |
+| pages/orders/index | 我的预约 | file-text |
+| pages/profile/index | 我的 | user |
 
-### 页面跳转规范
+### 页面路由
 
-- TabBar 页面使用 `Taro.switchTab()`
-- 普通页面使用 `Taro.navigateTo()`
-- 返回上一页使用 `Taro.navigateBack()`
+- 首页 → 服务详情：`/pages/service-detail/index?id=xxx`
+- 服务详情 → 在线预约：`/pages/booking/index?serviceId=xxx`
+- 首页 → 我的预约：`switchTab /pages/orders/index`
+- 首页 → 个人中心：`switchTab /pages/profile/index`
+- 个人中心 → 联系我们：`/pages/contact/index`
+- 个人中心 → 关于我们：`/pages/about/index`
+- 个人中心 → 隐私政策：`/pages/privacy/index`
+- 个人中心 → 用户协议：`/pages/terms/index`
+
+## 轮播图规范
+
+- 尺寸：宽度 100%，高度约 160px
+- 圆角：rounded-2xl (16px)
+- 间距：mb-4 (16px)
+- 自动播放：是
+- 指示器：显示
 
 ## 小程序约束
 
-### 包体积限制
-- 主包不超过 2MB
-- 所有分包不超过 20MB
-- 使用 CDN 加载大文件
+- 包体积：主包不超过 2MB
+- 图片策略：使用 CDN 加载轮播图，本地只保留 TabBar 图标
+- 性能优化：列表使用虚拟滚动，图片懒加载
 
-### 图片策略
-- 优先使用 WebP 格式
-- 使用对象存储管理图片
-- 避免使用 base64 大图
+## 服务列表数据
 
-### 性能优化
-- 使用分包加载
-- 图片懒加载
-- 避免 setData 过频
-- 合理使用缓存
-
-## 特殊要求
-
-### 文本换行（跨端）
-```tsx
-<Text className="block text-lg font-semibold">标题</Text>
-<Text className="block text-sm text-gray-500">说明</Text>
-```
-
-### Fixed + Flex（H5 兼容）
-```tsx
-<View style={{
-  position: 'fixed', bottom: 50, left: 0, right: 0,
-  display: 'flex', flexDirection: 'row', gap: '12px',
-  padding: '12px', backgroundColor: '#fff', borderTop: '1px solid #e5e5e5', zIndex: 100
-}}>
-  {/* 内容 */}
-</View>
-```
-
-### 底部避让 TabBar
-```tsx
-// 列表底部添加内边距
-<ScrollView className="pb-20">
-  {/* 内容 */}
-</ScrollView>
+```typescript
+const services = [
+  { id: '1', name: '日常保洁', price: '50元/小时', duration: '2小时起', icon: 'Sparkles' },
+  { id: '2', name: '深度保洁', price: '100元/小时', duration: '4小时起', icon: 'Sparkles' },
+  { id: '3', name: '新居开荒', price: '8元/平米', duration: '全天', icon: 'Home' },
+  { id: '4', name: '家电清洗', price: '80元/台起', duration: '1-2小时', icon: 'Tv' },
+  { id: '5', name: '收纳整理', price: '200元/次', duration: '3小时起', icon: 'LayoutGrid' },
+]
 ```

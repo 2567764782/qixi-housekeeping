@@ -2,22 +2,28 @@ import { View, Text, ScrollView } from '@tarojs/components'
 import Taro, { useLoad, useDidShow } from '@tarojs/taro'
 import { useState } from 'react'
 import { Network } from '@/network'
-import { ClipboardCheck, Clock, Circle, MapPin, Phone, Calendar } from 'lucide-react-taro'
+import { Clock, Check, X, Phone, Calendar, MapPin } from 'lucide-react-taro'
 import './index.css'
 
 interface Order {
   id: string
-  service_name: string
-  address: string
+  serviceName: string
+  name: string
   phone: string
-  appointment_date: string
-  appointment_time: string
-  status: string
+  address: string
+  date: string
+  time: string
+  status: 'pending' | 'completed' | 'cancelled'
   remark?: string
-  created_at: string
+  area?: string
+  createdAt: string
 }
 
 const OrdersPage = () => {
+  const [orders, setOrders] = useState<Order[]>([])
+  const [loading, setLoading] = useState(false)
+  const [activeTab, setActiveTab] = useState<'all' | 'pending' | 'completed' | 'cancelled'>('all')
+
   useLoad(() => {
     loadOrders()
   })
@@ -26,200 +32,211 @@ const OrdersPage = () => {
     loadOrders()
   })
 
-  const [orders, setOrders] = useState<Order[]>([])
-  const [loading, setLoading] = useState(false)
-
-  // 加载订单列表
   const loadOrders = async () => {
     try {
       setLoading(true)
       const res = await Network.request({
-        url: '/api/orders/user/demo-user-001',
+        url: '/api/orders/user/current',
         method: 'GET'
       })
-      // 处理不同的响应格式
-      let ordersData: Order[] = []
-      if (res.data && res.data.data && Array.isArray(res.data.data)) {
-        // 如果后端返回 { data: [...] } 格式
-        ordersData = res.data.data as Order[]
-      } else if (Array.isArray(res.data)) {
-        // 如果后端直接返回数组
-        ordersData = res.data as Order[]
+      
+      if (res.statusCode === 200 && res.data) {
+        const ordersData = res.data?.data || res.data || []
+        setOrders(Array.isArray(ordersData) ? ordersData : [])
+      } else {
+        // 使用模拟数据
+        getMockOrders()
       }
-      setOrders(ordersData || [])
     } catch (error) {
-      console.error('Failed to load orders:', error)
-      setOrders([]) // 出错时设置为空数组
+      console.error('加载订单失败:', error)
+      getMockOrders()
     } finally {
       setLoading(false)
     }
   }
 
-  // 获取状态信息
+  const getMockOrders = () => {
+    const mockOrders: Order[] = [
+      {
+        id: '1',
+        serviceName: '日常保洁',
+        name: '张先生',
+        phone: '138****8888',
+        address: '北京市朝阳区xxx小区',
+        date: '2024-03-20',
+        time: '09:00-11:00',
+        status: 'pending',
+        area: '100',
+        createdAt: '2024-03-18 14:30'
+      },
+      {
+        id: '2',
+        serviceName: '深度保洁',
+        name: '张先生',
+        phone: '138****8888',
+        address: '北京市朝阳区xxx小区',
+        date: '2024-03-15',
+        time: '13:00-17:00',
+        status: 'completed',
+        area: '100',
+        createdAt: '2024-03-14 10:00'
+      },
+      {
+        id: '3',
+        serviceName: '家电清洗',
+        name: '张先生',
+        phone: '138****8888',
+        address: '北京市朝阳区xxx小区',
+        date: '2024-03-10',
+        time: '15:00-17:00',
+        status: 'cancelled',
+        remark: '临时有事',
+        createdAt: '2024-03-09 16:20'
+      }
+    ]
+    setOrders(mockOrders)
+  }
+
   const getStatusInfo = (status: string) => {
-    const statusMap: Record<
-      string,
-      { text: string; icon: React.ReactNode; bg: string; color: string }
-    > = {
-      pending: {
-        text: '待确认',
-        icon: <Clock size={14} />,
-        bg: 'bg-amber-100',
-        color: '#F59E0B'
+    const statusMap: Record<string, { text: string; color: string; bgColor: string; icon: React.ReactNode }> = {
+      pending: { 
+        text: '待上门', 
+        color: 'text-orange-600', 
+        bgColor: 'bg-orange-100',
+        icon: <Clock size={14} color="#EA580C" />
       },
-      confirmed: {
-        text: '已确认',
-        icon: <ClipboardCheck size={14} />,
-        bg: 'bg-blue-100',
-        color: '#3B82F6'
+      completed: { 
+        text: '已完成', 
+        color: 'text-green-600', 
+        bgColor: 'bg-green-100',
+        icon: <Check size={14} color="#16A34A" />
       },
-      completed: {
-        text: '已完成',
-        icon: <Circle size={14} strokeWidth={3} />,
-        bg: 'bg-emerald-100',
-        color: '#10B981'
-      },
-      cancelled: {
-        text: '已取消',
-        icon: <Circle size={14} strokeWidth={2} />,
-        bg: 'bg-gray-100',
-        color: '#9CA3AF'
+      cancelled: { 
+        text: '已取消', 
+        color: 'text-gray-500', 
+        bgColor: 'bg-gray-100',
+        icon: <X size={14} color="#6B7280" />
       }
     }
-    return (
-      statusMap[status] || {
-        text: status,
-        icon: <Clock size={14} />,
-        bg: 'bg-gray-100',
-        color: '#9CA3AF'
+    return statusMap[status] || statusMap.pending
+  }
+
+  const filteredOrders = orders.filter(order => {
+    if (activeTab === 'all') return true
+    return order.status === activeTab
+  })
+
+  const handleOrderClick = (order: Order) => {
+    Taro.showModal({
+      title: '订单详情',
+      content: `服务：${order.serviceName}\n联系人：${order.name}\n电话：${order.phone}\n地址：${order.address}\n时间：${order.date} ${order.time}\n状态：${getStatusInfo(order.status).text}`,
+      showCancel: false
+    })
+  }
+
+  const handleCallPhone = (phone: string, e: any) => {
+    e.stopPropagation()
+    // 显示完整手机号让用户拨打
+    Taro.makePhoneCall({
+      phoneNumber: phone.replace(/\*+/g, '0'), // 模拟完整号码
+      fail: () => {
+        Taro.showToast({ title: '拨打失败', icon: 'none' })
       }
-    )
+    })
   }
 
   return (
-    <View className="flex flex-col h-full bg-gray-50">
-      <ScrollView className="flex-1" scrollY>
-        {/* 标题栏 */}
-        <View className="bg-white px-5 py-5 border-b border-gray-100">
-          <Text className="block text-2xl font-bold text-gray-800">我的订单</Text>
-        </View>
+    <View className="min-h-screen bg-gray-50">
+      {/* 顶部标签 */}
+      <View className="bg-white px-4 py-3 flex flex-row gap-2">
+        {[
+          { key: 'all', label: '全部' },
+          { key: 'pending', label: '待上门' },
+          { key: 'completed', label: '已完成' },
+          { key: 'cancelled', label: '已取消' }
+        ].map(tab => (
+          <View
+            key={tab.key}
+            className={`flex-1 py-2 rounded-lg text-center text-sm ${
+              activeTab === tab.key 
+                ? 'bg-emerald-500 text-white font-medium' 
+                : 'bg-gray-100 text-gray-600'
+            }`}
+            onClick={() => setActiveTab(tab.key as typeof activeTab)}
+          >
+            {tab.label}
+          </View>
+        ))}
+      </View>
 
-        <View className="px-4 py-5">
-          {loading ? (
-            <View className="flex flex-col items-center justify-center py-16">
-              <Text className="block text-sm text-gray-500">加载中...</Text>
+      {/* 订单列表 */}
+      <ScrollView scrollY className="px-4 py-4" style={{ height: 'calc(100vh - 120px)' }}>
+        {loading ? (
+          <View className="flex flex-col items-center justify-center py-20">
+            <Text className="block text-sm text-gray-400">加载中...</Text>
+          </View>
+        ) : filteredOrders.length === 0 ? (
+          <View className="flex flex-col items-center justify-center py-20">
+            <Text className="block text-base text-gray-400">暂无预约记录</Text>
+            <View 
+              className="mt-4 bg-emerald-500 text-white px-6 py-2 rounded-lg text-sm"
+              onClick={() => Taro.switchTab({ url: '/pages/index/index' })}
+            >
+              去预约
             </View>
-          ) : orders.length === 0 ? (
-            <View className="bg-white rounded-2xl border border-gray-100 p-8">
-              <View className="flex flex-col items-center">
-                <View className="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center mb-4">
-                  <ClipboardCheck size={36} color="#D1D5DB" />
-                </View>
-                <Text className="block text-base text-gray-700 mb-1 font-medium">暂无订单</Text>
-                <Text className="block text-sm text-gray-400">快去预约服务吧</Text>
-              </View>
-            </View>
-          ) : (
-            <View className="space-y-3">
-              {orders.map(order => {
-                const statusInfo = getStatusInfo(order.status)
-                return (
-                  <View
-                    key={order.id}
-                    className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden"
-                  >
-                    {/* 订单头部 */}
-                    <View className="px-5 py-4 border-b border-gray-50">
-                      <View className="flex flex-row items-center justify-between">
-                        <Text className="block text-base font-bold text-gray-800">
-                          {order.service_name}
-                        </Text>
-                        <View
-                          className={`${statusInfo.bg} px-3 py-1.5 rounded-full flex items-center gap-1.5`}
-                        >
-                          {statusInfo.icon}
-                          <Text
-                            className="block text-xs font-bold"
-                            style={{ color: statusInfo.color }}
-                          >
-                            {statusInfo.text}
-                          </Text>
-                        </View>
-                      </View>
-                    </View>
-
-                    {/* 订单详情 */}
-                    <View className="px-5 py-4 space-y-3">
-                      {/* 预约时间 */}
-                      <View className="flex flex-row items-start">
-                        <View className="w-8 h-8 bg-emerald-50 rounded-xl flex items-center justify-center mr-3 flex-shrink-0">
-                          <Calendar size={16} color="#10B981" />
-                        </View>
-                        <View className="flex-1">
-                          <Text className="block text-xs text-gray-400 mb-1 font-medium">
-                            预约时间
-                          </Text>
-                          <Text className="block text-sm text-gray-800 font-medium">
-                            {order.appointment_date}
-                          </Text>
-                          <Text className="block text-xs text-gray-500 mt-0.5">
-                            {order.appointment_time}
-                          </Text>
-                        </View>
-                      </View>
-
-                      {/* 服务地址 */}
-                      <View className="flex flex-row items-start">
-                        <View className="w-8 h-8 bg-emerald-50 rounded-xl flex items-center justify-center mr-3 flex-shrink-0">
-                          <MapPin size={16} color="#10B981" />
-                        </View>
-                        <View className="flex-1">
-                          <Text className="block text-xs text-gray-400 mb-1 font-medium">
-                            服务地址
-                          </Text>
-                          <Text className="block text-sm text-gray-800 font-medium leading-relaxed">
-                            {order.address}
-                          </Text>
-                        </View>
-                      </View>
-
-                      {/* 联系电话 */}
-                      <View className="flex flex-row items-start">
-                        <View className="w-8 h-8 bg-emerald-50 rounded-xl flex items-center justify-center mr-3 flex-shrink-0">
-                          <Phone size={16} color="#10B981" />
-                        </View>
-                        <View className="flex-1">
-                          <Text className="block text-xs text-gray-400 mb-1 font-medium">
-                            联系电话
-                          </Text>
-                          <Text className="block text-sm text-gray-800 font-medium">
-                            {order.phone}
-                          </Text>
-                        </View>
-                      </View>
-                    </View>
-
-                    {/* 底部操作栏 */}
-                    <View className="px-5 py-3 bg-gray-50 flex flex-row items-center justify-end gap-3">
-                      <View
-                        className="bg-white border border-gray-200 px-4 py-2 rounded-xl"
-                        onClick={() => Taro.showToast({ title: '联系客服', icon: 'none' })}
-                      >
-                        <Text className="block text-sm text-gray-600">联系客服</Text>
-                      </View>
-                      <View
-                        className="bg-emerald-500 px-4 py-2 rounded-xl"
-                        onClick={() => Taro.showToast({ title: '查看详情', icon: 'none' })}
-                      >
-                        <Text className="block text-sm text-white font-medium">查看详情</Text>
-                      </View>
+          </View>
+        ) : (
+          <View className="flex flex-col gap-3">
+            {filteredOrders.map(order => {
+              const statusInfo = getStatusInfo(order.status)
+              return (
+                <View
+                  key={order.id}
+                  className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100"
+                  onClick={() => handleOrderClick(order)}
+                >
+                  {/* 头部：服务名称 + 状态 */}
+                  <View className="flex flex-row items-center justify-between mb-3">
+                    <Text className="block text-base font-semibold text-gray-800">{order.serviceName}</Text>
+                    <View className={`flex flex-row items-center px-2 py-1 rounded-full ${statusInfo.bgColor}`}>
+                      {statusInfo.icon}
+                      <Text className={`block text-xs ml-1 ${statusInfo.color}`}>{statusInfo.text}</Text>
                     </View>
                   </View>
-                )
-              })}
-            </View>
-          )}
-        </View>
+
+                  {/* 预约信息 */}
+                  <View className="flex flex-col gap-2 mb-3">
+                    <View className="flex flex-row items-center">
+                      <Calendar size={14} color="#9CA3AF" />
+                      <Text className="block text-sm text-gray-500 ml-2">{order.date} {order.time}</Text>
+                    </View>
+                    <View className="flex flex-row items-center">
+                      <MapPin size={14} color="#9CA3AF" />
+                      <Text className="block text-sm text-gray-500 ml-2 line-clamp-1">{order.address}</Text>
+                    </View>
+                    <View className="flex flex-row items-center">
+                      <Phone size={14} color="#9CA3AF" />
+                      <Text className="block text-sm text-gray-500 ml-2">{order.phone}</Text>
+                    </View>
+                  </View>
+
+                  {/* 底部：时间 + 操作 */}
+                  <View className="flex flex-row items-center justify-between pt-3 border-t border-gray-100">
+                    <Text className="block text-xs text-gray-400">预约时间：{order.createdAt}</Text>
+                    {order.status === 'pending' && (
+                      <View 
+                        className="bg-emerald-500 text-white px-3 py-1 rounded-full text-xs"
+                        onClick={(e) => handleCallPhone(order.phone, e)}
+                      >
+                        联系师傅
+                      </View>
+                    )}
+                  </View>
+                </View>
+              )
+            })}
+          </View>
+        )}
       </ScrollView>
     </View>
   )
