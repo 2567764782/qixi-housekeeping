@@ -33,6 +33,45 @@ const NewsDetailPage = () => {
     }
   })
 
+  // 格式化日期
+  const formatDate = (dateStr?: string): string => {
+    if (!dateStr) return '刚刚'
+    
+    try {
+      const date = new Date(dateStr)
+      // 检查日期是否有效
+      if (isNaN(date.getTime())) {
+        return '刚刚'
+      }
+      
+      const now = new Date()
+      const diff = now.getTime() - date.getTime()
+      
+      // 小于1分钟
+      if (diff < 60000) {
+        return '刚刚'
+      }
+      // 小于1小时
+      if (diff < 3600000) {
+        return `${Math.floor(diff / 60000)}分钟前`
+      }
+      // 小于24小时
+      if (diff < 86400000) {
+        return `${Math.floor(diff / 3600000)}小时前`
+      }
+      // 大于24小时，显示具体日期
+      return date.toLocaleDateString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    } catch (error) {
+      return '刚刚'
+    }
+  }
+
   // 返回上一页
   const handleBack = () => {
     Taro.navigateBack()
@@ -96,7 +135,7 @@ const NewsDetailPage = () => {
               <View className="flex flex-row items-center mr-4">
                 <Clock size={14} color="#9CA3AF" />
                 <Text className="block text-sm text-gray-500 ml-1">
-                  {news.publish_time ? new Date(news.publish_time).toLocaleString('zh-CN') : '刚刚'}
+                  {formatDate(news.publish_time)}
                 </Text>
               </View>
               {news.source && (
