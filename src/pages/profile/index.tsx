@@ -103,7 +103,7 @@ const ProfilePage = () => {
       icon: <Settings size={20} color="#8B5CF6" />,
       title: '设置',
       action: () => {
-        Taro.showToast({ title: '设置功能开发中', icon: 'none' })
+        Taro.navigateTo({ url: '/pages/settings/index' })
       }
     }
   ]
