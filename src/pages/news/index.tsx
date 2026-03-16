@@ -85,10 +85,11 @@ const NewsPage = () => {
     }, 1000)
   }
 
-  // 打开新闻链接
-  const openNews = (url: string) => {
+  // 打开新闻详情
+  const openNews = (news: NewsItem) => {
+    // 跳转到本地新闻详情页
     Taro.navigateTo({
-      url: `/pages/webview/index?url=${encodeURIComponent(url)}`
+      url: `/pages/news-detail/index?title=${encodeURIComponent(news.title)}&url=${encodeURIComponent(news.url)}&source=${encodeURIComponent(news.source || '头条号')}&publish_time=${encodeURIComponent(news.publish_time || '')}&description=${encodeURIComponent(news.description || '')}`
     })
   }
 
@@ -130,7 +131,7 @@ const NewsPage = () => {
                 <View
                   key={index}
                   className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5"
-                  onClick={() => openNews(news.url)}
+                  onClick={() => openNews(news)}
                 >
                   {/* 新闻标题 */}
                   <Text className="block text-base font-bold text-gray-800 mb-3 line-clamp-2 leading-relaxed">

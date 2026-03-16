@@ -288,7 +288,7 @@ const IndexPage = () => {
                       key={index}
                       className="flex flex-row items-center mr-4"
                       onClick={() => Taro.navigateTo({
-                        url: `/pages/webview/index?url=${encodeURIComponent(news.url)}`
+                        url: `/pages/news-detail/index?title=${encodeURIComponent(news.title)}&url=${encodeURIComponent(news.url)}&source=${encodeURIComponent(news.source || '头条号')}&publish_time=${encodeURIComponent(news.publish_time || '')}&description=${encodeURIComponent(news.description || '')}`
                       })}
                     >
                       <Text className="block text-sm text-gray-700 line-clamp-1">
