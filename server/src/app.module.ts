@@ -21,6 +21,7 @@ import { SmsModule } from './sms/sms.module';
 import { MonitoringModule } from './monitoring/monitoring.module';
 import { HealthModule } from './health/health.module';
 import { NewsModule } from './news/news.module';
+import { CustomerServiceModule } from './customer-service/customer-service.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { NewsModule } from './news/news.module';
     MonitoringModule,
     HealthModule,
     NewsModule,
+    CustomerServiceModule,
   ],
   controllers: [AppController],
   providers: [

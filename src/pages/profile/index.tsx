@@ -1,6 +1,6 @@
 import Taro, { useLoad } from '@tarojs/taro'
 import { View, Text, ScrollView } from '@tarojs/components'
-import { User, Phone, MapPin, Settings, FileText, Award, ChevronRight, QrCode, TrendingUp, CreditCard, MessageSquare, Shield } from 'lucide-react-taro'
+import { User, Phone, MapPin, Settings, FileText, Award, ChevronRight, QrCode, TrendingUp, CreditCard, MessageSquare, Shield, Headphones } from 'lucide-react-taro'
 import './index.css'
 
 const ProfilePage = () => {
@@ -36,10 +36,10 @@ const ProfilePage = () => {
   // 服务功能分组
   const serviceMenuItems = [
     {
-      icon: <Phone size={20} color="#3B82F6" />,
-      title: '联系客服',
+      icon: <Headphones size={20} color="#3B82F6" />,
+      title: '在线客服',
       action: () => {
-        Taro.showToast({ title: '联系客服功能开发中', icon: 'none' })
+        Taro.navigateTo({ url: '/pages/customer-service/index' })
       }
     },
     {

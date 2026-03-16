@@ -32,7 +32,8 @@ export default defineAppConfig({
     'pages/statistics/index',
     'pages/payment/index',
     'pages/realtime/index',
-    'pages/roles/index'
+    'pages/roles/index',
+    'pages/customer-service/index'
   ],
   window: {
     backgroundTextStyle: 'light',
