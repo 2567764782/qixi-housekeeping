@@ -1,9 +1,37 @@
 import { Controller, Get, Post, Body, Param, Patch, HttpException, HttpStatus } from '@nestjs/common'
 import { OrdersService } from './orders.service'
+import { Public } from '../decorators/public.decorator'
 
 @Controller('orders')
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
+
+  @Public()
+  @Get('user/current/stats')
+  async getUserOrderStats() {
+    try {
+      // 获取当前用户的订单统计（模拟数据）
+      return {
+        code: 200,
+        msg: 'success',
+        data: {
+          total: 0,
+          pending: 0,
+          completed: 0
+        }
+      }
+    } catch (error) {
+      return {
+        code: 200,
+        msg: 'success',
+        data: {
+          total: 0,
+          pending: 0,
+          completed: 0
+        }
+      }
+    }
+  }
 
   @Get()
   async findAll() {

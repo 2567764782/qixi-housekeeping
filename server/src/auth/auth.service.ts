@@ -1,17 +1,16 @@
 import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import * as bcrypt from 'bcrypt'
-import { ConfigService } from '@nestjs/config'
 import { getSupabaseClient } from '../storage/database/supabase-client'
-import { SmsService } from '../sms/sms.service'
 import { JwtBlacklistService } from './jwt-blacklist.service'
+
+// 简单的内存验证码存储
+const verificationCodes = new Map<string, { code: string; expireAt: number }>()
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
-    private readonly smsService: SmsService,
     private readonly jwtBlacklistService: JwtBlacklistService,
   ) {}
 
@@ -141,11 +140,38 @@ export class AuthService {
   }
 
   /**
+   * 发送验证码（模拟）
+   */
+  async sendVerificationCode(phone: string): Promise<{ success: boolean; code?: string }> {
+    const code = Math.floor(100000 + Math.random() * 900000).toString()
+    verificationCodes.set(phone, { code, expireAt: Date.now() + 5 * 60 * 1000 })
+    console.log(`[SMS] 模拟发送验证码到 ${phone}: ${code}`)
+    return { success: true, code }
+  }
+
+  /**
+   * 验证验证码
+   */
+  async verifyCode(phone: string, code: string): Promise<boolean> {
+    const stored = verificationCodes.get(phone)
+    if (!stored) return false
+    if (Date.now() > stored.expireAt) {
+      verificationCodes.delete(phone)
+      return false
+    }
+    const isValid = stored.code === code
+    if (isValid) {
+      verificationCodes.delete(phone)
+    }
+    return isValid
+  }
+
+  /**
    * 验证码登录
    */
   async loginWithCode(phone: string, code: string) {
     // 验证验证码
-    const isValid = await this.smsService.verifyCode(phone, code)
+    const isValid = await this.verifyCode(phone, code)
 
     if (!isValid) {
       throw new UnauthorizedException('验证码错误或已过期')

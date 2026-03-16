@@ -4,10 +4,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js'
-import { loadEnv, getSupabaseCredentials } from '../src/storage/database/supabase-client'
-
-// 加载环境变量
-loadEnv()
+import { getSupabaseCredentials } from '../src/storage/database/supabase-client'
 
 // 配置
 const BATCH_SIZE = 1000 // 每批插入1000条

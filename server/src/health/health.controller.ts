@@ -2,7 +2,6 @@ import { Controller, Get } from '@nestjs/common'
 import {
   HealthCheck,
   HealthCheckService,
-  TypeOrmHealthIndicator,
   MemoryHealthIndicator,
   DiskHealthIndicator,
   HealthCheckResult,
@@ -14,7 +13,6 @@ import { Public } from '../decorators/public.decorator'
 export class HealthController {
   constructor(
     private health: HealthCheckService,
-    private db: TypeOrmHealthIndicator,
     private memory: MemoryHealthIndicator,
     private disk: DiskHealthIndicator,
   ) {}
@@ -23,9 +21,6 @@ export class HealthController {
   @HealthCheck()
   healthCheck(): Promise<HealthCheckResult> {
     return this.health.check([
-      // Database health check
-      () => this.db.pingCheck('database', { timeout: 1500 }),
-
       // Memory health check
       () => this.memory.checkHeap('memory_heap', 150 * 1024 * 1024), // 150MB
       () => this.memory.checkRSS('memory_rss', 150 * 1024 * 1024), // 150MB
@@ -47,8 +42,8 @@ export class HealthController {
   @HealthCheck()
   readiness(): Promise<HealthCheckResult> {
     return this.health.check([
-      // Check if the app can connect to critical services
-      () => this.db.pingCheck('database', { timeout: 1500 }),
+      // 简单的内存检查作为就绪探针
+      () => this.memory.checkHeap('memory_heap', 200 * 1024 * 1024), // 200MB
     ])
   }
 }

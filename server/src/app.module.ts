@@ -5,45 +5,17 @@ import { AppService } from '@/app.service';
 import { ServicesModule } from './services/services.module';
 import { OrdersModule } from './orders/orders.module';
 import { StaffModule } from './staff/staff.module';
-import { UsersModule } from './users/users.module';
-import { SearchModule } from './search/search.module';
-import { CleaningOrdersModule } from './cleaning-orders/cleaning-orders.module';
-import { CleanersModule } from './cleaners/cleaners.module';
-import { NotificationModule } from './notifications/notifications.module';
-import { RolesModule } from './roles/roles.module';
-import { StatisticsModule } from './statistics/statistics.module';
-import { RealtimeModule } from './realtime/realtime.module';
-import { PaymentModule } from './payment/payment.module';
 import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
-import { CacheModule } from './cache/cache.module';
-import { SmsModule } from './sms/sms.module';
-import { MonitoringModule } from './monitoring/monitoring.module';
 import { HealthModule } from './health/health.module';
-import { NewsModule } from './news/news.module';
-import { CustomerServiceModule } from './customer-service/customer-service.module';
 
 @Module({
   imports: [
-    CacheModule,
-    SmsModule,
     AuthModule,
     ServicesModule,
     OrdersModule,
     StaffModule,
-    UsersModule,
-    SearchModule,
-    CleaningOrdersModule,
-    CleanersModule,
-    NotificationModule,
-    RolesModule,
-    StatisticsModule,
-    RealtimeModule,
-    PaymentModule,
-    MonitoringModule,
     HealthModule,
-    NewsModule,
-    CustomerServiceModule,
   ],
   controllers: [AppController],
   providers: [
