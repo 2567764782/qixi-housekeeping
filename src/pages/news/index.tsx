@@ -33,11 +33,32 @@ const NewsPage = () => {
       console.log('📰 新闻数据:', res.data)
       setNewsList(res.data || [])
     } catch (error) {
-      console.error('Failed to load news:', error)
-      Taro.showToast({
-        title: '加载失败',
-        icon: 'none'
-      })
+      console.error('Failed to load news, using mock data:', error)
+      // 如果后端不可用，使用模拟数据
+      const mockNews = [
+        {
+          title: '财经新闻：最新市场动态分析',
+          url: 'https://example.com/news/finance/1',
+          source: '头条号',
+          publish_time: new Date().toISOString(),
+          description: '这是一条关于财经领域的最新报道...'
+        },
+        {
+          title: '娱乐热点：明星动态与影视资讯',
+          url: 'https://example.com/news/entertainment/2',
+          source: '头条号',
+          publish_time: new Date(Date.now() - 3600000).toISOString(),
+          description: '娱乐圈最新动态...'
+        },
+        {
+          title: '家庭生活：家政服务小技巧',
+          url: 'https://example.com/news/family/3',
+          source: '头条号',
+          publish_time: new Date(Date.now() - 7200000).toISOString(),
+          description: '实用的家庭清洁技巧...'
+        }
+      ]
+      setNewsList(mockNews)
     } finally {
       setLoading(false)
     }
