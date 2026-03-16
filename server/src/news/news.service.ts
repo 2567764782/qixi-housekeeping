@@ -1,25 +1,25 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { FetchClient, Config, HeaderUtils } from 'coze-coding-dev-sdk'
+import { NewsRepository } from './news.repository'
 
-interface NewsItem {
+export interface NewsItem {
+  id?: string
   title: string
   url: string
   source?: string
   publish_time?: string
   description?: string
+  category?: string
 }
 
 @Injectable()
 export class NewsService {
   private readonly logger = new Logger(NewsService.name)
-  private fetchClient: FetchClient
-  private config: Config
 
-  constructor(private configService: ConfigService) {
-    this.config = new Config()
-    this.fetchClient = new FetchClient(this.config)
-  }
+  constructor(
+    private configService: ConfigService,
+    private newsRepository: NewsRepository
+  ) {}
 
   /**
    * 获取头条号新闻
@@ -28,75 +28,31 @@ export class NewsService {
     try {
       this.logger.log('📰 开始获取头条号新闻...')
 
-      // 头条号 RSS 订阅地址
-      const toutiaoRssUrl = 'https://www.toutiao.com/rss/user/1234567890'
-
-      // 获取头条首页热门新闻（使用公开的 RSS 源）
-      const newsUrls = [
-        'https://www.toutiao.com/article/1234567890', // 示例 URL
-        // 可以添加更多的新闻源
-      ]
-
-      // 由于头条号 RSS 可能需要特定的访问方式，这里使用示例数据
-      // 在实际应用中，你可以：
-      // 1. 使用头条号的公开 RSS 订阅地址
-      // 2. 使用头条开放平台的 API
-      // 3. 使用新闻聚合 API
-
-      const mockNews: NewsItem[] = [
-        {
-          title: '2024年家政服务行业发展趋势分析',
-          url: 'https://www.toutiao.com/article/1234567890',
-          source: '头条号',
-          publish_time: new Date().toISOString(),
-          description: '随着人们生活水平的提高，家政服务行业迎来了快速发展期...'
-        },
-        {
-          title: '保洁服务的标准化与规范化',
-          url: 'https://www.toutiao.com/article/1234567891',
-          source: '头条号',
-          publish_time: new Date(Date.now() - 3600000).toISOString(),
-          description: '标准化服务流程是提升保洁服务质量的关键...'
-        },
-        {
-          title: '家庭清洁小技巧，让生活更美好',
-          url: 'https://www.toutiao.com/article/1234567892',
-          source: '头条号',
-          publish_time: new Date(Date.now() - 7200000).toISOString(),
-          description: '分享实用的家庭清洁技巧，帮助您轻松打造干净整洁的居住环境...'
-        },
-        {
-          title: '家政服务的数字化转型',
-          url: 'https://www.toutiao.com/article/1234567893',
-          source: '头条号',
-          publish_time: new Date(Date.now() - 10800000).toISOString(),
-          description: '数字化转型为家政服务带来了新的发展机遇...'
-        },
-        {
-          title: '如何选择合适的家政服务人员',
-          url: 'https://www.toutiao.com/article/1234567894',
-          source: '头条号',
-          publish_time: new Date(Date.now() - 14400000).toISOString(),
-          description: '选择家政服务人员需要考虑多个因素，包括经验、技能、口碑等...'
-        }
-      ]
+      // 从数据库获取新闻（限制前3条）
+      let news = await this.newsRepository.getNews(3, category)
 
       // 如果有关键词，进行过滤
       if (keyword) {
-        const filteredNews = mockNews.filter(news =>
-          news.title.toLowerCase().includes(keyword.toLowerCase()) ||
-          news.description?.toLowerCase().includes(keyword.toLowerCase())
+        news = news.filter(item =>
+          item.title.toLowerCase().includes(keyword.toLowerCase()) ||
+          item.description?.toLowerCase().includes(keyword.toLowerCase())
         )
-        return filteredNews
       }
 
-      this.logger.log(`✅ 成功获取 ${mockNews.length} 条新闻`)
+      this.logger.log(`✅ 成功获取 ${news.length} 条新闻`)
 
-      return mockNews
+      return news
     } catch (error) {
       this.logger.error('❌ 获取新闻失败:', error)
       throw error
     }
+  }
+
+  /**
+   * 保存新闻到数据库
+   */
+  async saveNews(newsItems: NewsItem[], category: string): Promise<void> {
+    await this.newsRepository.saveNews(newsItems, category)
   }
 
   /**
