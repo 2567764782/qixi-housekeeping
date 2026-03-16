@@ -361,10 +361,14 @@ const IndexPage = () => {
           </View>
         </View>
 
-        {/* 服务列表 */}
+        {/* 热门服务 - 模块化布局 */}
         <View className="px-4 pb-8">
           <View className="flex flex-row items-center justify-between mb-4">
             <Text className="block text-lg font-bold text-gray-800">热门服务</Text>
+            <View className="flex flex-row items-center" onClick={() => Taro.navigateTo({ url: '/pages/service-list/index' })}>
+              <Text className="block text-sm text-gray-500 mr-1">全部</Text>
+              <ChevronRight size={14} color="#9CA3AF" />
+            </View>
           </View>
 
           {loading ? (
@@ -382,48 +386,146 @@ const IndexPage = () => {
               </View>
             </View>
           ) : (
-            <View className="space-y-3">
-              {filteredServices.map((service) => {
-                const iconData = getIconComponent(service.icon)
-                return (
+            <View className="flex flex-col gap-3">
+              {/* 第一行：1个大卡片 + 2个小卡片 */}
+              <View style={{ display: 'flex', flexDirection: 'row', gap: '12px', height: '180px' }}>
+                {/* 大卡片 - 日常保洁 */}
+                {filteredServices[0] && (
                   <View
-                    key={service.id}
-                    className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm flex flex-row items-center"
-                    onClick={() => handleServiceClick(service)}
+                    className="flex-1 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-4 shadow-lg flex flex-col justify-between"
+                    style={{ flex: '1 1 55%' }}
+                    onClick={() => handleServiceClick(filteredServices[0])}
                   >
-                    {/* 服务图标 */}
-                    <View
-                      className={`w-16 h-16 ${iconData.bg} rounded-2xl flex items-center justify-center mr-4 shadow-sm`}
-                    >
-                      {iconData.icon}
+                    <View>
+                      <View className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-3">
+                        <Sparkles size={28} color="#fff" />
+                      </View>
+                      <Text className="block text-xl font-bold text-white mb-1">{filteredServices[0].name}</Text>
+                      <Text className="block text-sm text-white/80 line-clamp-2">{filteredServices[0].description}</Text>
                     </View>
-
-                    {/* 服务信息 */}
-                    <View className="flex-1">
-                      <Text className="block text-base font-bold text-gray-800 mb-1">
-                        {service.name}
-                      </Text>
-                      <Text className="block text-sm text-gray-500 mb-2 line-clamp-1">
-                        {service.description}
-                      </Text>
-                      <View className="flex flex-row items-center">
-                        <Text className="block text-sm font-bold text-emerald-600">
-                          {service.price}
-                        </Text>
-                        <View className="flex flex-row items-center ml-3">
-                          <Star size={12} color="#F59E0B" />
-                          <Text className="block text-xs text-gray-500 ml-1">4.9</Text>
-                        </View>
+                    <View className="flex flex-row items-center justify-between">
+                      <Text className="block text-base font-bold text-white">{filteredServices[0].price}</Text>
+                      <View className="flex flex-row items-center bg-white/20 rounded-full px-3 py-1">
+                        <Star size={12} color="#FCD34D" />
+                        <Text className="block text-xs text-white ml-1">4.9</Text>
                       </View>
                     </View>
+                  </View>
+                )}
 
-                    {/* 右箭头 */}
-                    <View className="ml-2">
-                      <ChevronRight size={20} color="#D1D5DB" />
+                {/* 右侧两个小卡片 */}
+                <View style={{ flex: '1 1 45%', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {filteredServices.slice(1, 3).map((service, index) => {
+                    const iconData = getIconComponent(service.icon, 24)
+                    const colors = [
+                      'bg-gradient-to-br from-blue-500 to-blue-600',
+                      'bg-gradient-to-br from-purple-500 to-purple-600'
+                    ]
+                    return (
+                      <View
+                        key={service.id}
+                        className={`flex-1 ${colors[index]} rounded-2xl p-3 shadow-md flex flex-row items-center`}
+                        onClick={() => handleServiceClick(service)}
+                      >
+                        <View className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mr-3">
+                          {iconData.icon}
+                        </View>
+                        <View className="flex-1">
+                          <Text className="block text-base font-bold text-white">{service.name}</Text>
+                          <Text className="block text-xs text-white/80">{service.price}</Text>
+                        </View>
+                      </View>
+                    )
+                  })}
+                </View>
+              </View>
+
+              {/* 第二行：横向中等卡片 */}
+              {filteredServices[3] && (
+                <View
+                  className="bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl p-4 shadow-md flex flex-row items-center"
+                  style={{ height: '100px' }}
+                  onClick={() => handleServiceClick(filteredServices[3])}
+                >
+                  <View className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center mr-4">
+                    <Wrench size={32} color="#fff" />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="block text-lg font-bold text-white mb-1">{filteredServices[3].name}</Text>
+                    <Text className="block text-sm text-white/80 line-clamp-1">{filteredServices[3].description}</Text>
+                  </View>
+                  <View className="flex flex-col items-end">
+                    <Text className="block text-base font-bold text-white">{filteredServices[3].price}</Text>
+                    <View className="flex flex-row items-center mt-1">
+                      <Star size={12} color="#FCD34D" />
+                      <Text className="block text-xs text-white ml-1">4.8</Text>
                     </View>
                   </View>
-                )
-              })}
+                </View>
+              )}
+
+              {/* 第三行：横向大卡片 */}
+              {filteredServices[4] && (
+                <View
+                  className="bg-gradient-to-br from-cyan-500 to-teal-500 rounded-2xl p-5 shadow-md flex flex-row items-center justify-between"
+                  style={{ height: '90px' }}
+                  onClick={() => handleServiceClick(filteredServices[4])}
+                >
+                  <View className="flex flex-row items-center flex-1">
+                    <View className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center mr-4">
+                      <PaintBucket size={32} color="#fff" />
+                    </View>
+                    <View className="flex-1">
+                      <Text className="block text-lg font-bold text-white mb-1">{filteredServices[4].name}</Text>
+                      <Text className="block text-sm text-white/80">{filteredServices[4].description}</Text>
+                    </View>
+                  </View>
+                  <View className="flex flex-col items-end ml-4">
+                    <Text className="block text-base font-bold text-white">{filteredServices[4].price}</Text>
+                    <View className="flex flex-row items-center mt-1">
+                      <Star size={12} color="#FCD34D" />
+                      <Text className="block text-xs text-white ml-1">4.9</Text>
+                    </View>
+                  </View>
+                </View>
+              )}
+
+              {/* 第四行：四个小卡片 */}
+              <View style={{ display: 'flex', flexDirection: 'row', gap: '12px' }}>
+                {filteredServices.slice(5, 8).map((service, index) => {
+                  const iconData = getIconComponent(service.icon, 20)
+                  const colors = [
+                    'bg-gradient-to-br from-pink-500 to-rose-500',
+                    'bg-gradient-to-br from-indigo-500 to-purple-500',
+                    'bg-gradient-to-br from-amber-500 to-orange-500'
+                  ]
+                  return (
+                    <View
+                      key={service.id}
+                      className={`flex-1 ${colors[index % 3]} rounded-2xl p-3 shadow-sm`}
+                      style={{ height: '90px' }}
+                      onClick={() => handleServiceClick(service)}
+                    >
+                      <View className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mb-2">
+                        {iconData.icon}
+                      </View>
+                      <Text className="block text-sm font-bold text-white">{service.name}</Text>
+                      <Text className="block text-xs text-white/80 mt-1">{service.price}</Text>
+                    </View>
+                  )
+                })}
+                {/* 更多服务卡片 */}
+                <View
+                  className="flex-1 bg-gradient-to-br from-gray-600 to-gray-700 rounded-2xl p-3 shadow-sm flex flex-col items-center justify-center"
+                  style={{ height: '90px' }}
+                  onClick={() => Taro.navigateTo({ url: '/pages/service-list/index' })}
+                >
+                  <View className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mb-2">
+                    <ChevronRight size={24} color="#fff" />
+                  </View>
+                  <Text className="block text-sm font-bold text-white">更多服务</Text>
+                </View>
+              </View>
             </View>
           )}
         </View>
