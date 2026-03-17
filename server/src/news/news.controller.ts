@@ -9,6 +9,16 @@ export class NewsController {
   constructor(private readonly newsService: NewsService) {}
 
   /**
+   * 获取新闻分类
+   * GET /api/news/categories
+   */
+  @Get('categories')
+  async getCategories() {
+    const data = await this.newsService.getCategories();
+    return { code: 200, msg: 'success', data };
+  }
+
+  /**
    * 获取热点新闻列表
    * GET /api/news/hot
    */
@@ -133,15 +143,5 @@ export class NewsController {
   async deleteNews(@Param('id') id: string) {
     await this.newsService.deleteNews(id);
     return { code: 200, msg: '删除成功' };
-  }
-
-  /**
-   * 获取新闻分类
-   * GET /api/news/categories
-   */
-  @Get('categories/list')
-  async getCategories() {
-    const data = await this.newsService.getCategories();
-    return { code: 200, msg: 'success', data };
   }
 }

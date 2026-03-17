@@ -19,6 +19,7 @@ export class HealthController {
 
   @Get()
   @HealthCheck()
+  @Public()
   healthCheck(): Promise<HealthCheckResult> {
     return this.health.check([
       // Memory health check

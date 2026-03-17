@@ -26,6 +26,7 @@ function parsePort(): number {
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: new Logger(),
+    bodyParser: true,
   });
 
   app.enableCors({
@@ -33,6 +34,8 @@ async function bootstrap() {
     credentials: true,
   });
   app.setGlobalPrefix('api');
+  
+  // 使用NestJS内置的body parser，不需要额外的express.json()
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ limit: '50mb', extended: true }));
 

@@ -474,13 +474,13 @@ const IndexPage = () => {
           </ScrollView>
 
           {/* 新闻内容 - 全部分类用轮播，其他分类用列表 */}
-          {activeNewsCategory === '' ? (
-            /* 轮播展示 */
+          {activeNewsCategory === '' && hotNews.length >= 2 ? (
+            /* 轮播展示 - 需要至少2条数据 */
             <View className="news-swiper-wrapper">
               <Swiper 
                 className="news-swiper"
-                autoplay
-                circular
+                autoplay={hotNews.length >= 3}
+                circular={hotNews.length >= 3}
                 interval={4000}
                 duration={500}
                 previousMargin="24rpx"

@@ -1,7 +1,9 @@
 import { Controller, Get, Post, Query, HttpException, HttpStatus } from '@nestjs/common'
 import { ServicesService } from './services.service'
+import { Public } from '../decorators/public.decorator'
 
 @Controller('services')
+@Public()
 export class ServicesController {
   constructor(private readonly servicesService: ServicesService) {}
 
