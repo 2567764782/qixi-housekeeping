@@ -1,7 +1,7 @@
 import Taro from '@tarojs/taro'
 import { View, Text, ScrollView, Picker, Input } from '@tarojs/components'
 import { useState, useEffect } from 'react'
-import { Calendar, Clock, MapPin, Phone, User, FileText, ChevronRight, Check } from 'lucide-react-taro'
+import { Calendar, Clock, MapPin, Phone, User, FileText, ChevronRight, Check, Info, X } from 'lucide-react-taro'
 import { Network } from '@/network'
 import './index.css'
 
@@ -12,6 +12,46 @@ interface BookingData {
   price: string
   unit: string
   duration: string
+}
+
+// ==================== 服务区域配置 ====================
+// 目前只开放北京朝阳区以下区域，后续根据业务量逐步放开
+const SERVICE_AREAS = {
+  '北京市': {
+    '朝阳区': [
+      { name: '酒仙桥', available: true },
+      { name: '望京', available: true },
+      { name: '东坝', available: true },
+      { name: '姚家园', available: true },
+      // 以下区域暂未开放，后续逐步放开
+      { name: '三里屯', available: false },
+      { name: '国贸', available: false },
+      { name: '大望路', available: false },
+      { name: '双井', available: false },
+      { name: '劲松', available: false },
+      { name: '潘家园', available: false },
+      { name: '团结湖', available: false },
+      { name: '呼家楼', available: false },
+      { name: '朝外', available: false },
+      { name: '建外大街', available: false }
+    ]
+  }
+  // 后续可扩展其他城市
+  // '上海市': { ... },
+  // '广州市': { ... }
+}
+
+// 获取所有省份
+const getProvinces = () => Object.keys(SERVICE_AREAS)
+
+// 获取城市
+const getCities = (province: string) => {
+  return Object.keys(SERVICE_AREAS[province] || {})
+}
+
+// 获取区域列表
+const getAreas = (province: string, city: string) => {
+  return (SERVICE_AREAS[province]?.[city] || [])
 }
 
 const ServiceBookPage = () => {
@@ -28,11 +68,23 @@ const ServiceBookPage = () => {
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
-    address: '',
+    province: '北京市',
+    city: '朝阳区',
+    area: '',
+    detailAddress: '',
     date: '',
     time: '',
     remark: ''
   })
+
+  // 区域选择状态
+  const [provinceIndex, setProvinceIndex] = useState(0)
+  const [cityIndex, setCityIndex] = useState(0)
+  const [areaIndex, setAreaIndex] = useState(0)
+  
+  const [provinces] = useState(getProvinces())
+  const [cities, setCities] = useState(getCities(provinces[0]))
+  const [areas, setAreas] = useState(getAreas(provinces[0], cities[0]))
 
   // 日期选择器
   const [dateIndex, setDateIndex] = useState<number>(0)
@@ -68,6 +120,22 @@ const ServiceBookPage = () => {
 
   const [loading, setLoading] = useState(false)
 
+  // 检查当前选择的区域是否可用
+  const isSelectedAreaAvailable = () => {
+    const province = provinces[provinceIndex]
+    const city = cities[cityIndex]
+    const areaList = getAreas(province, city)
+    if (areaIndex < areaList.length) {
+      return areaList[areaIndex].available
+    }
+    return false
+  }
+
+  // 获取区域选择器显示列表
+  const getAreaDisplayList = () => {
+    return areas.map(area => area.name)
+  }
+
   useEffect(() => {
     // 获取路由参数
     const instance = Taro.getCurrentInstance()
@@ -87,6 +155,59 @@ const ServiceBookPage = () => {
       Taro.setNavigationBarTitle({ title: '预约服务' })
     }
   }, [])
+
+  // 省份选择变化
+  const handleProvinceChange = (e) => {
+    const index = e.detail.value
+    setProvinceIndex(index)
+    const newCities = getCities(provinces[index])
+    setCities(newCities)
+    setCityIndex(0)
+    const newAreas = getAreas(provinces[index], newCities[0])
+    setAreas(newAreas)
+    setAreaIndex(0)
+    setFormData({
+      ...formData,
+      province: provinces[index],
+      city: newCities[0],
+      area: ''
+    })
+  }
+
+  // 城市选择变化
+  const handleCityChange = (e) => {
+    const index = e.detail.value
+    setCityIndex(index)
+    const newAreas = getAreas(provinces[provinceIndex], cities[index])
+    setAreas(newAreas)
+    setAreaIndex(0)
+    setFormData({
+      ...formData,
+      city: cities[index],
+      area: ''
+    })
+  }
+
+  // 区域选择变化
+  const handleAreaChange = (e) => {
+    const index = e.detail.value
+    setAreaIndex(index)
+    const selectedArea = areas[index]
+    setFormData({
+      ...formData,
+      area: selectedArea.name
+    })
+    
+    // 如果选择了不可用区域，提示用户
+    if (!selectedArea.available) {
+      Taro.showModal({
+        title: '温馨提示',
+        content: `${selectedArea.name}区域暂未开通服务，敬请期待！\n\n目前已开通：酒仙桥、望京、东坝、姚家园`,
+        showCancel: false,
+        confirmText: '知道了'
+      })
+    }
+  }
 
   // 日期选择
   const handleDateChange = (e) => {
@@ -117,10 +238,25 @@ const ServiceBookPage = () => {
       Taro.showToast({ title: '请输入正确的手机号', icon: 'none' })
       return
     }
-    if (!formData.address.trim()) {
-      Taro.showToast({ title: '请输入服务地址', icon: 'none' })
+    if (!formData.area) {
+      Taro.showToast({ title: '请选择服务区域', icon: 'none' })
       return
     }
+    if (!formData.detailAddress.trim()) {
+      Taro.showToast({ title: '请输入详细地址', icon: 'none' })
+      return
+    }
+    
+    // 检查区域是否可用
+    if (!isSelectedAreaAvailable()) {
+      Taro.showModal({
+        title: '暂未开通服务',
+        content: '抱歉，您选择的区域暂未开通服务。\n\n目前已开通区域：\n酒仙桥、望京、东坝、姚家园\n\n我们将逐步扩大服务范围，敬请期待！',
+        showCancel: false
+      })
+      return
+    }
+    
     if (!formData.date) {
       Taro.showToast({ title: '请选择服务日期', icon: 'none' })
       return
@@ -145,7 +281,10 @@ const ServiceBookPage = () => {
           duration: bookingData.duration,
           contact_name: formData.name,
           contact_phone: formData.phone,
-          address: formData.address,
+          province: formData.province,
+          city: formData.city,
+          area: formData.area,
+          address: `${formData.province}${formData.city}${formData.area}${formData.detailAddress}`,
           service_date: formData.date,
           service_time: formData.time,
           remark: formData.remark
@@ -176,6 +315,18 @@ const ServiceBookPage = () => {
   return (
     <View className="min-h-screen bg-gray-50">
       <ScrollView scrollY className="book-scroll-wrapper">
+        {/* 服务区域提示 */}
+        <View className="bg-blue-50 mx-4 mt-4 rounded-xl p-3 flex flex-row items-start">
+          <Info size={16} color="#007CFF" className="flex-shrink-0 mt-0.5" />
+          <View className="ml-2 flex-1">
+            <Text className="text-sm text-blue-700 font-medium">服务区域提示</Text>
+            <Text className="block text-xs text-blue-600 mt-1">
+              目前已开通：酒仙桥、望京、东坝、姚家园{'\n'}
+              其他区域将逐步开放，敬请期待
+            </Text>
+          </View>
+        </View>
+
         {/* 服务信息卡片 */}
         <View className="bg-white mx-4 mt-4 rounded-xl overflow-hidden shadow-sm">
           <View className="p-4 border-b border-gray-100">
@@ -229,17 +380,65 @@ const ServiceBookPage = () => {
             />
           </View>
 
-          {/* 地址 */}
+          {/* 区域选择 - 省 */}
           <View className="flex flex-row items-center px-4 py-3 border-b border-gray-50">
             <View className="w-6 flex-shrink-0">
               <MapPin size={18} color="#F85659" />
             </View>
-            <Text className="text-sm text-gray-600 w-20">服务地址</Text>
+            <Text className="text-sm text-gray-600 w-20">省份</Text>
+            <Picker mode="selector" range={provinces} value={provinceIndex} onChange={handleProvinceChange}>
+              <View className="flex flex-row items-center justify-end flex-1">
+                <Text className="text-sm text-gray-900">{provinces[provinceIndex]}</Text>
+                <ChevronRight size={16} color="#ccc" className="ml-1" />
+              </View>
+            </Picker>
+          </View>
+
+          {/* 区域选择 - 市 */}
+          <View className="flex flex-row items-center px-4 py-3 border-b border-gray-50">
+            <View className="w-6 flex-shrink-0" />
+            <Text className="text-sm text-gray-600 w-20">城市</Text>
+            <Picker mode="selector" range={cities} value={cityIndex} onChange={handleCityChange}>
+              <View className="flex flex-row items-center justify-end flex-1">
+                <Text className="text-sm text-gray-900">{cities[cityIndex]}</Text>
+                <ChevronRight size={16} color="#ccc" className="ml-1" />
+              </View>
+            </Picker>
+          </View>
+
+          {/* 区域选择 - 区/商圈 */}
+          <View className="flex flex-row items-center px-4 py-3 border-b border-gray-50">
+            <View className="w-6 flex-shrink-0" />
+            <Text className="text-sm text-gray-600 w-20">区域</Text>
+            <Picker mode="selector" range={getAreaDisplayList()} value={areaIndex} onChange={handleAreaChange}>
+              <View className="flex flex-row items-center justify-end flex-1">
+                <Text className={`text-sm ${formData.area ? 'text-gray-900' : 'text-gray-400'}`}>
+                  {formData.area || '请选择区域'}
+                </Text>
+                <ChevronRight size={16} color="#ccc" className="ml-1" />
+              </View>
+            </Picker>
+          </View>
+
+          {/* 区域状态提示 */}
+          {formData.area && !isSelectedAreaAvailable() && (
+            <View className="flex flex-row items-center px-4 py-2 bg-orange-50">
+              <X size={14} color="#F59E0B" />
+              <Text className="text-xs text-orange-600 ml-2">
+                该区域暂未开通服务，请选择其他区域
+              </Text>
+            </View>
+          )}
+
+          {/* 详细地址 */}
+          <View className="flex flex-row items-center px-4 py-3 border-b border-gray-50">
+            <View className="w-6 flex-shrink-0" />
+            <Text className="text-sm text-gray-600 w-20">详细地址</Text>
             <Input
               className="flex-1 text-sm text-right"
-              placeholder="请输入详细地址"
-              value={formData.address}
-              onInput={(e) => setFormData({ ...formData, address: e.detail.value })}
+              placeholder="小区名/楼栋号/门牌号"
+              value={formData.detailAddress}
+              onInput={(e) => setFormData({ ...formData, detailAddress: e.detail.value })}
             />
           </View>
 
