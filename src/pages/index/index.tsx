@@ -214,39 +214,45 @@ const IndexPage = () => {
           ))}
         </View>
 
-        {/* 会员服务推广区 - 左1右2布局 */}
+        {/* 会员服务推广区 - 一排三列布局 */}
         <View className="promotion-section">
-          <View className="promotion-left">
-            <View 
-              className="promotion-card member-card"
-              onClick={() => Taro.showToast({ title: '会员功能敬请期待', icon: 'none' })}
-            >
-              <View className="card-header">
-                <Crown size={20} color="#FFD700" />
-                <Text className="card-title">成为会员</Text>
-              </View>
-              <Text className="card-desc">9折优惠等你来购</Text>
-              <View className="card-icon">
-                <Crown size={40} color="rgba(255,255,255,0.3)" />
-              </View>
+          <View 
+            className="promotion-card member-card"
+            onClick={() => Taro.showToast({ title: '会员功能敬请期待', icon: 'none' })}
+          >
+            <View className="card-header">
+              <Crown size={18} color="#FFD700" />
+              <Text className="card-title">成为会员</Text>
+            </View>
+            <Text className="card-desc">9折优惠等你来购</Text>
+            <View className="card-icon">
+              <Crown size={28} color="rgba(255,255,255,0.3)" />
             </View>
           </View>
-          <View className="promotion-right">
-            <View 
-              className="promotion-card month-card"
-              onClick={() => Taro.showToast({ title: '敬请期待', icon: 'none' })}
-            >
-              <Text className="card-title-small">按月/季度服务</Text>
-              <Text className="card-desc-small">享受所有优惠制度</Text>
-              <Gift size={24} color="rgba(255,255,255,0.5)" />
+          <View 
+            className="promotion-card month-card"
+            onClick={() => Taro.showToast({ title: '敬请期待', icon: 'none' })}
+          >
+            <View className="card-header">
+              <Gift size={18} color="#FFD700" />
+              <Text className="card-title">按月/季度</Text>
             </View>
-            <View 
-              className="promotion-card year-card"
-              onClick={() => Taro.showToast({ title: '敬请期待', icon: 'none' })}
-            >
-              <Text className="card-title-small">包年付费</Text>
-              <Text className="card-desc-small">享受史诗级优惠</Text>
-              <Gift size={24} color="rgba(255,255,255,0.5)" />
+            <Text className="card-desc">享受所有优惠制度</Text>
+            <View className="card-icon">
+              <Gift size={28} color="rgba(255,255,255,0.3)" />
+            </View>
+          </View>
+          <View 
+            className="promotion-card year-card"
+            onClick={() => Taro.showToast({ title: '敬请期待', icon: 'none' })}
+          >
+            <View className="card-header">
+              <Star size={18} color="#FFD700" />
+              <Text className="card-title">包年付费</Text>
+            </View>
+            <Text className="card-desc">享受史诗级优惠</Text>
+            <View className="card-icon">
+              <Star size={28} color="rgba(255,255,255,0.3)" />
             </View>
           </View>
         </View>
