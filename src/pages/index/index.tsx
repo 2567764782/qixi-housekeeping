@@ -1,10 +1,12 @@
-import Taro, { useLoad } from '@tarojs/taro'
+import Taro, { useLoad, usePullDownRefresh } from '@tarojs/taro'
 import { View, Text, ScrollView, Swiper, SwiperItem, Image } from '@tarojs/components'
 import { 
   Sparkles, House, Tv, LayoutGrid, Phone, 
-  Gift, Wallet, Star, Crown, Wind, Sofa, Droplets, Percent
+  Gift, Wallet, Star, Crown, Wind, Sofa, Droplets, Percent,
+  Flame, Clock, Eye, ChevronRight, Newspaper
 } from 'lucide-react-taro'
 import { useState } from 'react'
+import { Network } from '@/network'
 import './index.css'
 
 // 轮播图类型
@@ -37,9 +39,23 @@ interface RecommendService {
   iconColor: string
 }
 
+// 热点新闻类型
+interface NewsItem {
+  id: string
+  title: string
+  summary: string
+  source: string
+  category: string
+  is_hot: boolean
+  view_count: number
+  publish_time: string
+  created_at: string
+}
+
 const IndexPage = () => {
   useLoad(() => {
     console.log('🏠 首页加载')
+    loadHotNews()
   })
 
   // 轮播图数据
@@ -69,6 +85,115 @@ const IndexPage = () => {
 
   // 当前轮播索引
   const [currentBanner, setCurrentBanner] = useState(0)
+
+  // 热点新闻数据
+  const [hotNews, setHotNews] = useState<NewsItem[]>([])
+  const [newsCategories] = useState([
+    { key: '', name: '全部' },
+    { key: 'industry', name: '行业' },
+    { key: 'market', name: '市场' },
+    { key: 'tech', name: '技术' }
+  ])
+  const [activeNewsCategory, setActiveNewsCategory] = useState('')
+
+  // 加载热点新闻
+  const loadHotNews = async (isRefresh = false) => {
+    try {
+      const res = await Network.request({
+        url: '/api/news/hot',
+        method: 'GET',
+        data: {
+          category: activeNewsCategory || undefined,
+          limit: 5
+        }
+      })
+
+      if (res.statusCode === 200 && res.data?.data) {
+        setHotNews(res.data.data)
+      }
+    } catch (error) {
+      console.error('加载热点新闻失败:', error)
+      // 模拟数据
+      setHotNews([
+        {
+          id: 'news-001',
+          title: '2024年家政服务行业发展趋势报告发布',
+          summary: '报告显示，家政服务行业正朝着智能化、标准化方向发展',
+          source: '行业资讯',
+          category: 'industry',
+          is_hot: true,
+          view_count: 1234,
+          publish_time: new Date(Date.now() - 3600000).toISOString(),
+          created_at: new Date(Date.now() - 3600000).toISOString()
+        },
+        {
+          id: 'news-002',
+          title: '春节家政服务需求激增，提前预约成趋势',
+          summary: '随着春节临近，保洁、家政等服务需求大幅增长',
+          source: '市场动态',
+          category: 'market',
+          is_hot: true,
+          view_count: 2345,
+          publish_time: new Date(Date.now() - 7200000).toISOString(),
+          created_at: new Date(Date.now() - 7200000).toISOString()
+        },
+        {
+          id: 'news-003',
+          title: '智能清洁设备助力家政服务升级',
+          summary: '新型智能清洁设备的应用，有效提升了服务效率和质量',
+          source: '技术前沿',
+          category: 'tech',
+          is_hot: false,
+          view_count: 567,
+          publish_time: new Date(Date.now() - 10800000).toISOString(),
+          created_at: new Date(Date.now() - 10800000).toISOString()
+        }
+      ])
+    } finally {
+      if (isRefresh) {
+        Taro.stopPullDownRefresh()
+      }
+    }
+  }
+
+  // 新闻分类切换
+  const handleNewsCategoryChange = (categoryKey: string) => {
+    setActiveNewsCategory(categoryKey)
+    setTimeout(() => loadHotNews(true), 100)
+  }
+
+  // 新闻点击
+  const handleNewsClick = (news: NewsItem) => {
+    Taro.navigateTo({
+      url: `/pages/news-detail/index?id=${news.id}`
+    })
+  }
+
+  // 查看更多新闻
+  const handleViewMoreNews = () => {
+    Taro.navigateTo({
+      url: '/pages/hot-news/index'
+    })
+  }
+
+  // 下拉刷新
+  usePullDownRefresh(() => {
+    loadHotNews(true)
+  })
+
+  // 格式化时间
+  const formatNewsTime = (dateStr: string) => {
+    const date = new Date(dateStr)
+    const now = new Date()
+    const diff = now.getTime() - date.getTime()
+    
+    const minutes = Math.floor(diff / 60000)
+    const hours = Math.floor(diff / 3600000)
+    
+    if (minutes < 60) return `${minutes}分钟前`
+    if (hours < 24) return `${hours}小时前`
+    return date.toLocaleDateString()
+  }
 
   // 8个功能入口
   const [functionItems] = useState<FunctionItem[]>([
@@ -254,6 +379,81 @@ const IndexPage = () => {
             <View className="card-icon">
               <Star size={28} color="rgba(255,255,255,0.3)" />
             </View>
+          </View>
+        </View>
+
+        {/* 热点新闻区域 */}
+        <View className="hot-news-section">
+          <View className="hot-news-header">
+            <View className="hot-news-title-wrap">
+              <View className="hot-news-icon">
+                <Flame size={18} color="#F85659" />
+              </View>
+              <Text className="hot-news-title">热点新闻</Text>
+            </View>
+            <View className="view-more-btn" onClick={handleViewMoreNews}>
+              <Text className="view-more-text">查看更多</Text>
+              <ChevronRight size={14} color="#999" />
+            </View>
+          </View>
+
+          {/* 分类标签 */}
+          <ScrollView scrollX className="news-category-scroll">
+            <View className="news-category-list">
+              {newsCategories.map(cat => (
+                <View
+                  key={cat.key}
+                  className={`news-category-item ${activeNewsCategory === cat.key ? 'active' : ''}`}
+                  onClick={() => handleNewsCategoryChange(cat.key)}
+                >
+                  <Text className="news-category-text">{cat.name}</Text>
+                </View>
+              ))}
+            </View>
+          </ScrollView>
+
+          {/* 新闻列表 */}
+          <View className="hot-news-list">
+            {hotNews.map((news, index) => (
+              <View 
+                key={news.id} 
+                className={`hot-news-card ${index === 0 ? 'first' : ''}`}
+                onClick={() => handleNewsClick(news)}
+              >
+                <View className="news-card-left">
+                  {news.is_hot && (
+                    <View className="hot-tag">
+                      <Flame size={10} color="#fff" />
+                      <Text className="hot-tag-text">热</Text>
+                    </View>
+                  )}
+                  <View className="news-rank">
+                    <Text className={`rank-num ${index < 3 ? 'top' : ''}`}>{index + 1}</Text>
+                  </View>
+                </View>
+                <View className="news-card-content">
+                  <Text className="news-card-title">{news.title}</Text>
+                  <View className="news-card-meta">
+                    <Text className="news-card-source">{news.source}</Text>
+                    <View className="news-meta-item">
+                      <Clock size={10} color="#999" />
+                      <Text className="news-meta-text">{formatNewsTime(news.publish_time || news.created_at)}</Text>
+                    </View>
+                    <View className="news-meta-item">
+                      <Eye size={10} color="#999" />
+                      <Text className="news-meta-text">{news.view_count || 0}</Text>
+                    </View>
+                  </View>
+                </View>
+              </View>
+            ))}
+
+            {hotNews.length === 0 && (
+              <View className="news-empty">
+                <Newspaper size={32} color="#ddd" />
+                <Text className="news-empty-text">暂无热点新闻</Text>
+              </View>
+            )}
           </View>
         </View>
 
