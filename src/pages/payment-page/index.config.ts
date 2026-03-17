@@ -1,7 +1,7 @@
 export default typeof definePageConfig === 'function'
   ? definePageConfig({
-      navigationBarTitleText: '阿姨接单'
+      navigationBarTitleText: '订单支付'
     })
   : {
-      navigationBarTitleText: '阿姨接单'
+      navigationBarTitleText: '订单支付'
     }

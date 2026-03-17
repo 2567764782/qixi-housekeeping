@@ -1,70 +1,161 @@
-import { Controller, Post, Body, Get, Query } from '@nestjs/common';
-import { WechatPayService } from './wechat-pay.service';
-import { CreatePaymentDto, RefundDto } from './dto/payment.dto';
+import { Controller, Post, Body, Get, Query, Param, HttpException, HttpStatus } from '@nestjs/common';
+import { PaymentService } from './payment.service';
+import { Public } from '../decorators/public.decorator';
+import { IsString, IsNotEmpty, IsNumber, IsOptional, Min } from 'class-validator';
+
+class CreatePaymentDto {
+  @IsString()
+  @IsNotEmpty({ message: '订单ID不能为空' })
+  orderId: string;
+
+  @IsNumber()
+  @Min(0.01, { message: '支付金额必须大于0' })
+  amount: number;
+
+  @IsOptional()
+  @IsString()
+  method?: string;
+}
+
+class MockPaymentDto {
+  @IsString()
+  @IsNotEmpty({ message: '支付ID不能为空' })
+  paymentId: string;
+}
+
+class RefundDto {
+  @IsString()
+  @IsNotEmpty({ message: '订单ID不能为空' })
+  orderId: string;
+
+  @IsOptional()
+  @IsString()
+  reason?: string;
+}
 
 @Controller('payment')
 export class PaymentController {
-  constructor(private readonly wechatPayService: WechatPayService) {}
+  constructor(private readonly paymentService: PaymentService) {}
 
   /**
    * 创建支付订单
+   * POST /api/payment/create
    */
   @Post('create')
-  async createPayment(@Body() createPaymentDto: CreatePaymentDto) {
-    const payment = await this.wechatPayService.createPaymentOrder(
-      createPaymentDto.orderId,
-      createPaymentDto.description,
-      createPaymentDto.amount,
-      createPaymentDto.openid
-    );
-
-    return {
-      status: 'success',
-      data: payment
-    };
+  async createPayment(@Body() dto: CreatePaymentDto) {
+    try {
+      const userId = 'mock-user-id';
+      const data = await this.paymentService.createPayment(
+        dto.orderId,
+        userId,
+        dto.amount,
+        dto.method || 'wechat'
+      );
+      return { code: 200, msg: '支付订单创建成功', data };
+    } catch (error) {
+      throw new HttpException(
+        { code: 500, msg: error.message, data: null },
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 
   /**
-   * 查询支付订单
+   * 模拟支付（开发测试用）
+   * POST /api/payment/mock
    */
+  @Post('mock')
+  async mockPayment(@Body() dto: MockPaymentDto) {
+    try {
+      const userId = 'mock-user-id';
+      const data = await this.paymentService.mockPayment(dto.paymentId, userId);
+      return { code: 200, msg: '支付成功', data };
+    } catch (error) {
+      throw new HttpException(
+        { code: 500, msg: error.message, data: null },
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  /**
+   * 查询支付状态
+   * GET /api/payment/query
+   */
+  @Public()
   @Get('query')
-  async queryPayment(@Query('orderId') orderId: string) {
-    const payment = await this.wechatPayService.queryPaymentOrder(orderId);
-
-    return {
-      status: 'success',
-      data: payment
-    };
+  async queryPayment(@Query('paymentId') paymentId: string) {
+    try {
+      const data = await this.paymentService.queryPayment(paymentId);
+      return { code: 200, msg: 'success', data };
+    } catch (error) {
+      throw new HttpException(
+        { code: 500, msg: error.message, data: null },
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 
   /**
-   * 支付回调
+   * 根据订单ID查询支付状态
+   * GET /api/payment/order/:orderId
    */
-  @Post('callback')
-  async paymentCallback(@Body() callbackData: any) {
-    const result = await this.wechatPayService.handlePaymentCallback(callbackData);
-
-    return {
-      code: 'SUCCESS',
-      message: '处理成功'
-    };
+  @Public()
+  @Get('order/:orderId')
+  async queryPaymentByOrderId(@Param('orderId') orderId: string) {
+    try {
+      const data = await this.paymentService.queryPaymentByOrderId(orderId);
+      return { code: 200, msg: 'success', data };
+    } catch (error) {
+      throw new HttpException(
+        { code: 500, msg: error.message, data: null },
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 
   /**
    * 申请退款
+   * POST /api/payment/refund
    */
   @Post('refund')
-  async createRefund(@Body() refundDto: RefundDto) {
-    const refund = await this.wechatPayService.refund(
-      refundDto.orderId,
-      refundDto.transactionId,
-      refundDto.refundAmount,
-      refundDto.totalAmount
-    );
+  async refund(@Body() dto: RefundDto) {
+    try {
+      const userId = 'mock-user-id';
+      const data = await this.paymentService.refund(dto.orderId, userId, dto.reason);
+      return { code: 200, msg: '退款申请已提交', data };
+    } catch (error) {
+      throw new HttpException(
+        { code: 500, msg: error.message, data: null },
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
 
-    return {
-      status: 'success',
-      data: refund
-    };
+  /**
+   * 获取用户支付记录
+   * GET /api/payment/list
+   */
+  @Public()
+  @Get('list')
+  async getUserPayments(
+    @Query('userId') userId: string,
+    @Query('page') page: string = '1',
+    @Query('pageSize') pageSize: string = '20'
+  ) {
+    try {
+      const uid = userId || 'mock-user-id';
+      const data = await this.paymentService.getUserPayments(
+        uid,
+        parseInt(page, 10) || 1,
+        parseInt(pageSize, 10) || 20
+      );
+      return { code: 200, msg: 'success', data };
+    } catch (error) {
+      throw new HttpException(
+        { code: 500, msg: error.message, data: null },
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 }

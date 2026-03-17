@@ -8,6 +8,8 @@ import { StaffModule } from './staff/staff.module';
 import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { HealthModule } from './health/health.module';
+import { CleanerPlatformModule } from './cleaner-platform/cleaner-platform.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -16,6 +18,8 @@ import { HealthModule } from './health/health.module';
     OrdersModule,
     StaffModule,
     HealthModule,
+    CleanerPlatformModule,
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [

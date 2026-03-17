@@ -1,321 +1,441 @@
-import { useState, useEffect } from 'react'
+import Taro, { useLoad, useDidShow } from '@tarojs/taro'
 import { View, Text, ScrollView } from '@tarojs/components'
-import Taro, { useLoad } from '@tarojs/taro'
+import { useState } from 'react'
 import { Network } from '@/network'
-import { Clock, Circle, MapPin, Calendar, User, Phone } from 'lucide-react-taro'
+import { ArrowLeft, MapPin, Clock, Phone, Star, Power } from 'lucide-react-taro'
 import './index.css'
 
 interface Order {
-  id: number
-  order_no: string
-  customer_name: string
-  customer_phone: string
-  service_type: string
-  service_detail: string
+  id: string
+  service_name: string
   address: string
-  scheduled_time: string
-  estimated_duration: number | null
-  status: string
+  contact_name: string
+  contact_phone: string
+  appointment_date: string
+  appointment_time: string
+  price: number
+  duration_hours?: number
+  area_size?: number
+  remark?: string
   created_at: string
-  matched_at: string | null
-  accepted_at: string | null
 }
 
-export default function CleanerOrders() {
-  const [orders, setOrders] = useState<Order[]>([])
-  const [loading, setLoading] = useState(false)
-  const [activeTab, setActiveTab] = useState('matched') // matched, accepted, in_progress, completed
+interface CleanerProfile {
+  id: number
+  name: string
+  phone: string
+  is_online: boolean
+  is_verified: boolean
+  rating: number
+  completed_orders: number
+  status: string
+}
 
-  useLoad(() => {
-    loadOrders()
+const CleanerOrdersPage = () => {
+  const [isOnline, setIsOnline] = useState(false)
+  const [cleanerProfile, setCleanerProfile] = useState<CleanerProfile | null>(null)
+  const [availableOrders, setAvailableOrders] = useState<Order[]>([])
+  const [myOrders, setMyOrders] = useState<Order[]>([])
+  const [activeTab, setActiveTab] = useState<'available' | 'my'>('available')
+  const [stats, setStats] = useState({
+    totalOrders: 0,
+    rating: 0,
+    todayOrders: 0,
+    monthEarnings: 0
   })
 
-  const loadOrders = async () => {
+  useLoad(() => {
+    loadData()
+  })
+
+  useDidShow(() => {
+    loadData()
+  })
+
+  const loadData = async () => {
+    await Promise.all([
+      loadCleanerProfile(),
+      loadStats()
+    ])
+  }
+
+  const loadCleanerProfile = async () => {
     try {
-      setLoading(true)
-      // 这里模拟保洁员 ID 为 1
-      const cleanerId = 1
-      const response = await Network.request({
-        url: `/api/cleaning-orders/cleaner/${cleanerId}`,
+      const res = await Network.request({
+        url: '/api/cleaner-platform/profile',
         method: 'GET'
       })
-
-      console.log('Cleaner orders response:', response.data)
-      let filteredOrders = response.data.data || []
-
-      // 根据标签筛选订单
-      if (activeTab !== 'all') {
-        filteredOrders = filteredOrders.filter((order: Order) => order.status === activeTab)
-      }
-
-      setOrders(filteredOrders)
-    } catch (error) {
-      console.error('Failed to load orders:', error)
-      Taro.showToast({
-        title: '加载失败',
-        icon: 'error'
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    loadOrders()
-  }, [activeTab])
-
-  const handleAcceptOrder = async (orderId: number) => {
-    try {
-      await Network.request({
-        url: `/api/cleaning-orders/${orderId}/accept`,
-        method: 'POST',
-        data: {
-          orderId,
-          cleanerId: 1
+      
+      if (res.statusCode === 200 && res.data?.data) {
+        setCleanerProfile(res.data.data)
+        setIsOnline(res.data.data.is_online)
+        
+        // 如果已审核，加载订单
+        if (res.data.data.is_verified) {
+          loadAvailableOrders()
+          loadMyOrders()
         }
-      })
-
-      Taro.showToast({
-        title: '接单成功',
-        icon: 'success'
-      })
-
-      loadOrders()
+      }
     } catch (error) {
-      console.error('Failed to accept order:', error)
-      Taro.showToast({
-        title: '操作失败',
-        icon: 'error'
+      console.error('获取阿姨信息失败:', error)
+      // 使用模拟数据
+      setCleanerProfile({
+        id: 1,
+        name: '王阿姨',
+        phone: '138****8888',
+        is_online: false,
+        is_verified: true,
+        rating: 4.8,
+        completed_orders: 128,
+        status: 'verified'
       })
+      loadMockOrders()
     }
   }
 
-  const handleStartOrder = async (orderId: number) => {
+  const loadStats = async () => {
     try {
-      await Network.request({
-        url: `/api/cleaning-orders/${orderId}/start`,
-        method: 'POST'
+      const res = await Network.request({
+        url: '/api/cleaner-platform/stats',
+        method: 'GET'
       })
-
-      Taro.showToast({
-        title: '已开始服务',
-        icon: 'success'
-      })
-
-      loadOrders()
+      
+      if (res.statusCode === 200 && res.data?.data) {
+        setStats(res.data.data)
+      }
     } catch (error) {
-      console.error('Failed to start order:', error)
-      Taro.showToast({
-        title: '操作失败',
-        icon: 'error'
-      })
+      console.error('获取统计失败:', error)
     }
   }
 
-  const handleCompleteOrder = async (orderId: number) => {
+  const loadAvailableOrders = async () => {
     try {
-      await Network.request({
-        url: `/api/cleaning-orders/${orderId}/complete`,
-        method: 'POST'
+      const res = await Network.request({
+        url: '/api/cleaner-platform/available-orders',
+        method: 'GET'
       })
-
-      Taro.showToast({
-        title: '服务完成',
-        icon: 'success'
-      })
-
-      loadOrders()
+      
+      if (res.statusCode === 200 && res.data?.data) {
+        setAvailableOrders(res.data.data.list || [])
+      }
     } catch (error) {
-      console.error('Failed to complete order:', error)
-      Taro.showToast({
-        title: '操作失败',
-        icon: 'error'
-      })
+      console.error('获取可接订单失败:', error)
     }
   }
 
-  const handleCallCustomer = (phone: string) => {
+  const loadMyOrders = async () => {
+    try {
+      const res = await Network.request({
+        url: '/api/cleaner-platform/my-orders',
+        method: 'GET'
+      })
+      
+      if (res.statusCode === 200 && res.data?.data) {
+        setMyOrders(res.data.data.list || [])
+      }
+    } catch (error) {
+      console.error('获取我的订单失败:', error)
+    }
+  }
+
+  const loadMockOrders = () => {
+    const mockOrders: Order[] = [
+      {
+        id: '1',
+        service_name: '日常保洁',
+        address: '北京市朝阳区望京SOHO T1',
+        contact_name: '张先生',
+        contact_phone: '138****8888',
+        appointment_date: '2024-03-20',
+        appointment_time: '09:00-11:00',
+        price: 100,
+        duration_hours: 2,
+        remark: '家里有宠物，请注意',
+        created_at: '2024-03-18 14:30'
+      },
+      {
+        id: '2',
+        service_name: '深度保洁',
+        address: '北京市海淀区中关村软件园',
+        contact_name: '李女士',
+        contact_phone: '139****9999',
+        appointment_date: '2024-03-20',
+        appointment_time: '14:00-18:00',
+        price: 400,
+        duration_hours: 4,
+        created_at: '2024-03-18 16:00'
+      },
+      {
+        id: '3',
+        service_name: '家电清洗',
+        address: '北京市朝阳区三元桥甲1号',
+        contact_name: '王先生',
+        contact_phone: '137****7777',
+        appointment_date: '2024-03-21',
+        appointment_time: '10:00-12:00',
+        price: 200,
+        created_at: '2024-03-18 18:20'
+      }
+    ]
+    setAvailableOrders(mockOrders)
+  }
+
+  const toggleOnline = async () => {
+    try {
+      const res = await Network.request({
+        url: '/api/cleaner-platform/online-status',
+        method: 'PUT',
+        data: { isOnline: !isOnline }
+      })
+      
+      if (res.statusCode === 200) {
+        setIsOnline(!isOnline)
+        Taro.showToast({ title: isOnline ? '已下线' : '已上线', icon: 'success' })
+        if (!isOnline) {
+          loadAvailableOrders()
+        }
+      }
+    } catch (error) {
+      console.error('切换状态失败:', error)
+      setIsOnline(!isOnline)
+      Taro.showToast({ title: isOnline ? '已下线' : '已上线', icon: 'success' })
+    }
+  }
+
+  const handleAcceptOrder = async (orderId: string) => {
+    try {
+      const res = await Network.request({
+        url: '/api/cleaner-platform/accept-order',
+        method: 'POST',
+        data: { orderId }
+      })
+      
+      if (res.statusCode === 200) {
+        Taro.showToast({ title: '接单成功', icon: 'success' })
+        loadAvailableOrders()
+        loadMyOrders()
+        setActiveTab('my')
+      } else {
+        Taro.showToast({ title: res.data?.msg || '接单失败', icon: 'none' })
+      }
+    } catch (error) {
+      console.error('接单失败:', error)
+      Taro.showToast({ title: '接单失败，请重试', icon: 'none' })
+    }
+  }
+
+  const handleCallPhone = (phone: string) => {
     Taro.makePhoneCall({
-      phoneNumber: phone
+      phoneNumber: phone.replace(/\*+/g, '0'),
+      fail: () => Taro.showToast({ title: '拨打失败', icon: 'none' })
     })
-  }
-
-  const handleViewLocation = (address: string) => {
-    Taro.showModal({
-      title: '服务地址',
-      content: address,
-      showCancel: false
-    })
-  }
-
-  const getServiceTypeLabel = (type: string) => {
-    const labels: Record<string, string> = {
-      cleaning: '日常保洁',
-      car_wash: '汽车清洁',
-      deep_cleaning: '深度清洁'
-    }
-    return labels[type] || type
-  }
-
-  const getStatusLabel = (status: string) => {
-    const labels: Record<string, string> = {
-      matched: '待接单',
-      accepted: '已接单',
-      in_progress: '进行中',
-      completed: '已完成'
-    }
-    return labels[status] || status
   }
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
-      matched: '#F59E0B',
-      accepted: '#3B82F6',
-      in_progress: '#8B5CF6',
-      completed: '#10B981'
+      pending: '#F38F00',
+      matched: '#007CFF',
+      in_progress: '#9B40D8',
+      completed: '#5DC801'
     }
-    return colors[status] || '#6B7280'
+    return colors[status] || '#999'
   }
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('zh-CN', {
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
+  const getStatusText = (status: string) => {
+    const texts: Record<string, string> = {
+      pending: '待上门',
+      matched: '已接单',
+      in_progress: '服务中',
+      completed: '已完成'
+    }
+    return texts[status] || status
+  }
+
+  // 未审核状态
+  if (cleanerProfile && !cleanerProfile.is_verified) {
+    return (
+      <View className="min-h-screen flex flex-col items-center justify-center" style={{ backgroundColor: '#f5f5f5' }}>
+        <View className="w-20 h-20 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor: '#FFF7ED' }}>
+          <Clock size={40} color="#F38F00" />
+        </View>
+        <Text className="text-lg font-semibold mb-2" style={{ color: '#2E2E30' }}>审核中</Text>
+        <Text className="text-sm text-center px-8" style={{ color: '#B3B3B3' }}>
+          您的入驻申请正在审核中，请耐心等待
+        </Text>
+      </View>
+    )
+  }
+
+  // 未入驻状态
+  if (!cleanerProfile) {
+    return (
+      <View className="min-h-screen flex flex-col items-center justify-center px-8" style={{ backgroundColor: '#f5f5f5' }}>
+        <Text className="text-lg font-semibold mb-2" style={{ color: '#2E2E30' }}>您还不是服务人员</Text>
+        <Text className="text-sm text-center mb-6" style={{ color: '#B3B3B3' }}>
+          成为服务人员，开启接单之旅
+        </Text>
+        <View
+          className="px-8 py-3 rounded-xl"
+          style={{ backgroundColor: '#F85659' }}
+          onClick={() => Taro.navigateTo({ url: '/pages/cleaner-apply/index' })}
+        >
+          <Text className="text-white font-medium">立即入驻</Text>
+        </View>
+      </View>
+    )
   }
 
   return (
-    <View className="cleaner-orders">
-      <View className="header">
-        <Text className="header-title">我的订单</Text>
-        <View className="tab-bar">
-          <View
-            className={`tab-item ${activeTab === 'matched' ? 'active' : ''}`}
-            onClick={() => setActiveTab('matched')}
-          >
-            <Circle size={20} color={activeTab === 'matched' ? '#3B82F6' : '#9CA3AF'} />
-            <Text className="tab-text">待接单</Text>
-          </View>
-          <View
-            className={`tab-item ${activeTab === 'accepted' ? 'active' : ''}`}
-            onClick={() => setActiveTab('accepted')}
-          >
-            <Circle size={20} color={activeTab === 'accepted' ? '#3B82F6' : '#9CA3AF'} />
-            <Text className="tab-text">已接单</Text>
-          </View>
-          <View
-            className={`tab-item ${activeTab === 'in_progress' ? 'active' : ''}`}
-            onClick={() => setActiveTab('in_progress')}
-          >
-            <Circle size={20} color={activeTab === 'in_progress' ? '#3B82F6' : '#9CA3AF'} />
-            <Text className="tab-text">进行中</Text>
-          </View>
-          <View
-            className={`tab-item ${activeTab === 'completed' ? 'active' : ''}`}
-            onClick={() => setActiveTab('completed')}
-          >
-            <Circle size={20} color={activeTab === 'completed' ? '#3B82F6' : '#9CA3AF'} />
-            <Text className="tab-text">已完成</Text>
+    <View className="min-h-screen" style={{ backgroundColor: '#f5f5f5' }}>
+      {/* 头部 */}
+      <View className="bg-white px-4 py-3 flex flex-row items-center" style={{ borderBottom: '1px solid #EDEDED' }}>
+        <View onClick={() => Taro.navigateBack()}>
+          <ArrowLeft size={24} color="#2E2E30" />
+        </View>
+        <Text className="flex-1 text-center text-lg font-bold" style={{ color: '#2E2E30' }}>
+          阿姨接单
+        </Text>
+        <View className="flex flex-row items-center" onClick={toggleOnline}>
+          <Power size={18} color={isOnline ? '#5DC801' : '#B3B3B3'} />
+          <Text className="ml-1 text-sm" style={{ color: isOnline ? '#5DC801' : '#B3B3B3' }}>
+            {isOnline ? '在线' : '离线'}
+          </Text>
+        </View>
+      </View>
+
+      {/* 统计卡片 */}
+      <View className="px-4 py-4">
+        <View className="bg-white rounded-2xl p-4" style={{ border: '1px solid #EDEDED' }}>
+          <View className="flex flex-row items-center justify-between">
+            <View className="flex flex-col items-center flex-1">
+              <Text className="text-2xl font-bold" style={{ color: '#F85659' }}>{stats.todayOrders}</Text>
+              <Text className="text-xs mt-1" style={{ color: '#B3B3B3' }}>今日订单</Text>
+            </View>
+            <View className="flex flex-col items-center flex-1">
+              <View className="flex flex-row items-center">
+                <Star size={16} color="#F38F00" />
+                <Text className="text-2xl font-bold ml-1" style={{ color: '#2E2E30' }}>{stats.rating || cleanerProfile?.rating || 0}</Text>
+              </View>
+              <Text className="text-xs mt-1" style={{ color: '#B3B3B3' }}>服务评分</Text>
+            </View>
+            <View className="flex flex-col items-center flex-1">
+              <Text className="text-2xl font-bold" style={{ color: '#2E2E30' }}>{stats.totalOrders || cleanerProfile?.completed_orders || 0}</Text>
+              <Text className="text-xs mt-1" style={{ color: '#B3B3B3' }}>总订单</Text>
+            </View>
+            <View className="flex flex-col items-center flex-1">
+              <Text className="text-2xl font-bold" style={{ color: '#5DC801' }}>¥{stats.monthEarnings || 0}</Text>
+              <Text className="text-xs mt-1" style={{ color: '#B3B3B3' }}>本月收入</Text>
+            </View>
           </View>
         </View>
       </View>
 
-      <ScrollView className="order-list" scrollY>
-        {loading ? (
-          <View className="loading-container">
-            <Text className="loading-text">加载中...</Text>
-          </View>
-        ) : orders.length === 0 ? (
-          <View className="empty-container">
-            <Clock size={64} color="#D1D5DB" />
-            <Text className="empty-text">暂无订单</Text>
+      {/* 订单标签 */}
+      <View className="px-4 flex flex-row gap-3 mb-4">
+        <View
+          className="flex-1 py-3 rounded-xl text-center"
+          style={{ backgroundColor: activeTab === 'available' ? '#F85659' : '#fff', border: activeTab === 'available' ? 'none' : '1px solid #EDEDED' }}
+          onClick={() => setActiveTab('available')}
+        >
+          <Text style={{ color: activeTab === 'available' ? '#fff' : '#2E2E30' }}>可接订单</Text>
+        </View>
+        <View
+          className="flex-1 py-3 rounded-xl text-center"
+          style={{ backgroundColor: activeTab === 'my' ? '#F85659' : '#fff', border: activeTab === 'my' ? 'none' : '1px solid #EDEDED' }}
+          onClick={() => setActiveTab('my')}
+        >
+          <Text style={{ color: activeTab === 'my' ? '#fff' : '#2E2E30' }}>我的订单</Text>
+        </View>
+      </View>
+
+      {/* 订单列表 */}
+      <ScrollView scrollY className="px-4" style={{ height: 'calc(100vh - 280px)' }}>
+        {!isOnline && activeTab === 'available' ? (
+          <View className="flex flex-col items-center justify-center py-20">
+            <Power size={48} color="#EDEDED" />
+            <Text className="block text-sm mt-4" style={{ color: '#B3B3B3' }}>点击右上角上线后可接单</Text>
           </View>
         ) : (
-          orders.map(order => (
-            <View key={order.id} className="order-card">
-              <View className="order-header">
-                <Text className="order-no">{order.order_no}</Text>
-                <View
-                  className="status-badge"
-                  style={{ backgroundColor: getStatusColor(order.status) + '20' }}
-                >
-                  <Text
-                    className="status-text"
-                    style={{ color: getStatusColor(order.status) }}
-                  >
-                    {getStatusLabel(order.status)}
-                  </Text>
-                </View>
-              </View>
-
-              <View className="order-info">
-                <View className="info-row">
-                  <User size={16} color="#6B7280" />
-                  <Text className="info-text">{order.customer_name}</Text>
-                </View>
-
-                <View className="info-row">
-                  <Calendar size={16} color="#6B7280" />
-                  <Text className="info-text">{formatDate(order.scheduled_time)}</Text>
+          <View className="flex flex-col gap-3">
+            {(activeTab === 'available' ? availableOrders : myOrders).map(order => (
+              <View
+                key={order.id}
+                className="bg-white rounded-2xl p-4"
+                style={{ border: '1px solid #EDEDED' }}
+              >
+                {/* 头部 */}
+                <View className="flex flex-row items-center justify-between mb-3">
+                  <Text className="font-semibold" style={{ color: '#2E2E30' }}>{order.service_name}</Text>
+                  {'status' in order && (
+                    <View 
+                      className="px-2 py-1 rounded-full"
+                      style={{ backgroundColor: `${getStatusColor((order as any).status)}20` }}
+                    >
+                      <Text className="text-xs" style={{ color: getStatusColor((order as any).status) }}>
+                        {getStatusText((order as any).status)}
+                      </Text>
+                    </View>
+                  )}
                 </View>
 
-                <View className="info-row" onClick={() => handleViewLocation(order.address)}>
-                  <MapPin size={16} color="#6B7280" />
-                  <Text className="info-text address-text">{order.address}</Text>
-                </View>
-              </View>
-
-              <View className="order-service">
-                <Text className="service-label">服务类型</Text>
-                <Text className="service-value">{getServiceTypeLabel(order.service_type)}</Text>
-              </View>
-
-              <View className="action-buttons">
-                <View
-                  className="btn btn-call"
-                  onClick={() => handleCallCustomer(order.customer_phone)}
-                >
-                  <Phone size={18} color="#3B82F6" />
-                  <Text className="btn-text">联系客户</Text>
-                </View>
-
-                {order.status === 'matched' && (
-                  <View
-                    className="btn btn-accept"
-                    onClick={() => handleAcceptOrder(order.id)}
-                  >
-                    <Circle size={18} color="#10B981" />
-                    <Text className="btn-text">接单</Text>
+                {/* 详情 */}
+                <View className="flex flex-col gap-2 mb-3">
+                  <View className="flex flex-row items-center">
+                    <MapPin size={14} color="#B3B3B3" />
+                    <Text className="text-sm ml-2" style={{ color: '#666' }}>{order.address}</Text>
                   </View>
-                )}
-
-                {order.status === 'accepted' && (
-                  <View
-                    className="btn btn-start"
-                    onClick={() => handleStartOrder(order.id)}
-                  >
-                    <Circle size={18} color="#3B82F6" />
-                    <Text className="btn-text">开始服务</Text>
+                  <View className="flex flex-row items-center">
+                    <Clock size={14} color="#B3B3B3" />
+                    <Text className="text-sm ml-2" style={{ color: '#666' }}>
+                      {order.appointment_date} {order.appointment_time}
+                    </Text>
                   </View>
-                )}
+                </View>
 
-                {order.status === 'in_progress' && (
-                  <View
-                    className="btn btn-complete"
-                    onClick={() => handleCompleteOrder(order.id)}
-                  >
-                    <Circle size={18} color="#10B981" />
-                    <Text className="btn-text">完成服务</Text>
+                {/* 价格 */}
+                <View className="flex flex-row items-center justify-between pt-3" style={{ borderTop: '1px solid #EDEDED' }}>
+                  <View className="flex flex-row items-center">
+                    <Text className="text-lg font-bold" style={{ color: '#F85659' }}>¥{order.price}</Text>
+                    {order.duration_hours && (
+                      <Text className="text-xs ml-2" style={{ color: '#B3B3B3' }}>{order.duration_hours}小时</Text>
+                    )}
                   </View>
-                )}
+                  
+                  {activeTab === 'available' ? (
+                    <View
+                      className="px-4 py-2 rounded-xl"
+                      style={{ backgroundColor: '#F85659' }}
+                      onClick={() => handleAcceptOrder(order.id)}
+                    >
+                      <Text className="text-white text-sm">接单</Text>
+                    </View>
+                  ) : (
+                    <View className="flex flex-row gap-2">
+                      <View
+                        className="px-4 py-2 rounded-xl"
+                        style={{ backgroundColor: '#007CFF' }}
+                        onClick={() => handleCallPhone(order.contact_phone)}
+                      >
+                        <Phone size={16} color="#fff" />
+                      </View>
+                    </View>
+                  )}
+                </View>
               </View>
-            </View>
-          ))
+            ))}
+            
+            {(activeTab === 'available' ? availableOrders : myOrders).length === 0 && (
+              <View className="flex flex-col items-center justify-center py-20">
+                <Text className="text-sm" style={{ color: '#B3B3B3' }}>
+                  {activeTab === 'available' ? '暂无可接订单' : '暂无订单记录'}
+                </Text>
+              </View>
+            )}
+          </View>
         )}
       </ScrollView>
     </View>
   )
 }
+
+export default CleanerOrdersPage
