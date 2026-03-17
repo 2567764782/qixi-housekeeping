@@ -206,21 +206,29 @@ const IndexPage = () => {
   // 功能入口点击
   const handleFunctionClick = (item: FunctionItem) => {
     if (item.id === '1') {
-      Taro.navigateTo({ url: '/pages/service-detail/index?id=1' })
+      // 保洁服务 -> 二级选择页
+      Taro.navigateTo({ url: '/pages/service-select/index?type=cleaning' })
     } else if (item.id === '2') {
-      Taro.navigateTo({ url: '/pages/service-detail/index?id=4' })
+      // 家电清洗 -> 二级选择页
+      Taro.navigateTo({ url: '/pages/service-select/index?type=appliance' })
     } else if (item.id === '3') {
-      Taro.navigateTo({ url: '/pages/service-detail/index?id=3' })
+      // 新居开荒 -> 二级选择页
+      Taro.navigateTo({ url: '/pages/service-select/index?type=newhouse' })
     } else if (item.id === '4') {
-      Taro.navigateTo({ url: '/pages/service-detail/index?id=5' })
+      // 收纳整理 -> 二级选择页
+      Taro.navigateTo({ url: '/pages/service-select/index?type=organize' })
     } else if (item.id === '5') {
-      Taro.showToast({ title: '敬请期待', icon: 'none' })
+      // 最新活动 -> 二级页面
+      Taro.navigateTo({ url: '/pages/activities/index' })
     } else if (item.id === '6') {
-      Taro.showToast({ title: '敬请期待', icon: 'none' })
+      // 分享推荐 -> 二级页面
+      Taro.navigateTo({ url: '/pages/referral/index' })
     } else if (item.id === '7') {
-      Taro.showToast({ title: '敬请期待', icon: 'none' })
+      // 我的钱包 -> 二级页面（充值功能）
+      Taro.navigateTo({ url: '/pages/wallet/index' })
     } else if (item.id === '8') {
-      Taro.showToast({ title: '敬请期待', icon: 'none' })
+      // 我的积分 -> 二级页面
+      Taro.navigateTo({ url: '/pages/points/index' })
     }
   }
 
