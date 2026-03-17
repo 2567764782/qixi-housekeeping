@@ -37,7 +37,10 @@ export default defineAppConfig({
     'pages/roles/index',
     'pages/cleaner-apply/index',
     'pages/create-review/index',
-    'pages/payment-page/index'
+    'pages/payment-page/index',
+    'pages/membership/index',
+    'pages/subscription/index',
+    'pages/annual/index'
   ],
   window: {
     backgroundTextStyle: 'light',

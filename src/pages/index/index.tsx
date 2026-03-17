@@ -218,7 +218,7 @@ const IndexPage = () => {
         <View className="promotion-section">
           <View 
             className="promotion-card member-card"
-            onClick={() => Taro.showToast({ title: '会员功能敬请期待', icon: 'none' })}
+            onClick={() => Taro.navigateTo({ url: '/pages/membership/index' })}
           >
             <View className="card-header">
               <Crown size={18} color="#FFD700" />
@@ -231,7 +231,7 @@ const IndexPage = () => {
           </View>
           <View 
             className="promotion-card month-card"
-            onClick={() => Taro.showToast({ title: '敬请期待', icon: 'none' })}
+            onClick={() => Taro.navigateTo({ url: '/pages/subscription/index' })}
           >
             <View className="card-header">
               <Gift size={18} color="#FFD700" />
@@ -244,7 +244,7 @@ const IndexPage = () => {
           </View>
           <View 
             className="promotion-card year-card"
-            onClick={() => Taro.showToast({ title: '敬请期待', icon: 'none' })}
+            onClick={() => Taro.navigateTo({ url: '/pages/annual/index' })}
           >
             <View className="card-header">
               <Star size={18} color="#FFD700" />
