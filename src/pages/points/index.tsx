@@ -214,7 +214,7 @@ const PointsPage = () => {
           {/* 查看更多 */}
           <View
             className="flex flex-row items-center justify-center py-3 border-t border-gray-50"
-            onClick={() => Taro.showToast({ title: '功能开发中', icon: 'none' })}
+            onClick={() => Taro.navigateTo({ url: '/pages/points-detail/index' })}
           >
             <Text className="text-sm text-gray-500">查看全部记录</Text>
             <ChevronRight size={16} color="#ccc" />

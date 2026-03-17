@@ -11,6 +11,7 @@ export default defineAppConfig({
     'pages/referral/index',
     'pages/wallet/index',
     'pages/points/index',
+    'pages/points-detail/index',
     'pages/contact/index',
     'pages/about/index',
     'pages/privacy/index',
