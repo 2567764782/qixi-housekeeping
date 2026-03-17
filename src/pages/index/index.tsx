@@ -1,11 +1,20 @@
 import Taro, { useLoad } from '@tarojs/taro'
-import { View, Text, ScrollView } from '@tarojs/components'
+import { View, Text, ScrollView, Swiper, SwiperItem, Image } from '@tarojs/components'
 import { 
   Sparkles, House, Tv, LayoutGrid, Phone, 
   Gift, Wallet, Star, Crown, Wind, Sofa, Droplets, Percent
 } from 'lucide-react-taro'
 import { useState } from 'react'
 import './index.css'
+
+// 轮播图类型
+interface BannerItem {
+  id: string
+  image: string
+  title: string
+  subtitle: string
+  bgGradient: string
+}
 
 // 功能入口类型
 interface FunctionItem {
@@ -32,6 +41,34 @@ const IndexPage = () => {
   useLoad(() => {
     console.log('🏠 首页加载')
   })
+
+  // 轮播图数据
+  const [banners] = useState<BannerItem[]>([
+    { 
+      id: '1', 
+      image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&h=400&fit=crop',
+      title: '享品质生活',
+      subtitle: '选柒玺家政',
+      bgGradient: 'linear-gradient(135deg, #F85659 0%, #FF8A8A 100%)'
+    },
+    { 
+      id: '2', 
+      image: 'https://images.unsplash.com/photo-1628177142898-93e36e4e3a50?w=800&h=400&fit=crop',
+      title: '专业家政服务',
+      subtitle: '品质生活从家开始',
+      bgGradient: 'linear-gradient(135deg, #10B981 0%, #34D399 100%)'
+    },
+    { 
+      id: '3', 
+      image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=400&fit=crop',
+      title: '新居开荒首选',
+      subtitle: '让您的新家焕然一新',
+      bgGradient: 'linear-gradient(135deg, #007CFF 0%, #60A5FA 100%)'
+    }
+  ])
+
+  // 当前轮播索引
+  const [currentBanner, setCurrentBanner] = useState(0)
 
   // 8个功能入口
   const [functionItems] = useState<FunctionItem[]>([
@@ -119,22 +156,42 @@ const IndexPage = () => {
     <View className="min-h-screen" style={{ backgroundColor: '#f5f5f5' }}>
       <ScrollView scrollY className="h-screen">
         {/* 轮播横幅区 */}
-        <View className="banner-container">
-          <View className="banner-content">
-            <View className="banner-text">
-              <Text className="banner-title">享品质生活</Text>
-              <Text className="banner-subtitle">选柒玺家政</Text>
-              <Text className="banner-desc">ENJOY THE QUALITY OF LIFE</Text>
-            </View>
-            <View className="banner-decoration">
-              <Sparkles size={80} color="rgba(255,255,255,0.3)" />
-            </View>
-          </View>
+        <View className="banner-wrapper">
+          <Swiper
+            className="banner-swiper"
+            indicatorDots={false}
+            autoplay
+            interval={4000}
+            duration={500}
+            onChange={(e) => setCurrentBanner(e.detail.current)}
+          >
+            {banners.map(banner => (
+              <SwiperItem key={banner.id}>
+                <View className="banner-container" style={{ background: banner.bgGradient }}>
+                  <Image 
+                    className="banner-image"
+                    src={banner.image}
+                    mode="aspectFill"
+                  />
+                  <View className="banner-overlay" />
+                  <View className="banner-content">
+                    <View className="banner-text">
+                      <Text className="banner-title">{banner.title}</Text>
+                      <Text className="banner-subtitle">{banner.subtitle}</Text>
+                    </View>
+                    <View className="banner-decoration">
+                      <Sparkles size={60} color="rgba(255,255,255,0.3)" />
+                    </View>
+                  </View>
+                </View>
+              </SwiperItem>
+            ))}
+          </Swiper>
           {/* 轮播指示器 */}
           <View className="banner-dots">
-            <View className="dot active" />
-            <View className="dot" />
-            <View className="dot" />
+            {banners.map((_, index) => (
+              <View key={index} className={`dot ${index === currentBanner ? 'active' : ''}`} />
+            ))}
           </View>
         </View>
 
