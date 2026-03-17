@@ -1,6 +1,6 @@
 .login-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #F85659 0%, #FF8A8A 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -53,7 +53,7 @@
   flex-shrink: 0;
   height: 96rpx;
   padding: 0 32rpx;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #F85659 0%, #FF8A8A 100%);
   color: #ffffff;
   border-radius: 16rpx;
   font-size: 24rpx;
@@ -69,7 +69,7 @@
   margin-top: 40rpx;
   font-size: 32rpx;
   font-weight: bold;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #F85659 0%, #FF8A8A 100%);
   color: #ffffff;
   border-radius: 48rpx;
 }
@@ -81,5 +81,5 @@
 
 .switch-text {
   font-size: 28rpx;
-  color: #667eea;
+  color: #F85659;
 }

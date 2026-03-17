@@ -2,7 +2,7 @@ import { View, Text, ScrollView } from '@tarojs/components'
 import Taro, { useLoad, useDidShow } from '@tarojs/taro'
 import { useState } from 'react'
 import { Network } from '@/network'
-import { Clock, Check, X, Phone, Calendar, MapPin, Star, CreditCard, MessageSquare } from 'lucide-react-taro'
+import { Clock, Check, X, Phone, Calendar, MapPin, Star, CreditCard, MessageSquare, User } from 'lucide-react-taro'
 import './index.css'
 
 interface Order {
@@ -27,15 +27,28 @@ interface Order {
 const OrdersPage = () => {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [activeTab, setActiveTab] = useState<'all' | 'pending' | 'in_progress' | 'completed' | 'cancelled'>('all')
 
   useLoad(() => {
-    loadOrders()
+    checkLoginStatus()
   })
 
   useDidShow(() => {
-    loadOrders()
+    checkLoginStatus()
+    if (isLoggedIn) {
+      loadOrders()
+    }
   })
+
+  const checkLoginStatus = () => {
+    const token = Taro.getStorageSync('token')
+    setIsLoggedIn(!!token)
+    
+    if (token) {
+      loadOrders()
+    }
+  }
 
   const loadOrders = async () => {
     try {
@@ -196,6 +209,30 @@ const OrdersPage = () => {
     Taro.navigateTo({
       url: `/pages/create-review/index?orderId=${order.id}&serviceName=${encodeURIComponent(order.serviceName)}&cleanerId=${order.cleanerId || 1}&cleanerName=${encodeURIComponent(order.cleanerName || '服务人员')}`
     })
+  }
+
+  const handleLogin = () => {
+    Taro.navigateTo({ url: '/pages/login/index' })
+  }
+
+  // 未登录状态显示
+  if (!isLoggedIn) {
+    return (
+      <View className="min-h-screen flex flex-col items-center justify-center" style={{ backgroundColor: '#f5f5f5' }}>
+        <View className="w-20 h-20 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor: '#FFF7F7' }}>
+          <User size={40} color="#F85659" />
+        </View>
+        <Text className="block text-lg font-medium mb-2" style={{ color: '#2E2E30' }}>登录后查看预约</Text>
+        <Text className="block text-sm mb-6" style={{ color: '#B3B3B3' }}>登录后可以查看和管理您的预约订单</Text>
+        <View 
+          className="px-8 py-3 rounded-full"
+          style={{ backgroundColor: '#F85659' }}
+          onClick={handleLogin}
+        >
+          <Text className="text-base font-medium text-white">立即登录</Text>
+        </View>
+      </View>
+    )
   }
 
   return (

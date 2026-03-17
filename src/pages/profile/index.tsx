@@ -1,7 +1,7 @@
 import Taro, { useLoad, useDidShow } from '@tarojs/taro'
 import { View, Text, ScrollView, Button } from '@tarojs/components'
 import { useState } from 'react'
-import { User, FileText, Phone, Info, Shield, ChevronRight, FileCheck, Briefcase, Star, Settings } from 'lucide-react-taro'
+import { User, FileText, Phone, Info, Shield, ChevronRight, FileCheck, Briefcase, Star, Settings, LogOut } from 'lucide-react-taro'
 import { Network } from '@/network'
 import './index.css'
 
@@ -13,21 +13,30 @@ interface UserInfo {
 
 const ProfilePage = () => {
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [orderStats, setOrderStats] = useState({ total: 0, pending: 0, completed: 0 })
 
   useLoad(() => {
-    loadUserInfo()
+    checkLoginStatus()
   })
 
   useDidShow(() => {
-    loadUserInfo()
-    loadOrderStats()
+    checkLoginStatus()
+    if (isLoggedIn) {
+      loadOrderStats()
+    }
   })
 
-  const loadUserInfo = () => {
+  const checkLoginStatus = () => {
+    const token = Taro.getStorageSync('token')
     const saved = Taro.getStorageSync('userInfo')
-    if (saved) {
+    
+    if (token && saved) {
+      setIsLoggedIn(true)
       setUserInfo(saved)
+    } else {
+      setIsLoggedIn(false)
+      setUserInfo(null)
     }
   }
 
@@ -47,19 +56,21 @@ const ProfilePage = () => {
   }
 
   const handleLogin = () => {
-    Taro.getUserProfile({
-      desc: '获取用户信息',
+    Taro.navigateTo({ url: '/pages/login/index' })
+  }
+
+  const handleLogout = () => {
+    Taro.showModal({
+      title: '提示',
+      content: '确定要退出登录吗？',
       success: (res) => {
-        const info = {
-          nickname: res.userInfo.nickName,
-          avatar: res.userInfo.avatarUrl,
-          phone: ''
+        if (res.confirm) {
+          Taro.removeStorageSync('token')
+          Taro.removeStorageSync('userInfo')
+          setIsLoggedIn(false)
+          setUserInfo(null)
+          Taro.showToast({ title: '已退出登录', icon: 'success' })
         }
-        setUserInfo(info)
-        Taro.setStorageSync('userInfo', info)
-      },
-      fail: () => {
-        Taro.showToast({ title: '授权失败', icon: 'none' })
       }
     })
   }
@@ -81,7 +92,14 @@ const ProfilePage = () => {
       icon: <Briefcase size={20} color="#9B40D8" />,
       title: '阿姨入驻',
       desc: '成为服务人员',
-      action: () => Taro.navigateTo({ url: '/pages/cleaner-apply/index' })
+      action: () => {
+        if (!isLoggedIn) {
+          Taro.showToast({ title: '请先登录', icon: 'none' })
+          setTimeout(() => Taro.navigateTo({ url: '/pages/login/index' }), 1500)
+          return
+        }
+        Taro.navigateTo({ url: '/pages/cleaner-apply/index' })
+      }
     },
     {
       icon: <Phone size={20} color="#007CFF" />,
@@ -122,7 +140,7 @@ const ProfilePage = () => {
       <ScrollView scrollY className="pb-8">
         {/* 用户信息卡片 */}
         <View className="px-5 py-8" style={{ background: 'linear-gradient(135deg, #F85659 0%, #FF8A8A 100%)' }}>
-          {userInfo ? (
+          {isLoggedIn && userInfo ? (
             <View className="flex flex-row items-center">
               <View className="w-16 h-16 rounded-full flex items-center justify-center overflow-hidden" style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}>
                 {userInfo.avatar ? (
@@ -150,34 +168,37 @@ const ProfilePage = () => {
               <View className="w-16 h-16 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}>
                 <User size={32} color="#fff" />
               </View>
+              <Text className="block text-base mt-3 text-white">登录后享受更多服务</Text>
               <Button 
                 className="mt-4 px-6 py-2 rounded-full text-sm font-medium"
                 style={{ backgroundColor: '#fff', color: '#F85659' }}
                 onClick={handleLogin}
               >
-                微信登录
+                立即登录
               </Button>
             </View>
           )}
         </View>
 
-        {/* 订单统计 */}
-        <View className="bg-white mx-4 -mt-4 rounded-2xl p-4" style={{ border: '1px solid #EDEDED' }}>
-          <View className="flex flex-row">
-            <View className="flex-1 text-center">
-              <Text className="block text-2xl font-bold" style={{ color: '#2E2E30' }}>{orderStats.total}</Text>
-              <Text className="block text-xs mt-1" style={{ color: '#B3B3B3' }}>全部预约</Text>
-            </View>
-            <View className="flex-1 text-center" style={{ borderLeft: '1px solid #EDEDED' }}>
-              <Text className="block text-2xl font-bold" style={{ color: '#F38F00' }}>{orderStats.pending}</Text>
-              <Text className="block text-xs mt-1" style={{ color: '#B3B3B3' }}>待上门</Text>
-            </View>
-            <View className="flex-1 text-center" style={{ borderLeft: '1px solid #EDEDED' }}>
-              <Text className="block text-2xl font-bold" style={{ color: '#5DC801' }}>{orderStats.completed}</Text>
-              <Text className="block text-xs mt-1" style={{ color: '#B3B3B3' }}>已完成</Text>
+        {/* 订单统计 - 仅登录后显示 */}
+        {isLoggedIn && (
+          <View className="bg-white mx-4 -mt-4 rounded-2xl p-4" style={{ border: '1px solid #EDEDED' }}>
+            <View className="flex flex-row">
+              <View className="flex-1 text-center">
+                <Text className="block text-2xl font-bold" style={{ color: '#2E2E30' }}>{orderStats.total}</Text>
+                <Text className="block text-xs mt-1" style={{ color: '#B3B3B3' }}>全部预约</Text>
+              </View>
+              <View className="flex-1 text-center" style={{ borderLeft: '1px solid #EDEDED' }}>
+                <Text className="block text-2xl font-bold" style={{ color: '#F38F00' }}>{orderStats.pending}</Text>
+                <Text className="block text-xs mt-1" style={{ color: '#B3B3B3' }}>待上门</Text>
+              </View>
+              <View className="flex-1 text-center" style={{ borderLeft: '1px solid #EDEDED' }}>
+                <Text className="block text-2xl font-bold" style={{ color: '#5DC801' }}>{orderStats.completed}</Text>
+                <Text className="block text-xs mt-1" style={{ color: '#B3B3B3' }}>已完成</Text>
+              </View>
             </View>
           </View>
-        </View>
+        )}
 
         {/* 功能菜单 */}
         <View className="px-4 mt-4">
@@ -261,11 +282,18 @@ const ProfilePage = () => {
         </View>
 
         {/* 阿姨端入口 */}
-        <View className="px-4 mt-4 mb-8">
+        <View className="px-4 mt-4">
           <View 
             className="rounded-2xl p-4 flex flex-row items-center justify-between"
             style={{ backgroundColor: '#FAF5FF' }}
-            onClick={() => Taro.navigateTo({ url: '/pages/cleaner-orders/index' })}
+            onClick={() => {
+              if (!isLoggedIn) {
+                Taro.showToast({ title: '请先登录', icon: 'none' })
+                setTimeout(() => Taro.navigateTo({ url: '/pages/login/index' }), 1500)
+                return
+              }
+              Taro.navigateTo({ url: '/pages/cleaner-orders/index' })
+            }}
           >
             <View className="flex flex-row items-center">
               <View className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#9B40D8' }}>
@@ -279,6 +307,20 @@ const ProfilePage = () => {
             <ChevronRight size={20} color="#9B40D8" />
           </View>
         </View>
+
+        {/* 退出登录按钮 - 仅登录后显示 */}
+        {isLoggedIn && (
+          <View className="px-4 mt-4 mb-8">
+            <View 
+              className="rounded-2xl p-4 flex flex-row items-center justify-center"
+              style={{ backgroundColor: '#fff', border: '1px solid #EDEDED' }}
+              onClick={handleLogout}
+            >
+              <LogOut size={18} color="#F85659" />
+              <Text className="block text-sm font-medium ml-2" style={{ color: '#F85659' }}>退出登录</Text>
+            </View>
+          </View>
+        )}
       </ScrollView>
     </View>
   )
