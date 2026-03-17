@@ -194,7 +194,7 @@ const IndexPage = () => {
           </View>
         </View>
 
-        {/* 推荐服务展示区 */}
+        {/* 推荐服务展示区 - 固定网格布局 */}
         <View className="recommend-section">
           <View className="recommend-header">
             <View className="recommend-icon">
@@ -203,7 +203,7 @@ const IndexPage = () => {
             <Text className="recommend-title">推荐服务</Text>
           </View>
           
-          <ScrollView scrollX className="recommend-scroll">
+          <View className="recommend-grid">
             {recommendServices.map(service => (
               <View 
                 key={service.id}
@@ -222,13 +222,6 @@ const IndexPage = () => {
                 </View>
               </View>
             ))}
-          </ScrollView>
-          
-          {/* 推荐服务指示器 */}
-          <View className="recommend-dots">
-            <View className="dot active" />
-            <View className="dot" />
-            <View className="dot" />
           </View>
         </View>
 

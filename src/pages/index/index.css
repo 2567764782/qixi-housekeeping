@@ -233,22 +233,19 @@
   color: #2E2E30;
 }
 
-.recommend-scroll {
-  white-space: nowrap;
-  display: flex;
-  flex-direction: row;
+/* 固定网格布局 - 2行2列 */
+.recommend-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 24rpx;
-  padding: 8rpx 0;
 }
 
 .recommend-card {
-  width: 260rpx;
   padding: 32rpx 24rpx;
   border-radius: 24rpx;
-  display: inline-flex;
+  display: flex;
   flex-direction: column;
   align-items: center;
-  flex-shrink: 0;
 }
 
 .recommend-card-icon {
@@ -271,8 +268,8 @@
   font-size: 22rpx;
   color: #666;
   margin-bottom: 16rpx;
-  white-space: normal;
   text-align: center;
+  white-space: normal;
 }
 
 .recommend-card-price {
@@ -290,26 +287,6 @@
 .price-unit {
   font-size: 22rpx;
   color: #999;
-}
-
-.recommend-dots {
-  display: flex;
-  justify-content: center;
-  gap: 12rpx;
-  margin-top: 24rpx;
-}
-
-.recommend-dots .dot {
-  width: 12rpx;
-  height: 12rpx;
-  border-radius: 50%;
-  background: #E5E5E5;
-}
-
-.recommend-dots .dot.active {
-  width: 24rpx;
-  border-radius: 6rpx;
-  background: #F85659;
 }
 
 /* ===== 底部客服信息 ===== */
