@@ -577,9 +577,10 @@
   line-height: 1.4;
   margin-bottom: 8rpx;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .news-swiper-summary {
@@ -587,9 +588,10 @@
   color: #666;
   line-height: 1.5;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-overflow: ellipsis;
   margin-bottom: 12rpx;
   flex: 1;
 }
