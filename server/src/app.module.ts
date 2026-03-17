@@ -10,6 +10,7 @@ import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { HealthModule } from './health/health.module';
 import { CleanerPlatformModule } from './cleaner-platform/cleaner-platform.module';
 import { PaymentModule } from './payment/payment.module';
+import { PaymentExtensionModule } from './payment-extension/payment-extension.module';
 import { MembershipModule } from './membership/membership.module';
 
 @Module({
@@ -21,6 +22,7 @@ import { MembershipModule } from './membership/membership.module';
     HealthModule,
     CleanerPlatformModule,
     PaymentModule,
+    PaymentExtensionModule,
     MembershipModule,
   ],
   controllers: [AppController],

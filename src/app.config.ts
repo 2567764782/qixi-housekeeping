@@ -40,7 +40,9 @@ export default defineAppConfig({
     'pages/payment-page/index',
     'pages/membership/index',
     'pages/subscription/index',
-    'pages/annual/index'
+    'pages/annual/index',
+    'pages/recharge/index',
+    'pages/coupon/index'
   ],
   window: {
     backgroundTextStyle: 'light',

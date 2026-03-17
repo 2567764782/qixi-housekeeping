@@ -1,0 +1,116 @@
+/* 充值页面样式 */
+
+.recharge-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80rpx;
+  background: #f8f8f8;
+  border: 2rpx solid #f0f0f0;
+  border-radius: 12rpx;
+  transition: all 0.2s;
+}
+
+.recharge-item.selected {
+  background: #FFF7F7;
+  border-color: #F85659;
+}
+
+.check-icon {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 32rpx;
+  height: 32rpx;
+  background: #F85659;
+  border-radius: 0 12rpx 0 12rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-amount-input {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 24rpx;
+  background: #f8f8f8;
+  border-radius: 12rpx;
+  gap: 8rpx;
+}
+
+.payment-method-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+.payment-method-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 24rpx;
+  background: #f8f8f8;
+  border-radius: 12rpx;
+  gap: 24rpx;
+  transition: all 0.2s;
+}
+
+.payment-method-item.selected {
+  background: #FFF7F7;
+  border: 2rpx solid #F85659;
+}
+
+.payment-icon {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 12rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.payment-icon.wechat {
+  background: #07C160;
+}
+
+.payment-icon.alipay {
+  background: #1677FF;
+}
+
+.radio-circle {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  border: 2rpx solid #ddd;
+  transition: all 0.2s;
+}
+
+.radio-circle.checked {
+  border-color: #F85659;
+  background: #F85659;
+  position: relative;
+}
+
+.radio-circle.checked::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 16rpx;
+  height: 16rpx;
+  background: #fff;
+  border-radius: 50%;
+}
+
+.recharge-btn {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 32rpx;
+  border-radius: 48rpx;
+  transition: all 0.2s;
+}
