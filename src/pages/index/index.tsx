@@ -3,7 +3,7 @@ import { View, Text, ScrollView, Swiper, SwiperItem, Image } from '@tarojs/compo
 import { 
   Sparkles, House, Tv, LayoutGrid, Phone, 
   Gift, Wallet, Star, Crown, Wind, Sofa, Droplets, Percent,
-  Flame, Clock, Eye, ChevronRight, Newspaper
+  Flame, Clock, Eye, ChevronRight, Newspaper, X, Share2
 } from 'lucide-react-taro'
 import { useState } from 'react'
 import { Network } from '@/network'
@@ -44,7 +44,9 @@ interface NewsItem {
   id: string
   title: string
   summary: string
+  content?: string
   source: string
+  source_url?: string
   category: string
   is_hot: boolean
   view_count: number
@@ -95,17 +97,24 @@ const IndexPage = () => {
     { key: 'tech', name: '技术' }
   ])
   const [activeNewsCategory, setActiveNewsCategory] = useState('')
+  
+  // 新闻弹窗状态
+  const [showNewsModal, setShowNewsModal] = useState(false)
+  const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null)
+  const [newsLoading, setNewsLoading] = useState(false)
 
   // 加载热点新闻
   const loadHotNews = async (isRefresh = false) => {
     try {
+      const params: Record<string, any> = { limit: 5 }
+      if (activeNewsCategory) {
+        params.category = activeNewsCategory
+      }
+      
       const res = await Network.request({
         url: '/api/news/hot',
         method: 'GET',
-        data: {
-          category: activeNewsCategory || undefined,
-          limit: 5
-        }
+        data: params
       })
 
       if (res.statusCode === 200 && res.data?.data) {
@@ -162,11 +171,104 @@ const IndexPage = () => {
     setTimeout(() => loadHotNews(true), 100)
   }
 
-  // 新闻点击
-  const handleNewsClick = (news: NewsItem) => {
-    Taro.navigateTo({
-      url: `/pages/news-detail/index?id=${news.id}`
-    })
+  // 新闻点击 - 直接展示内容弹窗
+  const handleNewsClick = async (news: NewsItem) => {
+    setSelectedNews(news)
+    setShowNewsModal(true)
+    setNewsLoading(true)
+    
+    // 加载新闻详情
+    try {
+      const res = await Network.request({
+        url: `/api/news/${news.id}`,
+        method: 'GET'
+      })
+      
+      if (res.statusCode === 200 && res.data?.data) {
+        setSelectedNews(res.data.data)
+      }
+    } catch (error) {
+      console.error('加载新闻详情失败:', error)
+      // 使用模拟数据
+      const mockContent = generateMockContent(news)
+      setSelectedNews({ ...news, content: mockContent })
+    } finally {
+      setNewsLoading(false)
+    }
+  }
+
+  // 生成模拟新闻内容
+  const generateMockContent = (news: NewsItem) => {
+    const contents: Record<string, string> = {
+      'news-001': `近日，中国家庭服务业协会发布了《2024年家政服务行业发展趋势报告》。报告显示，家政服务行业正朝着智能化、标准化方向快速发展。
+
+报告指出，随着居民消费升级和人口老龄化趋势加剧，家政服务市场需求持续增长。预计2024年市场规模将突破1.2万亿元。
+
+主要趋势包括：
+
+1. **数字化转型加速**：越来越多的家政企业开始使用智能调度系统、在线预约平台等数字化工具，提升服务效率。
+
+2. **服务标准化推进**：各地纷纷出台家政服务标准，推动行业规范化发展。
+
+3. **专业化人才培养**：家政从业人员培训体系逐步完善，专业素质不断提升。
+
+4. **品牌化经营**：头部企业加速扩张，品牌化、连锁化成为发展趋势。
+
+业内专家表示，家政服务行业的转型升级将为消费者带来更优质的服务体验，同时也为从业者创造更多发展机会。`,
+      
+      'news-002': `随着春节临近，各地家政服务市场迎来需求高峰。据多家家政平台数据显示，保洁、家电清洗、新居开荒等服务预订量同比增长超过50%。
+
+**市场现状：**
+
+- 日常保洁服务需求增长40%
+- 深度清洁服务增长60%
+- 新居开荒服务增长35%
+- 家电清洗服务增长45%
+
+**预约建议：**
+
+1. 提前1-2周预约，避免高峰期排队
+2. 选择正规家政公司，确保服务质量
+3. 明确服务内容和价格，避免纠纷
+4. 提前做好家务整理，提高服务效率
+
+业内人士提醒，春节期间家政服务人员返乡较多，服务价格可能有所上涨，建议市民提前做好规划。`,
+      
+      'news-003': `随着科技发展，智能清洁设备正在改变传统家政服务模式，提升服务效率和质量。
+
+**智能设备应用场景：**
+
+扫地机器人：自动清扫地面，节省人工时间
+洗地机：一键洗地，深度清洁
+蒸汽清洁机：高温杀菌，去除顽固污渍
+智能吸尘器：强力吸尘，净化空气
+
+**优势特点：**
+
+- 效率提升：设备清洁比人工快3-5倍
+- 质量更好：标准化清洁，效果稳定
+- 环保健康：减少化学清洁剂使用
+- 成本降低：长期使用降低人工成本
+
+专家表示，智能设备与传统人工服务相结合，将成为家政服务行业的发展方向，为消费者提供更专业、更高效的服务体验。`
+    }
+    
+    return contents[news.id] || `${news.title}\n\n${news.summary}\n\n这是新闻的详细内容。随着家政服务行业的快速发展，越来越多的家庭开始选择专业的家政服务，享受便捷、高效的家庭生活。`
+  }
+
+  // 关闭新闻弹窗
+  const closeNewsModal = () => {
+    setShowNewsModal(false)
+    setSelectedNews(null)
+  }
+
+  // 分享新闻
+  const handleShareNews = () => {
+    if (selectedNews) {
+      Taro.showShareMenu({
+        withShareTicket: true
+      })
+    }
   }
 
   // 查看更多新闻
@@ -513,6 +615,63 @@ const IndexPage = () => {
           </View>
         </View>
       </ScrollView>
+
+      {/* 新闻详情弹窗 */}
+      {showNewsModal && selectedNews && (
+        <View className="news-modal-overlay" onClick={closeNewsModal}>
+          <View className="news-modal-container" onClick={(e) => e.stopPropagation()}>
+            {/* 弹窗头部 */}
+            <View className="news-modal-header">
+              <Text className="news-modal-title">{selectedNews.title}</Text>
+              <View className="news-modal-close" onClick={closeNewsModal}>
+                <X size={20} color="#666" />
+              </View>
+            </View>
+
+            {/* 新闻元信息 */}
+            <View className="news-modal-meta">
+              <View className="news-modal-meta-item">
+                <Clock size={12} color="#999" />
+                <Text className="news-modal-meta-text">
+                  {formatNewsTime(selectedNews.publish_time || selectedNews.created_at)}
+                </Text>
+              </View>
+              <View className="news-modal-meta-item">
+                <Eye size={12} color="#999" />
+                <Text className="news-modal-meta-text">{selectedNews.view_count || 0} 阅读</Text>
+              </View>
+              {selectedNews.source && (
+                <Text className="news-modal-source">来源：{selectedNews.source}</Text>
+              )}
+            </View>
+
+            {/* 新闻内容 */}
+            <ScrollView scrollY className="news-modal-content">
+              {newsLoading ? (
+                <View className="news-loading-container">
+                  <View className="news-loading-spinner" />
+                  <Text className="news-loading-text">加载中...</Text>
+                </View>
+              ) : (
+                <Text className="news-modal-body">
+                  {selectedNews.content || selectedNews.summary || '暂无详细内容'}
+                </Text>
+              )}
+            </ScrollView>
+
+            {/* 弹窗底部操作栏 */}
+            <View className="news-modal-footer">
+              <View className="news-modal-btn share" onClick={handleShareNews}>
+                <Share2 size={16} color="#F85659" />
+                <Text className="news-modal-btn-text">分享</Text>
+              </View>
+              <View className="news-modal-btn close" onClick={closeNewsModal}>
+                <Text className="news-modal-btn-text">关闭</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      )}
     </View>
   )
 }
