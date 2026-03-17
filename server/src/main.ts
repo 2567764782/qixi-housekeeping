@@ -12,14 +12,16 @@ import { initializeTracing } from './tracing/tracing';
 initializeTracing();
 
 function parsePort(): number {
-  // 优先使用环境变量 PORT (Serverless 环境)
-  if (process.env.PORT) {
-    const port = parseInt(process.env.PORT, 10);
+  // 开发环境：使用固定的 3000 端口
+  // 生产/Serverless 环境：使用环境变量 SERVER_PORT 或 PORT
+  const envPort = process.env.SERVER_PORT || process.env.PORT
+  if (envPort && process.env.NODE_ENV === 'production') {
+    const port = parseInt(envPort, 10);
     if (!Number.isNaN(port) && port > 0 && port < 65536) {
       return port;
     }
   }
-  // 其次解析命令行参数
+  // 解析命令行参数
   const args = process.argv.slice(2);
   const portIndex = args.indexOf('-p');
   if (portIndex !== -1 && args[portIndex + 1]) {
@@ -28,6 +30,7 @@ function parsePort(): number {
       return port;
     }
   }
+  // 默认端口
   return 3000;
 }
 
