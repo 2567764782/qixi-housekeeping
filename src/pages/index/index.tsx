@@ -514,49 +514,100 @@ const IndexPage = () => {
             </View>
           </ScrollView>
 
-          {/* 新闻列表 */}
-          <View className="hot-news-list">
-            {hotNews.map((news, index) => (
-              <View 
-                key={news.id} 
-                className={`hot-news-card ${index === 0 ? 'first' : ''}`}
-                onClick={() => handleNewsClick(news)}
-              >
-                <View className="news-card-left">
-                  {news.is_hot && (
-                    <View className="hot-tag">
-                      <Flame size={10} color="#fff" />
-                      <Text className="hot-tag-text">热</Text>
+          {/* 新闻内容 - 全部分类用轮播，其他分类用列表 */}
+          {activeNewsCategory === '' ? (
+            /* 轮播展示 */
+            <Swiper 
+              className="news-swiper"
+              indicatorDots
+              autoplay
+              circular
+              interval={4000}
+              duration={500}
+              indicatorColor="rgba(0,0,0,0.2)"
+              indicatorActiveColor="#F85659"
+            >
+              {hotNews.map((news, index) => (
+                <SwiperItem key={news.id}>
+                  <View 
+                    className="news-swiper-card"
+                    onClick={() => handleNewsClick(news)}
+                  >
+                    <View className="news-swiper-rank">
+                      <Text className={`rank-badge ${index < 3 ? 'top' : ''}`}>{index + 1}</Text>
                     </View>
-                  )}
-                  <View className="news-rank">
-                    <Text className={`rank-num ${index < 3 ? 'top' : ''}`}>{index + 1}</Text>
+                    <View className="news-swiper-content">
+                      {news.is_hot && (
+                        <View className="news-swiper-hot">
+                          <Flame size={12} color="#fff" />
+                          <Text className="hot-label">热门</Text>
+                        </View>
+                      )}
+                      <Text className="news-swiper-title">{news.title}</Text>
+                      <Text className="news-swiper-summary">{news.summary}</Text>
+                      <View className="news-swiper-meta">
+                        <Text className="news-swiper-source">{news.source}</Text>
+                        <View className="news-swiper-stats">
+                          <View className="stat-item">
+                            <Clock size={12} color="#999" />
+                            <Text className="stat-text">{formatNewsTime(news.publish_time || news.created_at)}</Text>
+                          </View>
+                          <View className="stat-item">
+                            <Eye size={12} color="#999" />
+                            <Text className="stat-text">{news.view_count || 0}</Text>
+                          </View>
+                        </View>
+                      </View>
+                    </View>
+                  </View>
+                </SwiperItem>
+              ))}
+            </Swiper>
+          ) : (
+            /* 列表展示 */
+            <View className="hot-news-list">
+              {hotNews.map((news, index) => (
+                <View 
+                  key={news.id} 
+                  className={`hot-news-card ${index === 0 ? 'first' : ''}`}
+                  onClick={() => handleNewsClick(news)}
+                >
+                  <View className="news-card-left">
+                    {news.is_hot && (
+                      <View className="hot-tag">
+                        <Flame size={10} color="#fff" />
+                        <Text className="hot-tag-text">热</Text>
+                      </View>
+                    )}
+                    <View className="news-rank">
+                      <Text className={`rank-num ${index < 3 ? 'top' : ''}`}>{index + 1}</Text>
+                    </View>
+                  </View>
+                  <View className="news-card-content">
+                    <Text className="news-card-title">{news.title}</Text>
+                    <View className="news-card-meta">
+                      <Text className="news-card-source">{news.source}</Text>
+                      <View className="news-meta-item">
+                        <Clock size={10} color="#999" />
+                        <Text className="news-meta-text">{formatNewsTime(news.publish_time || news.created_at)}</Text>
+                      </View>
+                      <View className="news-meta-item">
+                        <Eye size={10} color="#999" />
+                        <Text className="news-meta-text">{news.view_count || 0}</Text>
+                      </View>
+                    </View>
                   </View>
                 </View>
-                <View className="news-card-content">
-                  <Text className="news-card-title">{news.title}</Text>
-                  <View className="news-card-meta">
-                    <Text className="news-card-source">{news.source}</Text>
-                    <View className="news-meta-item">
-                      <Clock size={10} color="#999" />
-                      <Text className="news-meta-text">{formatNewsTime(news.publish_time || news.created_at)}</Text>
-                    </View>
-                    <View className="news-meta-item">
-                      <Eye size={10} color="#999" />
-                      <Text className="news-meta-text">{news.view_count || 0}</Text>
-                    </View>
-                  </View>
-                </View>
-              </View>
-            ))}
+              ))}
+            </View>
+          )}
 
-            {hotNews.length === 0 && (
-              <View className="news-empty">
-                <Newspaper size={32} color="#ddd" />
-                <Text className="news-empty-text">暂无热点新闻</Text>
-              </View>
-            )}
-          </View>
+          {hotNews.length === 0 && (
+            <View className="news-empty">
+              <Newspaper size={32} color="#ddd" />
+              <Text className="news-empty-text">暂无热点新闻</Text>
+            </View>
+          )}
         </View>
 
         {/* 推荐服务展示区 - 固定网格布局 */}
