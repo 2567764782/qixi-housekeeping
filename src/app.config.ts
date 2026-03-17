@@ -42,7 +42,10 @@ export default defineAppConfig({
     'pages/subscription/index',
     'pages/annual/index',
     'pages/recharge/index',
-    'pages/coupon/index'
+    'pages/coupon/index',
+    'pages/admin-coupon/index',
+    'pages/admin-member/index',
+    'pages/admin-content/index'
   ],
   window: {
     backgroundTextStyle: 'light',

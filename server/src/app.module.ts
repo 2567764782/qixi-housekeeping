@@ -12,6 +12,7 @@ import { CleanerPlatformModule } from './cleaner-platform/cleaner-platform.modul
 import { PaymentModule } from './payment/payment.module';
 import { PaymentExtensionModule } from './payment-extension/payment-extension.module';
 import { MembershipModule } from './membership/membership.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { MembershipModule } from './membership/membership.module';
     PaymentModule,
     PaymentExtensionModule,
     MembershipModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [
