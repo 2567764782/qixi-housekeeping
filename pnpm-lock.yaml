@@ -345,6 +345,9 @@ importers:
       '@opentelemetry/semantic-conventions':
         specifier: ^1.40.0
         version: 1.40.0
+      '@serverless-devs/s':
+        specifier: ^3.1.10
+        version: 3.1.10
       '@types/better-sqlite3':
         specifier: ^7.6.13
         version: 7.6.13
@@ -4368,6 +4371,11 @@ packages:
 
   '@scarf/scarf@1.4.0':
     resolution: {integrity: sha512-xxeapPiUXdZAE3che6f3xogoJPeZgig6omHEy1rIY5WVsB3H2BHNnZH+gHG6x91SCWyQCzWGsuL2Hh3ClO5/qQ==}
+
+  '@serverless-devs/s@3.1.10':
+    resolution: {integrity: sha512-BIKbyOVpu+Xb2MBYWZoOwOSLhlLVUquzWjoIHMg4yPpthTGUFhMAtQnR8iKeI2cYTTz/8dS13TNzO9qwhpqE1A==}
+    engines: {node: '>=14.14.0'}
+    hasBin: true
 
   '@sideway/address@4.1.5':
     resolution: {integrity: sha512-IqO/DUQHUkPeixNQ8n0JA6102hT9CmaljNTPmQ1u8MEhBo/R4Q8eKLN/vGZxuebwOroDB4cbpjheD4+/sKFK4Q==}
@@ -17926,6 +17934,8 @@ snapshots:
   '@rtsao/scc@1.1.0': {}
 
   '@scarf/scarf@1.4.0': {}
+
+  '@serverless-devs/s@3.1.10': {}
 
   '@sideway/address@4.1.5':
     dependencies:

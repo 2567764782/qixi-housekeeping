@@ -12,6 +12,14 @@ import { initializeTracing } from './tracing/tracing';
 initializeTracing();
 
 function parsePort(): number {
+  // 优先使用环境变量 PORT (Serverless 环境)
+  if (process.env.PORT) {
+    const port = parseInt(process.env.PORT, 10);
+    if (!Number.isNaN(port) && port > 0 && port < 65536) {
+      return port;
+    }
+  }
+  // 其次解析命令行参数
   const args = process.argv.slice(2);
   const portIndex = args.indexOf('-p');
   if (portIndex !== -1 && args[portIndex + 1]) {

@@ -1,0 +1,8 @@
+#!/bin/bash
+# 阿里云函数计算 Custom Runtime 启动脚本
+
+# 设置端口 (函数计算默认 9000)
+export PORT=9000
+
+# 启动 NestJS 应用
+node dist/src/main.js

@@ -1,0 +1,73 @@
+# 阿里云函数计算 Serverless 配置文件
+# 文档: https://help.aliyun.com/product/250897.html
+
+edition: 3.0.0
+name: qixi-housekeeping
+access: default
+
+vars:
+  region: cn-hangzhou  # 可根据需要修改: cn-beijing, cn-shanghai, cn-shenzhen 等
+
+services:
+  qixi-api:
+    component: fc3
+    props:
+      region: ${vars.region}
+      
+      # 函数配置
+      functionName: qixi-housekeeping-api
+      description: 柒玺家政小程序后端API服务
+      
+      # 运行环境
+      runtime: custom
+      memorySize: 512        # 内存大小(MB)，可根据需要调整
+      timeout: 60            # 超时时间(秒)
+      
+      # 代码配置
+      code: ./
+      
+      # 实例配置
+      instanceConcurrency: 10  # 单实例并发数
+      instanceLength: 60       # 实例空闲时的保留时间(秒)
+      
+      # 环境变量 - 部署前需要修改
+      environmentVariables:
+        NODE_ENV: production
+        # JWT 配置 (请修改为随机字符串)
+        JWT_SECRET: your-super-secret-jwt-key-change-this
+        JWT_EXPIRES_IN: 7d
+        
+        # Supabase 数据库配置 (保持不变)
+        COZE_SUPABASE_URL: ${env.COZE_SUPABASE_URL}
+        COZE_SUPABASE_ANON_KEY: ${env.COZE_SUPABASE_ANON_KEY}
+        
+        # 短信配置 (可选，需要时配置)
+        ALIYUN_ACCESS_KEY_ID: ${env.ALIYUN_ACCESS_KEY_ID}
+        ALIYUN_ACCESS_KEY_SECRET: ${env.ALIYUN_ACCESS_KEY_SECRET}
+        ALIYUN_SMS_SIGN_NAME: 柒玺家政
+        ALIYUN_SMS_TEMPLATE_CODE: ${env.ALIYUN_SMS_TEMPLATE_CODE}
+        USE_ALIYUN_SMS: "false"
+        
+        # 禁用不需要的服务
+        ENABLE_TRACING: "false"
+      
+      # HTTP 触发器配置
+      triggers:
+        - name: httpTrigger
+          type: http
+          props:
+            methods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - PATCH
+              - HEAD
+              - OPTIONS
+      
+      # 自定义域名配置 (可选，推荐配置)
+      # customDomains:
+      #   - domainName: api.your-domain.com
+      #     protocol: HTTP,HTTPS
+      #     routeConfigs:
+      #       - path: '/*'
