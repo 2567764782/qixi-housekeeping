@@ -138,10 +138,41 @@
 
 /* ===== 会员服务推广区 ===== */
 .promotion-section {
+  padding: 0 24rpx 32rpx;
+}
+
+.promotion-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 20rpx;
+  padding: 16rpx 24rpx;
+  background: linear-gradient(135deg, #FFF5F5 0%, #FFE4E4 100%);
+  border-radius: 16rpx;
+  width: fit-content;
+}
+
+.promotion-header-icon {
+  width: 40rpx;
+  height: 40rpx;
+  background: #F85659;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.promotion-header-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #2E2E30;
+}
+
+.promotion-grid {
   display: flex;
   flex-direction: row;
   gap: 16rpx;
-  padding: 24rpx 24rpx;
 }
 
 .promotion-card {
