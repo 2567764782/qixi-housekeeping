@@ -45,7 +45,9 @@ export default defineAppConfig({
     'pages/coupon/index',
     'pages/admin-coupon/index',
     'pages/admin-member/index',
-    'pages/admin-content/index'
+    'pages/admin-content/index',
+    'pages/hot-news/index',
+    'pages/news-manage/index'
   ],
   window: {
     backgroundTextStyle: 'light',

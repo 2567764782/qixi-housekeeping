@@ -1,0 +1,223 @@
+/* 热点新闻页面样式 */
+
+.page-container {
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+
+.page-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 32rpx;
+  background: #fff;
+  border-bottom: 1rpx solid #EDEDED;
+}
+
+.page-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #2E2E30;
+}
+
+.header-action {
+  padding: 8rpx;
+}
+
+.rotating {
+  animation: rotate 1s linear infinite;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* 分类标签 */
+.category-scroll {
+  background: #fff;
+  white-space: nowrap;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.category-list {
+  display: inline-flex;
+  flex-direction: row;
+  padding: 20rpx 24rpx;
+  gap: 16rpx;
+}
+
+.category-item {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8rpx;
+  padding: 12rpx 24rpx;
+  background: #f5f5f5;
+  border-radius: 32rpx;
+  flex-shrink: 0;
+}
+
+.category-item.active {
+  background: #FFF5F5;
+}
+
+.category-text {
+  font-size: 26rpx;
+  color: #666;
+}
+
+.category-item.active .category-text {
+  color: #F85659;
+  font-weight: 500;
+}
+
+/* 新闻列表 */
+.news-list {
+  height: calc(100vh - 180rpx);
+  padding: 24rpx 32rpx;
+}
+
+.news-card {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 28rpx;
+  margin-bottom: 24rpx;
+}
+
+.news-header {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 12rpx;
+  margin-bottom: 16rpx;
+}
+
+.hot-tag {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4rpx;
+  padding: 4rpx 12rpx;
+  background: #FFF5F5;
+  border-radius: 8rpx;
+  flex-shrink: 0;
+}
+
+.hot-text {
+  font-size: 22rpx;
+  color: #F85659;
+  font-weight: 500;
+}
+
+.news-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #2E2E30;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.news-summary {
+  display: block;
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 20rpx;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.news-footer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.news-meta {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.news-source {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.meta-divider {
+  width: 1rpx;
+  height: 20rpx;
+  background: #e5e5e5;
+}
+
+.meta-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4rpx;
+}
+
+.meta-text {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 加载状态 */
+.loading-state {
+  display: flex;
+  justify-content: center;
+  padding: 40rpx 0;
+}
+
+.loading-text {
+  font-size: 26rpx;
+  color: #999;
+}
+
+.no-more-state {
+  display: flex;
+  justify-content: center;
+  padding: 40rpx 0;
+}
+
+.no-more-text {
+  font-size: 26rpx;
+  color: #ccc;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100rpx 0;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #999;
+  margin-top: 20rpx;
+}
+
+.refresh-btn {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8rpx;
+  margin-top: 32rpx;
+  padding: 16rpx 32rpx;
+  background: #FFF5F5;
+  border-radius: 40rpx;
+}
+
+.refresh-text {
+  font-size: 26rpx;
+  color: #F85659;
+}

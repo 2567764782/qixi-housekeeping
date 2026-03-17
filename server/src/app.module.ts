@@ -13,6 +13,7 @@ import { PaymentModule } from './payment/payment.module';
 import { PaymentExtensionModule } from './payment-extension/payment-extension.module';
 import { MembershipModule } from './membership/membership.module';
 import { AdminModule } from './admin/admin.module';
+import { NewsModule } from './news/news.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { AdminModule } from './admin/admin.module';
     PaymentExtensionModule,
     MembershipModule,
     AdminModule,
+    NewsModule,
   ],
   controllers: [AppController],
   providers: [
