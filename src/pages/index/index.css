@@ -531,9 +531,13 @@
 }
 
 /* ===== 新闻轮播样式 ===== */
+.news-swiper-wrapper {
+  position: relative;
+  padding: 0 24rpx;
+}
+
 .news-swiper {
   height: 280rpx;
-  margin: 0 24rpx;
   border-radius: 16rpx;
   overflow: hidden;
 }
@@ -543,11 +547,31 @@
   background: linear-gradient(135deg, #FFF7F7 0%, #FFFFFF 100%);
   border-radius: 16rpx;
   padding: 24rpx;
-  margin: 0 4rpx;
+  margin: 0 8rpx;
   position: relative;
   display: flex;
   flex-direction: row;
   box-shadow: 0 2rpx 12rpx rgba(248, 86, 89, 0.08);
+}
+
+/* 自定义指示点 */
+.news-swiper-dots {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 8rpx;
+  margin-top: 16rpx;
+}
+
+.news-swiper-dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: rgba(248, 86, 89, 0.3);
+}
+
+.news-swiper-dot:first-child {
+  background: #F85659;
 }
 
 .news-swiper-rank {

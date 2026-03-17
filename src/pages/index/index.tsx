@@ -119,6 +119,8 @@ const IndexPage = () => {
 
       if (res.statusCode === 200 && res.data?.data) {
         setHotNews(res.data.data)
+      } else {
+        throw new Error('API返回异常')
       }
     } catch (error) {
       console.error('加载热点新闻失败:', error)
@@ -474,52 +476,59 @@ const IndexPage = () => {
           {/* 新闻内容 - 全部分类用轮播，其他分类用列表 */}
           {activeNewsCategory === '' ? (
             /* 轮播展示 */
-            <Swiper 
-              className="news-swiper"
-              indicatorDots
-              autoplay
-              circular
-              interval={4000}
-              duration={500}
-              indicatorColor="rgba(0,0,0,0.2)"
-              indicatorActiveColor="#F85659"
-            >
-              {hotNews.map((news, index) => (
-                <SwiperItem key={news.id}>
-                  <View 
-                    className="news-swiper-card"
-                    onClick={() => handleNewsClick(news)}
-                  >
-                    <View className="news-swiper-rank">
-                      <Text className={`rank-badge ${index < 3 ? 'top' : ''}`}>{index + 1}</Text>
-                    </View>
-                    <View className="news-swiper-content">
-                      {news.is_hot && (
-                        <View className="news-swiper-hot">
-                          <Flame size={12} color="#fff" />
-                          <Text className="hot-label">热门</Text>
-                        </View>
-                      )}
-                      <Text className="news-swiper-title">{news.title}</Text>
-                      <Text className="news-swiper-summary">{news.summary}</Text>
-                      <View className="news-swiper-meta">
-                        <Text className="news-swiper-source">{news.source}</Text>
-                        <View className="news-swiper-stats">
-                          <View className="stat-item">
-                            <Clock size={12} color="#999" />
-                            <Text className="stat-text">{formatNewsTime(news.publish_time || news.created_at)}</Text>
+            <View className="news-swiper-wrapper">
+              <Swiper 
+                className="news-swiper"
+                autoplay
+                circular
+                interval={4000}
+                duration={500}
+                previousMargin="24rpx"
+                nextMargin="24rpx"
+              >
+                {hotNews.map((news, index) => (
+                  <SwiperItem key={news.id}>
+                    <View 
+                      className="news-swiper-card"
+                      onClick={() => handleNewsClick(news)}
+                    >
+                      <View className="news-swiper-rank">
+                        <Text className={`rank-badge ${index < 3 ? 'top' : ''}`}>{index + 1}</Text>
+                      </View>
+                      <View className="news-swiper-content">
+                        {news.is_hot && (
+                          <View className="news-swiper-hot">
+                            <Flame size={12} color="#fff" />
+                            <Text className="hot-label">热门</Text>
                           </View>
-                          <View className="stat-item">
-                            <Eye size={12} color="#999" />
-                            <Text className="stat-text">{news.view_count || 0}</Text>
+                        )}
+                        <Text className="news-swiper-title">{news.title}</Text>
+                        <Text className="news-swiper-summary">{news.summary}</Text>
+                        <View className="news-swiper-meta">
+                          <Text className="news-swiper-source">{news.source}</Text>
+                          <View className="news-swiper-stats">
+                            <View className="stat-item">
+                              <Clock size={12} color="#999" />
+                              <Text className="stat-text">{formatNewsTime(news.publish_time || news.created_at)}</Text>
+                            </View>
+                            <View className="stat-item">
+                              <Eye size={12} color="#999" />
+                              <Text className="stat-text">{news.view_count || 0}</Text>
+                            </View>
                           </View>
                         </View>
                       </View>
                     </View>
-                  </View>
-                </SwiperItem>
-              ))}
-            </Swiper>
+                  </SwiperItem>
+                ))}
+              </Swiper>
+              {/* 自定义指示点 */}
+              <View className="news-swiper-dots">
+                {hotNews.map((_, idx) => (
+                  <View key={idx} className="news-swiper-dot" />
+                ))}
+              </View>
+            </View>
           ) : (
             /* 列表展示 */
             <View className="hot-news-list">
