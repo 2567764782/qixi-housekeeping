@@ -1,0 +1,10 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://你的railway域名.up.railway.app/api/:path*"
+    }
+  ],
+  "buildCommand": "pnpm build:web",
+  "outputDirectory": "dist-web"
+}
