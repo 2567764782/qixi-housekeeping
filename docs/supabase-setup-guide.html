@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Supabase 创建步骤</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .step { background: #f5f5f5; padding: 15px; margin: 15px 0; border-radius: 8px; border-left: 4px solid #3ECF8E; }
+        .step h3 { color: #3ECF8E; margin-top: 0; }
+        .code { background: #2d2d2d; color: #fff; padding: 10px; border-radius: 4px; font-family: monospace; margin: 10px 0; }
+        .important { background: #fff3cd; padding: 10px; border-radius: 4px; border-left: 4px solid #ffc107; }
+        .success { background: #d4edda; padding: 10px; border-radius: 4px; border-left: 4px solid #28a745; }
+        img { max-width: 100%; border: 1px solid #ddd; border-radius: 4px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🗄️ Supabase 数据库创建完整教程</h1>
+    
+    <div class="step">
+        <h3>步骤 1：访问 Supabase 官网</h3>
+        <p>打开浏览器，访问：<a href="https://supabase.com" target="_blank">https://supabase.com</a></p>
+        <p>点击右上角的 <strong>"Start your project"</strong> 按钮</p>
+    </div>
+
+    <div class="step">
+        <h3>步骤 2：使用 GitHub 登录</h3>
+        <p>选择 <strong>"Continue with GitHub"</strong></p>
+        <p>如果你还没登录 GitHub，会提示你先登录</p>
+        <p>授权 Supabase 访问你的 GitHub 账号</p>
+    </div>
+
+    <div class="step">
+        <h3>步骤 3：创建组织（Organization）</h3>
+        <p>第一次使用需要创建组织：</p>
+        <ul>
+            <li><strong>Organization Name</strong>: 填写 <code>qixi-housekeeping</code></li>
+            <li>点击 <strong>"Create organization"</strong></li>
+        </ul>
+    </div>
+
+    <div class="step">
+        <h3>步骤 4：创建项目</h3>
+        <p>点击 <strong>"New Project"</strong> 按钮</p>
+        <p>填写以下信息：</p>
+        <ul>
+            <li><strong>Name</strong>: <code>qixi-housekeeping</code></li>
+            <li><strong>Database Password</strong>: 设置一个复杂密码（<span class="important">一定要记住！</span>）</li>
+            <li><strong>Region</strong>: 选择 <code>Northeast Asia (Tokyo)</code> 或 <code>Southeast Asia (Singapore)</code></li>
+            <li><strong>Pricing Plan</strong>: 选择 <code>Free</code></li>
+        </ul>
+        <p>点击 <strong>"Create new project"</strong></p>
+        <div class="important">
+            <strong>⚠️ 重要提示：</strong>数据库密码需要包含：
+            <ul>
+                <li>至少 8 个字符</li>
+                <li>包含大小写字母</li>
+                <li>包含数字</li>
+                <li>包含特殊符号（如：!@#$%^&*）</li>
+            </ul>
+            <p>示例密码：<code>QixiHousekeeping2024!@#</code></p>
+        </div>
+    </div>
+
+    <div class="step">
+        <h3>步骤 5：等待项目初始化</h3>
+        <p>项目创建需要 <strong>1-2 分钟</strong></p>
+        <p>你会看到一个加载动画，显示 "Setting up project..."</p>
+        <p>完成后会自动跳转到项目控制台</p>
+    </div>
+
+    <div class="step">
+        <h3>步骤 6：获取数据库连接信息</h3>
+        <p>项目创建完成后：</p>
+        <ol>
+            <li>点击左侧菜单的 <strong>"Settings"</strong>（齿轮图标）</li>
+            <li>点击 <strong>"Database"</strong></li>
+            <li>向下滚动找到 <strong>"Connection string"</strong> 部分</li>
+            <li>选择 <strong>"URI"</strong> 标签</li>
+            <li>点击 <strong>"Copy"</strong> 按钮复制连接字符串</li>
+        </ol>
+        
+        <div class="code">
+# 连接字符串格式：
+postgresql://postgres.xxxxx:你的密码@aws-0-ap-northeast-1.pooler.supabase.com:6543/postgres
+        </div>
+        
+        <div class="important">
+            <strong>⚠️ 注意：</strong>
+            <ul>
+                <li>复制后需要把 <code>[YOUR-PASSWORD]</code> 替换成你设置的密码</li>
+                <li>密码中如果有特殊字符，需要 URL 编码</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="success">
+        <h3>✅ 完成！</h3>
+        <p>现在你已经有了：</p>
+        <ul>
+            <li>✅ Supabase 项目</li>
+            <li>✅ 数据库连接字符串（DATABASE_URL）</li>
+        </ul>
+        <p>下一步：部署后端到 Railway</p>
+    </div>
+</body>
+</html>
