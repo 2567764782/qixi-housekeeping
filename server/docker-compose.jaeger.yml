@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+      - COLLECTOR_ZIPKIN_HOST_PORT=:9411
+    ports:
+      - "5775:5775/udp"
+      - "6831:6831/udp"
+      - "6832:6832/udp"
+      - "5778:5778"
+      - "16686:16686"
+      - "14268:14268"
+      - "14250:14250"
+      - "9411:9411"
+      - "4317:4317"
+      - "4318:4318"
+    networks:
+      - tracing_network
+    restart: unless-stopped
+
+  # Elasticsearch for Jaeger storage (optional, for production)
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+    container_name: jaeger-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9201:9200"
+    volumes:
+      - jaeger_es_data:/usr/share/elasticsearch/data
+    networks:
+      - tracing_network
+    restart: unless-stopped
+
+  # Hot ROD (Jaeger example application - optional)
+  hotrod:
+    image: jaegertracing/example-hotrod:latest
+    container_name: jaeger-hotrod
+    environment:
+      - JAEGER_AGENT_HOST=jaeger
+      - JAEGER_AGENT_PORT=6831
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+      - "8082:8082"
+      - "8083:8083"
+    depends_on:
+      - jaeger
+    networks:
+      - tracing_network
+    restart: unless-stopped
+
+volumes:
+  jaeger_es_data:
+    driver: local
+
+networks:
+  tracing_network:
+    driver: bridge
