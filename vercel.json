@@ -1,10 +1,32 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "npm install -g pnpm && pnpm install",
+  "buildCommand": "pnpm build:web",
+  "outputDirectory": "dist-web",
   "rewrites": [
     {
       "source": "/api/:path*",
       "destination": "https://你的railway域名.up.railway.app/api/:path*"
     }
   ],
-  "buildCommand": "pnpm build:web",
-  "outputDirectory": "dist-web"
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        }
+      ]
+    }
+  ]
 }
